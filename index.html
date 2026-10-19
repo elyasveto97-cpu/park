@@ -14,7 +14,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.webmanifest">
 <!-- L'URL du serveur est dans config.js (à remplir une seule fois, jamais écrasé par les mises à jour) -->
-<script src="Config.js"></script>
+<script src="config.js"></script>
 <script>/*__PARK_BOOT__*/</script>
 <style>
 :root{
@@ -691,14 +691,31 @@ function parseLabel(l) {
   return { col: parseInt(m[1], 10), row: C.rows.indexOf(m[2]) };
 }
 
-/* Même logique que Code.gs : colonne par colonne (1A→1G, puis 2A→2G…) */
-function mainOrder(m) {
-  var out = []; if (!m) return out;
-  var cs = m.ec >= m.sc ? 1 : -1, rs = m.er >= m.sr ? 1 : -1;
+/* Même logique que Code.gs.
+   Sélection : colonne par colonne de la place de début à la place de fin (1C→2B = 1C…1G puis 2A, 2B).
+   Stationnement : par bloc de colonnes, rangée par rangée (17A 16A 15A 17B 16B 15B…). */
+function zoneSet(m) {
+  var set = {}; if (!m) return set;
+  var cs = m.ec >= m.sc ? 1 : -1, last = C.rows.length - 1, r;
+  if (m.sc === m.ec) { for (r = Math.min(m.sr, m.er); r <= Math.max(m.sr, m.er); r++) set[label(m.sc, r)] = 1; return set; }
   for (var c = m.sc; ; c += cs) {
-    for (var r = m.sr; ; r += rs) { out.push(label(c, r)); if (r === m.er) break; }
+    var from = c === m.sc ? m.sr : 0, to = c === m.ec ? m.er : last;
+    for (r = from; r <= to; r++) set[label(c, r)] = 1;
     if (c === m.ec) break;
   }
+  return set;
+}
+function mainOrder(m) {
+  var out = []; if (!m) return out;
+  var set = zoneSet(m), cs = m.ec >= m.sc ? 1 : -1, groups = [];
+  for (var c = m.sc; ; c += cs) {
+    var g = groups[groups.length - 1];
+    if (g && C.blockOf[g[0]] === C.blockOf[c]) g.push(c); else groups.push([c]);
+    if (c === m.ec) break;
+  }
+  groups.forEach(function (g) {
+    for (var r = 0; r < C.rows.length; r++) g.forEach(function (cc) { var l = label(cc, r); if (set[l]) out.push(l); });
+  });
   return out;
 }
 function isAnyLabel(l) { return isFront(l) || !!parseLabel(l); }
@@ -1013,7 +1030,7 @@ function renderWaveEditor() {
   $('wm-rangeBtns').style.display = WE.mode === 'range' ? '' : 'none';
   $('wm-pickBtns').style.display = WE.mode === 'pick' ? '' : 'none';
   $('wm-hint').innerHTML = WE.mode === 'range'
-    ? 'Tape la place de <b>début</b> puis la place de <b>fin</b> : remplissage colonne par colonne (ex. 1A → 1G, puis 2A → 2G…). <b style="color:var(--front)">Section avant</b> : tape les places une par une, elles passent en premier.'
+    ? 'Tape la place de <b>début</b> puis la place de <b>fin</b> : la zone se sélectionne colonne par colonne (ex. 1C → 2B = 1C…1G puis 2A, 2B). Les numéros montrent l\'ordre de stationnement (par bloc, rangée par rangée : 17A, 16A, 15A, 17B…). <b style="color:var(--front)">Section avant</b> : tape les places une par une, elles passent en premier.'
     : 'Tape les places <b>une par une</b>, dans l\'ordre où tu veux les remplir (grille ou section avant). Retape une place pour l\'enlever. Les places choisies passent avant la zone début → fin.';
   $('wm-ptS').classList.toggle('on', WE.pt === 's');
   $('wm-ptE').classList.toggle('on', WE.pt === 'e');
