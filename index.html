@@ -193,6 +193,9 @@ button.chip{cursor:pointer}
 .place.offzone{box-shadow:inset 0 0 0 2px var(--orange)}
 .place.al-red{border-color:var(--red)!important;animation:blinkRed 1s infinite;background:#ffd9d5}
 .place.al-or{border-color:var(--orange)!important;animation:blinkOr 1.4s infinite;background:#ffe7cf}
+.place.pend{animation:pendPulse 1s ease-in-out infinite}
+@keyframes pendPulse{0%,100%{opacity:1}50%{opacity:.55}}
+.place-badge.pend{opacity:.6}
 .place.hl{box-shadow:0 0 0 3px var(--orange),0 0 12px rgba(248,130,35,.5);border-color:var(--orange)!important;z-index:2}
 .place.msrc{box-shadow:0 0 0 3px var(--purple),0 0 14px rgba(126,87,194,.55);border-color:var(--purple)!important;z-index:3}
 .place.blk-on{background:var(--red-bg);border-color:var(--red);border-style:solid}
@@ -610,6 +613,8 @@ function applyResult(res) {
     r.in = x.in; r.out = x.out; r.tIn = x.tIn; r.tOut = x.tOut;
     deriveOut(S);
   }
+  if (res.v) VER = res.v;
+  if (res.route) { var rr = S.byId[res.route.id]; if (rr) rr._pend = false; }
   if (res.plan) { S.plan = res.plan; derivePlan(S); }
   if (res.blocked) S.blocked = new Set(res.blocked);
   if (res.waves) { S.waves = res.waves; deriveWaves(S); }
@@ -618,7 +623,7 @@ function applyResult(res) {
 
 /* File d'attente : les actions partent dans l'ordre, sans bloquer l'écran.
    Le rechargement complet se fait en arrière-plan quand la file est vide. */
-var Q = Promise.resolve(), actSeq = 0, refT = null;
+var Q = Promise.resolve(), actSeq = 0, refT = null, VER = '';
 function enqueue(fn) {
   pending++; actSeq++;
   Q = Q.then(fn).catch(function (e) { toast('❌ ' + (e && e.message || e)); })
@@ -641,6 +646,7 @@ function loadState(showLoader) {
     if (seq !== actSeq || pending) { scheduleRefresh(); return; }   // une action est passée entre-temps : on garde l'affichage local
     skew = st.serverNow - Math.round((t0 + Date.now()) / 2);
     S = prepare(st);
+    VER = st.v || VER;
     if (st.role) setRole(st.role);
     $('login').classList.add('hidden');
     lastOk = Date.now(); lastErr = '';
@@ -865,7 +871,7 @@ function routeCard(r) {
   var off = r.place && w && S.rangeOf[r.wave].indexOf(r.place) < 0;
   var h = '<div class="route-card' + (al ? ' al-' + al.k : '') + '"><div class="rc-main">';
   h += '<div class="route-name">' + tagBadge(r.tag) + esc(r.disp) +
-       (r.place ? ' <span class="place-badge' + (off ? ' off' : '') + '"' + (off ? ' title="Hors zone"' : '') + '>' + esc(r.place) + '</span>' : '') + ' ' + waveBadge(r.wave) + '</div>';
+       (r.place ? ' <span class="place-badge' + (off ? ' off' : '') + (r._pend ? ' pend' : '') + '"' + (off ? ' title="Hors zone"' : '') + '>' + esc(r.place) + '</span>' : '') + ' ' + waveBadge(r.wave) + '</div>';
   h += '<div class="route-idc"><span class="idc-dot" style="background:' + idcColor(r.idc) + '"></span>' + esc(r.idc) + (r.idcAuto ? ' <span class="hint" title="IDC lu dans Vanscan">(Vanscan)</span>' : '') + '</div>';
   var st = r.out ? '<span class="st-out">🔴 Sorti WH</span>' : (r.in ? '<span class="st-in">🟢 Stationné' + (r.place ? '' : ' (sans place)') + '</span>' : '<span class="st-none">⚪ En attente</span>');
   h += '<div class="route-status">' + st + '</div>';
@@ -896,13 +902,36 @@ function vsLine(r) {
     (v.ppm != null ? '<span>' + v.ppm.toFixed(1) + ' PPM</span>' : '') +
     (v.wr ? '<span style="color:var(--red-txt)">WR ' + v.wr + '</span>' : '') + '</div></div>';
 }
+/* Même logique que assignPlace_ (Code.gs) : la place est affichée tout de suite,
+   puis confirmée (ou corrigée) par le serveur */
+function globalOrder() {
+  var out = [], seen = {};
+  C.blocks.map(function (b) { return b.slice().sort(function (a, c) { return c - a; }); })
+    .sort(function (a, b) { return b[0] - a[0]; })
+    .forEach(function (b) { for (var r = 0; r < C.rows.length; r++) b.forEach(function (c) { var l = label(c, r); out.push(l); seen[l] = 1; }); });
+  for (var c = C.cols - 1; c >= 0; c--) for (var r = 0; r < C.rows.length; r++) if (!seen[label(c, r)]) out.push(label(c, r));
+  return out.concat(C.front.labels);
+}
+function predictPlace(r) {
+  var free = function (l) { return !S.blocked.has(l) && (!S.plan[l] || S.outKeys[S.plan[l]]); };
+  var i, lst = S.rangeOf[r.wave] || [];
+  for (i = 0; i < lst.length; i++) if (free(lst[i])) return lst[i];
+  var g = globalOrder();
+  for (i = 0; i < g.length; i++) if (!S.ownersOf[g[i]] && !isFront(g[i]) && free(g[i])) return g[i];
+  for (i = 0; i < g.length; i++) if (free(g[i])) return g[i];
+  return '';
+}
 function toggleCheck(id, col) {
   var r = S && S.byId[id]; if (!r) return;
   var nv = col === 'IN' ? !r.in : !r.out;
   var hm = nowHM();
   if (col === 'IN') { r.in = nv; r.tIn = nv ? hm : ''; r.inMs = nv ? now() : null; if (!nv) { r.out = false; r.tOut = ''; } }
   else { r.out = nv; r.tOut = nv ? hm : ''; }
-  if (col === 'IN' && !nv) Object.keys(S.plan).forEach(function (l) { if (S.plan[l] === r.key) delete S.plan[l]; });
+  if (col === 'IN') {
+    Object.keys(S.plan).forEach(function (l) { if (S.plan[l] === r.key) delete S.plan[l]; });
+    deriveOut(S);
+    if (nv) { var pl = predictPlace(r); if (pl) { S.plan[pl] = r.key; r._pend = true; } }
+  }
   deriveOut(S); derivePlan(S);
   renderAll();
   enqueue(function () {
@@ -1150,6 +1179,7 @@ function renderPlan() {
     if (ro && (!S.waves[ro.wave] || S.rangeOf[ro.wave].indexOf(l) < 0)) cls += ' offzone';
     var p = (status === 'in' && ro) ? vsPct(ro) : null, bd = p != null ? band(p, ro.vs.done) : '';
     if (bd) cls += ' vs-' + bd;
+    if (ro && ro._pend) cls += ' pend';
     if (q && ro && (ro.disp + ' ' + ro.route + ' ' + ro.idc + ' ' + ro.wave + ' ' + ro.tag).toLowerCase().indexOf(q) !== -1) { cls += ' hl'; found++; }
 
     var body = '#e0e0e0';
@@ -1397,7 +1427,15 @@ window.addEventListener('resize', function () { clearTimeout(rzT); rzT = setTime
  *  (pause pendant qu'une fenêtre est ouverte)
  * ================================================================= */
 function modalOpen() { return !!document.querySelector('.modal:not(.hidden)'); }
-setInterval(function () { if (!document.hidden && !pending && CONN.api && !modalOpen() && Date.now() - lastOk > 15000) loadState(false); }, 20000);
+var verBusy = false;
+setInterval(function () {
+  if (document.hidden || pending || !CONN.api || !CONN.key || modalOpen() || verBusy || loading || !S) return;
+  if (Date.now() - lastOk > 30000) { loadState(false); return; }          // Vanscan à jour
+  verBusy = true;
+  jsonp({ api: 'ver' }, 10000).then(function (res) {
+    if (res && res.ok && res.v && res.v !== VER && !pending) loadState(false);   // un autre écran a changé quelque chose
+  }).catch(function () {}).then(function () { verBusy = false; });
+}, 4000);
 setInterval(function () { if (!document.hidden && S && !pending && !modalOpen()) renderAll(); else renderLive(); }, 30000);
 document.addEventListener('visibilitychange', function () { if (!document.hidden && Date.now() - lastOk > 20000) loadState(false); });
 
