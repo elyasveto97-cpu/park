@@ -1,7 +1,7 @@
 /* ParK — service worker : rend l'app installable et l'ouvre même si le réseau est lent.
    Seuls les fichiers du site sont mis en cache ; les données (Apps Script) passent toujours par le réseau. */
-const CACHE = 'park-v17';
-const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
+const CACHE = 'park-v20';
+const SHELL = ['./', './index.html', './config.js', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
