@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>ParK</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#00A68F">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<script>
+  /* ⚙️ URL de l'application web Apps Script (Déployer → Gérer les déploiements → URL /exec).
+     À remplir dans la copie hébergée sur GitHub Pages. Inutile quand la page est servie par Apps Script. */
+  window.PARK_API = 'https://script.google.com/macros/s/AKfycbx05K_TLxQAeuvAb3y74UmJW7aTRchF1EaNV9fouZLo_6ke4imnrlDFBNGngXEKYO9U/exec';
+</script>
+<script>/*__PARK_BOOT__*/</script>
+<style>
+:root{
+  --tq:#00A68F; --tq-d:#008A76; --tq-l:#e0f5f1;
+  --red:#F24438; --red-bg:#ffeae8; --red-txt:#c62828;
+  --orange:#F88223; --or-bg:#fff3e0; --or-txt:#e65100;
+  --purple:#7E57C2; --front:#0f766e;
+  --bg:#f0f2f5; --g100:#f8f8f8; --g200:#eeeeee; --g300:#ddd; --g400:#bdbdbd; --g500:#888;
+  --lavl:#14538a; --mont:#5b2b86; --ridp:#9a4d00;
+  --r-sm:8px; --r-md:12px; --r-lg:20px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:var(--bg);color:#000}
+button,input,select{font-family:inherit}
+#app{display:flex;flex-direction:column;height:100vh;height:100dvh}
+
+/* ---------- Header ---------- */
+header{flex-shrink:0;background:var(--tq);color:#fff;padding:10px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+header h1{font-size:18px;font-weight:800;white-space:nowrap}
+header h1 span{font-size:11px;font-weight:600;opacity:.85;margin-left:4px}
+.hspace{flex:1}
+.live{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;background:rgba(255,255,255,.16);padding:5px 10px;border-radius:999px;white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;background:#8dffc4;animation:pulse 2s infinite}
+.dot.stale{background:#ffd36b;animation:none}.dot.off{background:#ffb1b1;animation:none}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(141,255,196,.65)}70%{box-shadow:0 0 0 8px rgba(141,255,196,0)}100%{box-shadow:0 0 0 0 rgba(141,255,196,0)}}
+.hbtns{display:flex;gap:6px}
+.hdr-btn{background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.5);color:#fff;padding:6px 11px;border-radius:var(--r-lg);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+.hdr-btn:active{background:rgba(255,255,255,.35)}
+.hdr-btn.danger{background:rgba(242,68,56,.7)}
+
+.tabs{flex-shrink:0;display:flex;background:#fff;border-bottom:2px solid #e0e0e0}
+.tab{flex:1;padding:11px 4px;text-align:center;font-size:12px;font-weight:700;cursor:pointer;color:var(--g500);border:0;background:none;white-space:nowrap}
+.tab.active{color:var(--tq);border-bottom:2.5px solid var(--tq);margin-bottom:-2px}
+
+.view{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px}
+.view.hidden{display:none!important}
+#plan-view,#blocks-view{display:flex;flex-direction:column}
+
+.banner{border-radius:10px;padding:10px 14px;margin-bottom:10px;font-size:13px;font-weight:600;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.banner.err{background:var(--red-bg);color:var(--red-txt)}
+.banner.warn{background:var(--or-bg);color:var(--or-txt)}
+.banner.info{background:#e7eefc;color:#2f63c9}
+.banner button{border:0;background:#fff;border-radius:999px;padding:5px 12px;font-weight:700;cursor:pointer;color:inherit}
+
+/* ---------- Commun ---------- */
+.search-bar,.sel{padding:10px 12px;border:1.5px solid var(--g300);border-radius:10px;font-size:14px;background:#fff;min-width:0}
+.search-bar:focus,.sel:focus{outline:none;border-color:var(--tq)}
+.sel{font-weight:600;font-size:13px;-webkit-appearance:none;appearance:none;padding-right:26px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 9px center}
+.filters{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.filters .search-bar{flex:1 1 200px}
+.filters .sel{flex:0 1 160px}
+.stats-bar{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;padding:4px 0 10px}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;border:0;white-space:nowrap}
+button.chip{cursor:pointer}
+.c-total{background:var(--g200);color:#666}.c-in{background:var(--tq-l);color:var(--tq-d)}
+.c-out{background:var(--red-bg);color:var(--red-txt)}.c-avg{background:#ede7f6;color:#5e35b1}
+.c-free{background:#e3f2fd;color:#1565c0}.c-blk{background:var(--or-bg);color:var(--or-txt)}
+.c-front{background:#ccfbf1;color:var(--front)}
+.c-alert{background:var(--red);color:#fff}.c-alert.off{background:var(--red-bg);color:var(--red-txt)}
+.c-vs{background:#fff;border:1px solid var(--g300);color:#333}
+.c-vs b{color:var(--tq-d)}
+.tag{display:inline-block;font-size:9px;font-weight:900;letter-spacing:.4px;padding:2px 6px;border-radius:5px;background:var(--g200);color:#555;vertical-align:middle}
+.tag-LAVL{background:#d9ecff;color:var(--lavl)}.tag-MONT{background:#f2e4ff;color:var(--mont)}.tag-RIDP{background:#ffe9d1;color:var(--ridp)}
+.wave-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:800;padding:2px 7px;border-radius:6px;background:var(--g100);border:1px solid var(--g300);color:#444}
+.wdot,.idc-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;display:inline-block}
+.place-badge{display:inline-block;background:var(--tq);color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:6px;vertical-align:middle}
+.place-badge.off{background:var(--orange)}
+.btn{border:none;border-radius:var(--r-sm);padding:9px 13px;font-size:13px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.btn:active{opacity:.7}
+.btn-in{background:var(--tq-l);color:var(--tq-d)}.btn-in.active{background:var(--tq);color:#fff}
+.btn-out{background:var(--red-bg);color:var(--red-txt)}.btn-out.active{background:var(--red);color:#fff}
+.btn-edit{background:#efeaf8;color:#5e35b1;padding:9px 11px}
+.bbtn{border:none;border-radius:var(--r-sm);padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+.bbtn:active{opacity:.7}
+.b-ok{background:var(--tq-l);color:var(--tq-d)}.b-bad{background:var(--red-bg);color:var(--red)}
+.b-pri{background:var(--tq);color:#fff}.b-neu{background:var(--g200);color:#444}
+.hint{font-size:12px;color:var(--g500)}
+.empty-msg{color:var(--g500);text-align:center;padding:30px;font-size:13px}
+
+@keyframes blinkRed{0%,100%{box-shadow:0 0 0 0 rgba(242,68,56,0)}50%{box-shadow:0 0 0 4px rgba(242,68,56,.55)}}
+@keyframes blinkOr{0%,100%{box-shadow:0 0 0 0 rgba(248,130,35,0)}50%{box-shadow:0 0 0 4px rgba(248,130,35,.55)}}
+
+/* ---------- Routes ---------- */
+.route-card{background:#fff;border-radius:var(--r-md);padding:12px 14px;margin-bottom:9px;box-shadow:0 1px 4px rgba(0,0,0,.08);display:flex;align-items:center;gap:10px;border-left:4px solid transparent}
+.route-card.al-red{border-left-color:var(--red);animation:blinkRed 1.2s infinite}
+.route-card.al-or{border-left-color:var(--orange);animation:blinkOr 1.6s infinite}
+.rc-main{min-width:0;flex:1}
+.route-name{font-size:16px;font-weight:800;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.route-idc{font-size:11px;font-weight:600;color:var(--g500);margin-top:3px;display:flex;align-items:center;gap:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.route-status{font-size:11px;margin-top:3px;font-weight:600}
+.st-none{color:var(--g500)}.st-in{color:var(--tq-d)}.st-out{color:var(--red)}
+.route-times{font-size:11px;font-weight:600;margin-top:3px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.t-in{color:var(--tq-d)}.t-out{color:var(--red-txt)}
+.t-dur{font-weight:800;padding:1px 7px;border-radius:10px;font-size:10px}
+.t-ok{background:var(--tq-l);color:var(--tq-d)}.t-warn{background:var(--or-bg);color:var(--or-txt)}.t-bad{background:var(--red-bg);color:var(--red-txt)}
+.vs-line{margin-top:6px;font-size:11px;font-weight:600;color:#555}
+.vs-bar{height:6px;background:#e9edf1;border-radius:99px;overflow:hidden;max-width:320px;margin-bottom:3px}
+.vs-bar i{display:block;height:100%;background:#3b82f6;border-radius:99px}
+.vs-bar.b-r i{background:#ef4444}.vs-bar.b-o i{background:#f59e0b}.vs-bar.b-g i{background:#16a34a}
+.pct-r{color:#dc2626}.pct-o{color:#d97706}.pct-g{color:#15803d}
+.vs-txt{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.vs-txt b{color:#111}
+.vs-none{color:var(--g400)}
+.al-pill{display:inline-block;margin-top:5px;font-size:11px;font-weight:800;padding:3px 8px;border-radius:7px}
+.al-pill.red{background:var(--red);color:#fff}.al-pill.or{background:var(--orange);color:#fff}
+.btn-group{display:flex;gap:8px;flex-shrink:0}
+
+/* ---------- Vagues ---------- */
+.wave-card{background:#fff;border-radius:var(--r-md);padding:13px 14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.08);border-top:4px solid var(--g300)}
+.wave-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.wave-name{font-size:17px;font-weight:900}
+.wave-vs{margin-left:auto;font-size:12px;font-weight:800;color:var(--tq-d)}
+.wave-counts{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.wave-range{font-size:13px;font-weight:700;margin:4px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.rng{background:var(--tq-l);color:var(--tq-d);padding:3px 9px;border-radius:7px;font-weight:900}
+.rng.none{background:var(--or-bg);color:var(--or-txt)}
+.rng.fr{background:#ccfbf1;color:var(--front)}
+.wave-msg{font-size:12px;font-weight:600;margin-top:4px}
+.wave-msg.ok{color:var(--tq-d)}.wave-msg.bad{color:var(--red-txt)}.wave-msg.warn{color:var(--or-txt)}
+.wave-btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.waves-head{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+
+/* ---------- Grille ---------- */
+.plan-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;flex-shrink:0}
+.plan-tools .stats-bar{padding:0;justify-content:flex-start}
+.tool-btn{border:1.5px solid var(--g300);background:#fff;border-radius:var(--r-lg);padding:6px 11px;font-size:12px;font-weight:700;color:#555;cursor:pointer;white-space:nowrap}
+.tool-btn.on{background:var(--purple);border-color:var(--purple);color:#fff}
+.zoom-ctl{display:inline-flex;align-items:center;gap:2px;background:#fff;border:1.5px solid var(--g300);border-radius:var(--r-lg);padding:2px}
+.zoom-ctl button{width:28px;height:26px;border:none;background:transparent;font-size:15px;font-weight:700;color:var(--tq-d);cursor:pointer;border-radius:50%}
+.zoom-ctl span{font-size:11px;font-weight:700;color:#555;min-width:38px;text-align:center}
+.psearch{flex:1 1 220px;display:flex;align-items:center;gap:8px}
+.psearch input{flex:1}
+.found{background:var(--tq);color:#fff;font-size:11px;font-weight:700;padding:3px 9px;border-radius:10px;white-space:nowrap}
+.move-bar{display:none;align-items:center;gap:8px;flex-wrap:wrap;background:#f3ecff;border:1.5px solid var(--purple);border-radius:var(--r-sm);padding:8px 12px;margin-bottom:8px;font-size:12px;font-weight:600;color:#4a2b7a;flex-shrink:0}
+.move-bar.show{display:flex}
+.move-bar .sp{flex:1}
+.legend{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;flex-shrink:0;font-size:11px;font-weight:500}
+.legend span{display:inline-flex;align-items:center;gap:4px}
+.legend i{width:13px;height:13px;border-radius:3px;display:inline-block}
+.wave-legend{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px;font-size:11px;font-weight:700;flex-shrink:0}
+.wave-legend span{display:inline-flex;align-items:center;gap:4px}
+
+.g-outer{flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+.g{display:inline-flex;flex-direction:column;gap:var(--gap,4px);padding:2px}
+.g-row{display:flex;gap:var(--gap,4px);align-items:stretch}
+.g-row.front-row{margin:8px 0}
+.g-rl{width:22px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#555}
+.g-rl.fr{font-size:9px;color:var(--front)}
+.g-ch{width:var(--cw);flex-shrink:0;text-align:center;font-size:11px;font-weight:900;color:#fff;background:#1d3b5c;border-radius:5px;padding:3px 0}
+.g-sp{width:var(--cw);flex-shrink:0}
+.aisle{margin-left:10px}
+.place{position:relative;width:var(--cw);height:var(--ch);flex-shrink:0;border-radius:6px;border:2px solid var(--g300);display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:3px 2px 4px;user-select:none;overflow:hidden;background:var(--g100);-webkit-tap-highlight-color:transparent}
+.place.front{border-style:dashed;border-color:#5eead4}
+.place.front .pl-label{color:var(--front)}
+.place.click{cursor:pointer}
+.place.click:active{transform:scale(.94)}
+.pl-label{font-weight:800;font-size:var(--lfs);line-height:1;color:#bbb}
+.van-wrap{flex:1;display:flex;align-items:center;justify-content:center;min-height:0;position:relative;width:100%}
+.van-icon{width:var(--vw);height:var(--vh)}
+.pl-pct{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;font-size:var(--pfs);font-weight:900;color:#111;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 2px #fff}
+.pl-route{font-weight:900;font-size:var(--rfs);line-height:1;text-align:center;min-height:9px;white-space:nowrap;letter-spacing:-.3px;max-width:100%;overflow:hidden}
+.pl-bar{position:absolute;left:0;bottom:0;height:4px;background:#3b82f6}
+.pl-bar.b-r{background:#ef4444}.pl-bar.b-o{background:#f59e0b}.pl-bar.b-g{background:#16a34a}
+.place.in.vs-r{background:#fee2e2;border-color:#f87171}.place.in.vs-r .pl-label,.place.in.vs-r .pl-route{color:#b91c1c}
+.place.in.vs-o{background:#ffedd5;border-color:#fb923c}.place.in.vs-o .pl-label,.place.in.vs-o .pl-route{color:#c2410c}
+.place.in.vs-g{background:#dcfce7;border-color:#22c55e}.place.in.vs-g .pl-label,.place.in.vs-g .pl-route{color:#15803d}
+.pl-wbar{position:absolute;left:0;right:0;top:0;height:3px}
+.place.in{background:var(--tq-l);border-color:var(--tq);border-style:solid}
+.place.in .pl-label{color:var(--tq)}.place.in .pl-route{color:var(--tq-d)}
+.place.out{background:var(--red-bg);border-color:#ef9a9a;border-style:solid}
+.place.out .pl-label{color:#ef9a9a}.place.out .pl-route{color:var(--red-txt)}
+.place.blocked{background:var(--g200);border-color:var(--g400)}
+.place.blocked .pl-label{color:#bbb}
+.place.offzone{box-shadow:inset 0 0 0 2px var(--orange)}
+.place.al-red{border-color:var(--red)!important;animation:blinkRed 1s infinite;background:#ffd9d5}
+.place.al-or{border-color:var(--orange)!important;animation:blinkOr 1.4s infinite;background:#ffe7cf}
+.place.hl{box-shadow:0 0 0 3px var(--orange),0 0 12px rgba(248,130,35,.5);border-color:var(--orange)!important;z-index:2}
+.place.msrc{box-shadow:0 0 0 3px var(--purple),0 0 14px rgba(126,87,194,.55);border-color:var(--purple)!important;z-index:3}
+.place.blk-on{background:var(--red-bg);border-color:var(--red);border-style:solid}
+.place.blk-on .pl-label{color:var(--red)}
+.blk-ico{font-size:calc(var(--vh) * .45)}
+
+/* mini-grilles (éditeur de plage, modif route) */
+.g.mini .place{padding:2px;justify-content:center;gap:1px}
+.g.mini .pl-label{color:#999}
+.g.mini .ord{font-size:10px;font-weight:900;color:var(--tq-d);line-height:1}
+.g.mini .occ{font-size:9px;font-weight:800;color:#555;line-height:1}
+.place.rng{background:var(--tq-l);border-color:var(--tq);border-style:solid}
+.place.rng .pl-label{color:var(--tq-d)}
+.place.rng-occ{background:#c9ebe4}
+.place.rng-fr{background:#ccfbf1;border-color:var(--front);border-style:solid}
+.place.rng-fr .ord{color:var(--front)}
+.place.rng-other{background:#fff6e5;border-color:#f5c27a}
+.place.pt-start{box-shadow:0 0 0 3px #16a34a;z-index:2}
+.place.pt-end{box-shadow:0 0 0 3px var(--red);z-index:2}
+.place.mini-blk{background:var(--g200);border-color:var(--g400);opacity:.6}
+.place.m-busy{background:#e9ecef;border-color:#c9ced4}
+.place.m-out{background:var(--red-bg);border-color:#ef9a9a}
+.place.m-cur{background:#ede7f6;border-color:var(--purple);border-style:solid}
+.place.m-sel{box-shadow:0 0 0 3px var(--purple);background:#d9ccf3;border-color:var(--purple);border-style:solid;z-index:2}
+
+/* ---------- Blocages ---------- */
+.bulk{background:#fff;border-radius:var(--r-md);padding:12px 14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.08);flex-shrink:0}
+.bulk-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:4px 0}
+.bulk-title{font-size:13px;font-weight:700;margin:6px 0}
+
+/* ---------- Modals ---------- */
+#loader{position:fixed;inset:0;background:rgba(255,255,255,.85);display:flex;align-items:center;justify-content:center;z-index:999;font-weight:600}
+#loader.hidden{display:none}
+.spinner{width:30px;height:30px;margin-right:10px;border:4px solid #e0e0e0;border-top-color:var(--tq);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#000;color:#fff;padding:9px 18px;border-radius:var(--r-lg);font-size:13px;font-weight:500;opacity:0;transition:opacity .3s;pointer-events:none;z-index:1200;max-width:92vw;text-align:center}
+#toast.show{opacity:1}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:1100;padding:12px}
+.modal.hidden{display:none}
+.mbox{background:#fff;border-radius:var(--r-md);padding:20px;max-width:380px;width:100%;box-shadow:0 12px 40px rgba(0,0,0,.25);max-height:94vh;overflow:auto}
+.mbox.wide{max-width:1150px}
+.mbox h3{font-size:17px;font-weight:800;margin-bottom:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.mbox p{font-size:13px;color:var(--g500);margin-bottom:12px;line-height:1.45}
+.mbtns{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.mbtns button{flex:1;padding:11px;border:none;border-radius:var(--r-sm);font-size:14px;font-weight:700;cursor:pointer;min-width:110px}
+.mbtns button:disabled{opacity:.45;cursor:default}
+.mbox label{display:block;font-size:12px;font-weight:700;margin:10px 0 4px}
+.mbox input[type=text],.mbox input[type=url],.mbox input[type=search],.mbox input[type=time]{width:100%;padding:10px;border:1.5px solid var(--g300);border-radius:8px;font-size:14px}
+.pick-list{max-height:300px;overflow-y:auto;margin-top:8px}
+.pick-item{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:var(--r-sm);cursor:pointer;font-size:13px;font-weight:600}
+.pick-item:hover{background:var(--g100)}
+.pick-sec{font-size:11px;font-weight:800;color:var(--g500);text-transform:uppercase;letter-spacing:.4px;margin:8px 10px 2px}
+.pt-btns{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap}
+.pt-btn{flex:1;min-width:130px;border:2px solid var(--g300);background:#fff;border-radius:10px;padding:9px;font-weight:800;font-size:14px;cursor:pointer}
+.pt-btn.s.on{border-color:#16a34a;background:#e8f7ee;color:#166534}
+.pt-btn.e.on{border-color:var(--red);background:var(--red-bg);color:var(--red-txt)}
+.pt-btn.f{flex:0 1 auto;border-color:#5eead4;color:var(--front)}
+.rng-info{font-size:13px;font-weight:700;margin:6px 0 10px;display:flex;gap:8px;flex-wrap:wrap}
+.re-row{display:flex;gap:10px;flex-wrap:wrap}
+.re-row>div{flex:1;min-width:130px}
+.re-place{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;font-weight:700;margin:6px 0}
+.re-place .big{font-size:22px;font-weight:900;color:var(--purple)}
+
+@media (max-width:600px){
+  header{padding:9px 12px}
+  .hdr-btn{padding:6px 9px;font-size:11px}
+  .tab{font-size:11px}
+  .route-card{flex-wrap:wrap}
+  .btn-group{width:100%}
+  .btn-group .btn{flex:1}
+  .btn-group .btn-edit{flex:0 0 auto}
+}
+/* ---------- Connexion ---------- */
+.login{position:fixed;inset:0;z-index:2000;background:linear-gradient(160deg,#00A68F 0%,#007a69 100%);display:flex;align-items:center;justify-content:center;padding:16px}
+.login.hidden{display:none}
+.lbox{background:#fff;border-radius:18px;padding:28px 22px;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,.25);text-align:center}
+.llogo{font-size:30px;font-weight:900;color:#00A68F}
+.lsub{font-size:13px;color:var(--g500);font-weight:600;margin:4px 0 20px}
+.lbox input{width:100%;padding:14px;border:2px solid var(--g300);border-radius:12px;font-size:18px;font-weight:700;text-align:center;letter-spacing:2px;text-transform:uppercase}
+.lbox input:focus{outline:none;border-color:var(--tq)}
+.lbox input.url{font-size:12px;letter-spacing:0;text-transform:none;font-weight:500;text-align:left}
+.lbtn{width:100%;margin-top:12px;padding:14px;border:0;border-radius:12px;background:var(--tq);color:#fff;font-size:16px;font-weight:800;cursor:pointer}
+.lbtn:disabled{opacity:.6}
+.lerr{min-height:18px;margin-top:10px;font-size:13px;font-weight:700;color:var(--red-txt)}
+.lshow{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;color:var(--g500);margin-top:8px;cursor:pointer}
+.ladv{display:block;margin-top:14px;font-size:11px;color:var(--g400);cursor:pointer;background:none;border:0;text-decoration:underline}
+.ladv-box{margin-top:8px;text-align:left}
+.ladv-box.hidden{display:none}
+.lhint{font-size:11px;color:var(--g500);margin-top:12px;line-height:1.4}
+.role-badge{font-size:10px;font-weight:800;background:#fff;color:var(--tq-d);padding:3px 8px;border-radius:999px;margin-left:6px;vertical-align:middle}
+.ro .adm{display:none!important}
+.ro .btn-group{display:none!important}
+</style>
+</head>
+<body>
+<div id="loader"><div class="spinner"></div> Chargement...</div>
+<div id="toast"></div>
+
+<!-- Reset -->
+<div id="resetModal" class="modal hidden">
+  <div class="mbox">
+    <h3>&#128260; Reset All</h3>
+    <p>Vider le plan et d&#233;cocher toutes les cases ?<br><small>Les blocages et les plages de vagues sont conserv&#233;s.</small></p>
+    <div class="mbtns">
+      <button data-act="reset-yes" style="background:var(--red);color:#fff">&#9989; Oui</button>
+      <button class="b-neu" data-act="close-modal">&#10060; Non</button>
+    </div>
+  </div>
+</div>
+
+<!-- Placer une route sur une place -->
+<div id="pickModal" class="modal hidden">
+  <div class="mbox">
+    <h3 id="pick-title">Placer une route</h3>
+    <p>Une route en attente passera IN maintenant.</p>
+    <input type="search" id="pick-q" placeholder="&#128269; Route, vague, IDC...">
+    <div class="pick-list" id="pick-list"></div>
+    <div class="mbtns"><button class="b-neu" data-act="close-modal">Annuler</button></div>
+  </div>
+</div>
+
+<!-- Modifier une route (place + heures) -->
+<div id="routeModal" class="modal hidden">
+  <div class="mbox wide">
+    <h3 id="re-title">Modifier</h3>
+    <div class="re-place" id="re-place"></div>
+    <div class="hint">Tape une place libre (ou la place d'un van sorti) pour y mettre la route.</div>
+    <div class="g-outer" id="re-grid" style="max-height:46vh;margin-top:8px"></div>
+    <div class="re-row">
+      <div><label for="re-tin">Heure IN</label><input type="time" id="re-tin"></div>
+      <div><label for="re-tout">Heure OUT</label><input type="time" id="re-tout"></div>
+    </div>
+    <div class="hint" style="margin-top:6px">Heure IN vide = route en attente (retir&#233;e du plan). Heure OUT vide = pas sortie.</div>
+    <div class="mbtns">
+      <button class="b-pri" data-act="re-save">&#128190; Enregistrer</button>
+      <button class="b-bad" data-act="re-remove">&#129529; Retirer du plan</button>
+      <button class="b-neu" data-act="close-modal">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- Plage de vague -->
+<div id="waveModal" class="modal hidden">
+  <div class="mbox wide">
+    <h3 id="wm-title">Plage</h3>
+    <p id="wm-sub"></p>
+    <div class="pt-btns">
+      <button class="pt-btn s" id="wm-ptS" data-act="wm-pt" data-pt="s">&#9654; D&#233;but : <span>&#8212;</span></button>
+      <button class="pt-btn e" id="wm-ptE" data-act="wm-pt" data-pt="e">&#9632; Fin : <span>&#8212;</span></button>
+      <button class="pt-btn f" data-act="wm-nomain">Sans plage grille</button>
+    </div>
+    <div class="hint">Grille : tape la place de d&#233;but puis la place de fin. Remplissage par bloc de colonnes (rang&#233;e A, B, C&#8230; jusqu'&#224; ce que le bloc soit plein, puis bloc suivant).
+      <b style="color:var(--front)">Section avant : tape les places une par une</b> &#8212; elles sont stationn&#233;es en premier, dans l'ordre choisi.</div>
+    <div class="rng-info" id="wm-info"></div>
+    <div class="g-outer" id="wm-grid" style="max-height:52vh"></div>
+    <div class="mbtns">
+      <button class="b-pri" id="wm-save" data-act="wm-save">&#128190; Enregistrer</button>
+      <button class="b-bad" data-act="wm-clear">&#128465;&#65039; Effacer la plage</button>
+      <button class="b-neu" data-act="close-modal">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- Connexion -->
+<div id="login" class="login hidden">
+  <form class="lbox" id="l-form" autocomplete="on" onsubmit="return false">
+    <div class="llogo">&#128667; ParK</div>
+    <div class="lsub" id="l-sub">Stationnement &#8212; Intelcom</div>
+    <input type="password" id="l-key" placeholder="Cl&#233; d'acc&#232;s" autocomplete="current-password" autocapitalize="characters" spellcheck="false">
+    <label class="lshow"><input type="checkbox" id="l-show" style="width:auto"> afficher la cl&#233;</label>
+    <button class="lbtn" id="l-btn" type="submit">Entrer</button>
+    <div class="lerr" id="l-err"></div>
+    <button class="ladv" type="button" data-act="login-adv" id="l-advbtn">Serveur&#8230;</button>
+    <div class="ladv-box hidden" id="l-adv">
+      <input class="url" type="url" id="l-api" placeholder="https://script.google.com/macros/s/.../exec">
+    </div>
+    <div class="lhint">La cl&#233; est m&#233;moris&#233;e sur cet appareil. Bouton &#128682; pour se d&#233;connecter.</div>
+  </form>
+</div>
+
+<div id="app">
+  <header>
+    <h1>&#128667; ParK <span id="station-name"></span><span class="role-badge" id="role-badge" style="display:none">&#128065;&#65039; Lecture seule</span></h1>
+    <div class="hspace"></div>
+    <div class="live"><span class="dot off" id="dot"></span><span id="live-txt">Connexion&#8230;</span></div>
+    <div class="hbtns">
+      <button class="hdr-btn adm" data-act="undo">&#8617;&#65039; Retour</button>
+      <button class="hdr-btn danger adm" data-act="reset">&#128260; Reset</button>
+      <button class="hdr-btn" data-act="refresh">&#8635;</button>
+      <button class="hdr-btn" data-act="logout" title="Se d&#233;connecter">&#128682;</button>
+    </div>
+  </header>
+  <nav class="tabs">
+    <button class="tab active" data-tab="routes">Routes</button>
+    <button class="tab" data-tab="waves">&#127754; Vagues</button>
+    <button class="tab" data-tab="plan">Plan WH</button>
+    <button class="tab adm" data-tab="blocks">&#128274; Blocages</button>
+  </nav>
+
+  <!-- ROUTES -->
+  <section id="routes-view" class="view">
+    <div id="banners"></div>
+    <div class="filters">
+      <input class="search-bar" type="search" id="r-q" placeholder="&#128269; Route, IDC, vague ou place...">
+      <select class="sel" id="r-tag"><option value="">&#8212; Tags &#8212;</option></select>
+      <select class="sel" id="r-wave"><option value="">&#8212; Vagues &#8212;</option></select>
+      <select class="sel" id="r-idc"><option value="">&#8212; Tous IDC &#8212;</option></select>
+    </div>
+    <div class="stats-bar" id="r-stats"></div>
+    <div class="stats-bar" id="r-vs" style="padding-top:0"></div>
+    <div id="r-list"></div>
+  </section>
+
+  <!-- VAGUES -->
+  <section id="waves-view" class="view hidden">
+    <div class="waves-head">
+      <div class="hint" style="flex:1;min-width:220px">Avant chaque vague, choisis les places de la section avant (stationn&#233;es en premier) et la plage sur la grille. Les vans prennent la premi&#232;re place libre. Si deux vagues partagent des places, elles se m&#233;langent.</div>
+      <button class="bbtn b-ok adm" data-act="export" data-wave="">&#128228; Exporter tout</button>
+    </div>
+    <div id="w-list"></div>
+  </section>
+
+  <!-- PLAN -->
+  <section id="plan-view" class="view hidden">
+    <div class="plan-tools">
+      <div class="psearch"><input class="search-bar" type="search" id="p-q" placeholder="&#128269; Route, IDC, vague..."><span id="p-found"></span></div>
+      <select class="sel" id="p-color" title="Couleur des vans">
+        <option value="status">Couleur : statut</option>
+        <option value="wave">Couleur : vague</option>
+        <option value="idc">Couleur : IDC</option>
+      </select>
+    </div>
+    <div class="plan-tools">
+      <div class="stats-bar" id="p-stats"></div>
+      <div class="hspace"></div>
+      <button class="tool-btn adm" id="move-btn" data-act="move-mode">&#9995; Modifier le stationnement</button>
+      <button class="tool-btn" data-act="flip-x" title="Inverser gauche / droite">&#8644;</button>
+      <button class="tool-btn" data-act="flip-y" title="Inverser haut / bas">&#8645;</button>
+      <div class="zoom-ctl">
+        <button data-act="zoom" data-z="-1">&#8722;</button><span class="zoom-val">100%</span><button data-act="zoom" data-z="1">+</button>
+      </div>
+    </div>
+    <div class="move-bar" id="move-bar">
+      <span id="move-msg"></span><span class="sp"></span>
+      <button class="bbtn b-ok" id="move-edit" data-act="move-edit" style="display:none">&#9999;&#65039; Heures</button>
+      <button class="bbtn b-bad" id="move-free" data-act="move-free" style="display:none">&#129529; Vider</button>
+      <button class="bbtn b-neu" id="move-cancel" data-act="move-cancel" style="display:none">&#10006; Annuler</button>
+    </div>
+    <div class="wave-legend" id="p-wlegend"></div>
+    <div class="g-outer" id="p-grid"></div>
+    <div class="legend">
+      <span><i style="background:var(--tq-l);border:2px solid var(--tq)"></i>IN</span>
+      <span><i style="background:var(--red-bg);border:2px solid #ef9a9a"></i>OUT</span>
+      <span><i style="background:var(--g100);border:2px solid var(--g300)"></i>Libre</span>
+      <span><i style="background:var(--g100);border:2px dashed #5eead4"></i>Section avant</span>
+      <span><i style="background:var(--g200);border:2px solid var(--g400)"></i>Bloqu&#233;</span>
+      <span><i style="border:2px solid var(--orange)"></i>Hors plage</span>
+      <span><i style="background:#fee2e2;border:2px solid #f87171"></i>0&#8211;40 %</span>
+      <span><i style="background:#ffedd5;border:2px solid #fb923c"></i>40&#8211;60 %</span>
+      <span><i style="background:#dcfce7;border:2px solid #22c55e"></i>60&#8211;100 %</span>
+      <span><i style="background:#ffd9d5;border:2px solid var(--red)"></i>Clignote : pas commenc&#233;, PPM &lt; 5 ou scan &gt; 75 min</span>
+      <span><i style="background:#ffe7cf;border:2px solid var(--orange)"></i>Charg&#233;, pas sorti</span>
+    </div>
+  </section>
+
+  <!-- BLOCAGES -->
+  <section id="blocks-view" class="view hidden">
+    <div class="bulk">
+      <div class="bulk-title">&#128207; Par rang&#233;e</div>
+      <div class="bulk-row">
+        <select class="sel" id="b-row"><option value="">&#8212; Rang&#233;e &#8212;</option></select>
+        <button class="bbtn b-bad" data-act="blk-row" data-v="1">&#128274; Bloquer</button>
+        <button class="bbtn b-ok" data-act="blk-row" data-v="0">&#128275; D&#233;bloquer</button>
+      </div>
+      <div class="bulk-title">&#128208; Par colonne</div>
+      <div class="bulk-row">
+        <select class="sel" id="b-col"><option value="">&#8212; Colonne &#8212;</option></select>
+        <button class="bbtn b-bad" data-act="blk-col" data-v="1">&#128274; Bloquer</button>
+        <button class="bbtn b-ok" data-act="blk-col" data-v="0">&#128275; D&#233;bloquer</button>
+      </div>
+    </div>
+    <div class="plan-tools">
+      <p class="hint" style="margin:0">Tape une place pour la bloquer / d&#233;bloquer</p>
+      <div class="hspace"></div>
+      <div class="zoom-ctl">
+        <button data-act="zoom" data-z="-1">&#8722;</button><span class="zoom-val">100%</span><button data-act="zoom" data-z="1">+</button>
+      </div>
+    </div>
+    <div class="g-outer" id="b-grid"></div>
+    <div class="legend">
+      <span><i style="background:var(--red-bg);border:2px solid var(--red)"></i>Bloqu&#233;</span>
+      <span><i style="background:var(--g100);border:2px solid var(--g300)"></i>Libre</span>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+'use strict';
+
+/* =================================================================
+ *  CONNEXION (servie par Apps Script, ou fichier local)
+ * ================================================================= */
+var BOOT = window.PARK_BOOT || null;
+var LS = {
+  get: function (k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch (_) { return d; } },
+  set: function (k, v) { try { localStorage.setItem(k, v); } catch (_) {} }
+};
+function readConn() {
+  var qs = new URLSearchParams(location.search), hs = new URLSearchParams(location.hash.replace(/^#/, ''));
+  var key = hs.get('k') || qs.get('k') || (BOOT && BOOT.key) || '';
+  if (key) LS.set('park_key', key);
+  if (hs.get('k')) try { history.replaceState(null, '', location.pathname + location.search); } catch (_) {}
+  if (BOOT && BOOT.api) return { api: BOOT.api, key: key || LS.get('park_key', ''), fixed: true };
+  var api = hs.get('api') || qs.get('api');
+  if (api) LS.set('park_api', api);
+  var cfg = /^https?:\/\/.+\/exec/.test(window.PARK_API || '') ? window.PARK_API : '';
+  return { api: api || cfg || LS.get('park_api', ''), key: key || LS.get('park_key', ''), fixed: !!cfg && !api };
+}
+var CONN = readConn();
+
+function jsonp(params, timeout) {
+  return new Promise(function (resolve, reject) {
+    var cb = '__pk' + Date.now() + Math.floor(Math.random() * 1e6);
+    var s = document.createElement('script');
+    var t = setTimeout(function () { cleanup(); reject(new Error('Délai dépassé')); }, timeout || 40000);
+    function cleanup() { clearTimeout(t); try { delete window[cb]; } catch (_) { window[cb] = undefined; } if (s.parentNode) s.parentNode.removeChild(s); }
+    window[cb] = function (d) { cleanup(); resolve(d); };
+    s.onerror = function () { cleanup(); reject(new Error('Erreur réseau')); };
+    var q = new URLSearchParams(params);
+    q.set('k', CONN.key); q.set('callback', cb); q.set('_', Date.now());
+    s.src = CONN.api + (CONN.api.indexOf('?') >= 0 ? '&' : '?') + q.toString();
+    document.head.appendChild(s);
+  });
+}
+function api(name, params) {
+  if (!CONN.api) return Promise.reject(new Error('Serveur non configuré'));
+  return jsonp(Object.assign({ api: name }, params || {})).then(function (res) {
+    if (res && res.auth === false) { showLogin(CONN.key ? 'Clé invalide ou changée' : ''); throw new Error(res.msg || 'Clé invalide'); }
+    if (res && res.role && res.role !== ROLE) setRole(res.role);
+    return res;
+  });
+}
+
+/* =================================================================
+ *  ÉTAT
+ * ================================================================= */
+var S = null, C = null;
+var skew = 0, lastOk = 0, lastErr = '', pending = 0, loading = false;
+var tab = 'routes';
+var ui = {
+  alertsOnly: false,
+  colorMode: LS.get('park_color', 'status'),
+  col0Left: LS.get('park_col0_left', '1') === '1',
+  rowABottom: LS.get('park_rowA_bottom', '1') === '1',
+  zoom: parseFloat(LS.get('park_zoom2', '1')) || 1,
+  moveMode: false, moveFrom: null, pickTarget: null
+};
+function now() { return Date.now() + skew; }
+
+function prepare(st) {
+  C = st.config;
+  C.frontAt = {};
+  C.front.labels.forEach(function (l, i) { C.frontAt[C.front.start + i] = l; });
+  C.blockOf = {};
+  C.blocks.forEach(function (b, i) { b.forEach(function (c) { C.blockOf[c] = i; }); });
+  for (var c = 0; c < C.cols; c++) if (C.blockOf[c] === undefined) C.blockOf[c] = 'x' + c;
+
+  var s = { routes: st.routes, plan: st.plan || {}, blocked: new Set(st.blocked || []), waves: st.waves || {}, vanscan: st.vanscan || {}, station: st.station };
+  s.byKey = {}; s.byId = {}; s.placeByKey = {}; s.outKeys = {};
+  s.routes.forEach(function (r) { s.byKey[r.key] = r; s.byId[r.id] = r; if (r.out) s.outKeys[r.key] = 1; });
+  s.dups = st.dups || [];
+  Object.keys(s.plan).forEach(function (l) { s.placeByKey[s.plan[l]] = l; });
+  s.routes.forEach(function (r) { r.place = s.placeByKey[r.key] || ''; });
+
+  var set = {};
+  (st.waveSheets || []).forEach(function (w) { set[w] = 1; });
+  s.routes.forEach(function (r) { set[r.wave] = 1; });
+  s.waveList = Object.keys(set).sort(natCmp);
+
+  s.rangeOf = {}; s.ownersOf = {};
+  Object.keys(s.waves).forEach(function (w) {
+    var labels = waveOrder(s.waves[w]);
+    s.rangeOf[w] = labels;
+    labels.forEach(function (l) { (s.ownersOf[l] = s.ownersOf[l] || []).push(w); });
+  });
+  var idcs = {};
+  s.routes.forEach(function (r) { idcs[r.idc] = 1; });
+  buildIdcColors(Object.keys(idcs));
+  return s;
+}
+
+function loadState(showLoader) {
+  if (!CONN.api) { showLogin(''); return Promise.resolve(); }
+  if (loading) return Promise.resolve();
+  loading = true;
+  if (showLoader) loader(true);
+  var t0 = Date.now();
+  return api('state').then(function (st) {
+    if (!st || !st.ok) throw new Error((st && st.msg) || 'Réponse invalide');
+    skew = st.serverNow - Math.round((t0 + Date.now()) / 2);
+    S = prepare(st);
+    if (st.role) setRole(st.role);
+    $('login').classList.add('hidden');
+    lastOk = Date.now(); lastErr = '';
+    $('station-name').textContent = S.station || '';
+  }).catch(function (e) {
+    lastErr = e.message || String(e);
+  }).then(function () {
+    loading = false; loader(false);
+    renderAll();
+  });
+}
+
+/* =================================================================
+ *  UTILS
+ * ================================================================= */
+function $(id) { return document.getElementById(id); }
+function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+function natCmp(a, b) { return String(a).localeCompare(String(b), 'fr', { numeric: true }); }
+function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+function loader(v) { $('loader').classList.toggle('hidden', !v); }
+var toastT = null;
+function toast(msg) {
+  var t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastT); toastT = setTimeout(function () { t.classList.remove('show'); }, 3000);
+}
+function hhmm(iso) { return iso ? new Date(iso).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '—'; }
+function nowHM() { return new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }); }
+function pad2(t) { var m = String(t || '').match(/^(\d{1,2}):(\d{2})/); return m ? ('0' + m[1]).slice(-2) + ':' + m[2] : ''; }
+function durText(m) {
+  m = Math.round(m);
+  if (m < 60) return m + ' min';
+  var h = Math.floor(m / 60), r = m % 60;
+  return r ? h + 'h' + ('0' + r).slice(-2) : h + 'h';
+}
+function durClass(m) { return m <= C.loOk ? 't-dur t-ok' : (m <= C.loWarn ? 't-dur t-warn' : 't-dur t-bad'); }
+function tagBadge(t) { return t ? '<span class="tag tag-' + esc(t) + '">' + esc(t) + '</span>' : ''; }
+function waveBadge(w) { return '<span class="wave-badge"><span class="wdot" style="background:' + waveColor(w) + '"></span>' + esc(w) + '</span>'; }
+function lighten(hex, amt) {
+  hex = hex.replace('#', ''); if (hex.length === 3) hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+  var r = clamp(parseInt(hex.substr(0, 2), 16) + amt, 0, 255), g = clamp(parseInt(hex.substr(2, 2), 16) + amt, 0, 255), b = clamp(parseInt(hex.substr(4, 2), 16) + amt, 0, 255);
+  return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+function label(c, r) { return String(c) + C.rows[r]; }
+function isFront(l) { return C.front.labels.indexOf(l) !== -1; }
+function parseLabel(l) {
+  var m = String(l || '').match(/^(\d{1,2})([A-Z])$/);
+  if (!m) return null;
+  return { col: parseInt(m[1], 10), row: C.rows.indexOf(m[2]) };
+}
+
+/* Même logique que Code.gs : blocs de colonnes, rangée par rangée dans chaque bloc */
+function mainOrder(m) {
+  var out = []; if (!m) return out;
+  var cs = m.ec >= m.sc ? 1 : -1, rs = m.er >= m.sr ? 1 : -1, groups = [];
+  for (var c = m.sc; ; c += cs) {
+    var g = groups[groups.length - 1];
+    if (g && C.blockOf[g[0]] === C.blockOf[c]) g.push(c); else groups.push([c]);
+    if (c === m.ec) break;
+  }
+  groups.forEach(function (g) {
+    for (var r = m.sr; ; r += rs) { g.forEach(function (cc) { out.push(label(cc, r)); }); if (r === m.er) break; }
+  });
+  return out;
+}
+function waveOrder(w) { return w ? (w.front || []).filter(isFront).concat(mainOrder(w.main)) : []; }
+function rangeHTML(w) {
+  if (!w) return '<span class="rng none">Pas de plage</span>';
+  var h = '';
+  if (w.front && w.front.length) h += '<span class="rng fr">Avant ' + esc(w.front.join(' ')) + '</span>';
+  if (w.main) h += '<span class="rng">' + esc(label(w.main.sc, w.main.sr) + ' → ' + label(w.main.ec, w.main.er)) + '</span>';
+  return h;
+}
+function rangeText(w) {
+  var p = [];
+  if (w && w.front && w.front.length) p.push('Avant ' + w.front.join(' '));
+  if (w && w.main) p.push(label(w.main.sc, w.main.sr) + ' → ' + label(w.main.ec, w.main.er));
+  return p.join(' + ');
+}
+function isFreeLabel(l) { return !S.blocked.has(l) && (!S.plan[l] || S.outKeys[S.plan[l]]); }
+
+/* ---------- Couleurs ---------- */
+var WAVE_PAL = ['#1E88E5', '#E53935', '#8E24AA', '#FB8C00', '#43A047', '#00ACC1', '#6D4C41', '#D81B60', '#3949AB', '#7CB342', '#F4511E', '#5E35B1'];
+function waveColor(w) { var i = S ? S.waveList.indexOf(w) : -1; return i < 0 ? '#9e9e9e' : WAVE_PAL[i % WAVE_PAL.length]; }
+var IDC_PAL = ['#E57373', '#F06292', '#BA68C8', '#9575CD', '#7986CB', '#64B5F6', '#4FC3F7', '#4DD0E1', '#4DB6AC', '#81C784', '#AED581', '#DCE775', '#FFD54F', '#FFB74D', '#FF8A65', '#A1887F', '#90A4AE',
+  '#C62828', '#AD1457', '#6A1B9A', '#4527A0', '#283593', '#1565C0', '#0277BD', '#00838F', '#00695C', '#2E7D32', '#558B2F', '#9E9D24', '#FF8F00', '#EF6C00', '#D84315', '#4E342E'];
+var idcMap = {};
+function hashStr(s) { var h = 0; for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return Math.abs(h); }
+function buildIdcColors(names) {
+  var used = {}; idcMap = {};
+  names.slice().sort().forEach(function (n) {
+    var i = hashStr(n) % IDC_PAL.length, t = 0;
+    while (used[i] && t < IDC_PAL.length) { i = (i + 1) % IDC_PAL.length; t++; }
+    used[i] = 1; idcMap[n] = IDC_PAL[i];
+  });
+}
+function idcColor(n) { return idcMap[n] || IDC_PAL[hashStr(n || '') % IDC_PAL.length]; }
+
+/* =================================================================
+ *  VANSCAN — progression + alertes
+ * ================================================================= */
+function vsPct(r) { var v = r.vs; return v && v.t ? Math.min(100, Math.round(v.s / v.t * 100)) : null; }
+/* 0-40 rouge, 40-60 orange, 60-100 vert */
+function band(p, done) { if (done) return 'g'; if (p == null) return ''; return p < C.pctRed ? 'r' : (p < C.pctOrange ? 'o' : 'g'); }
+var BAND_VAN = { r: '#f87171', o: '#fdba74', g: '#86efac' };
+function alertFor(r) {
+  if (!C || !C.vanscan || !r.in || r.out) return null;
+  var v = r.vs, t = now();
+  if (v && v.done) {
+    var m = v.end ? (t - Date.parse(v.end)) / 60000 : null;
+    return (m != null && m >= C.loadedAlertMin) ? { k: 'or', txt: '📦 Chargé, pas sorti (' + durText(m) + ')' } : null;
+  }
+  var inMin = r.inMs ? (t - r.inMs) / 60000 : null;
+  if (!v || !v.st) {
+    var sess = S.vanscan[r.tag];
+    return (inMin != null && inMin >= C.parkedAlertMin && sess && sess.ok) ? { k: 'red', txt: '🔴 Scan pas commencé (stationné ' + durText(inMin) + ')' } : null;
+  }
+  var scanMin = (t - Date.parse(v.st)) / 60000;
+  if (scanMin > C.maxScanMin) return { k: 'red', txt: '⏱️ Scan trop long : ' + durText(scanMin) + ' (' + vsPct(r) + '%)' };
+  if (v.ppm != null && v.ppm < C.slowPpm && scanMin >= C.ppmGraceMin) return { k: 'red', txt: '🐢 Scan lent : ' + v.ppm.toFixed(1) + ' PPM' };
+  return null;
+}
+
+/* =================================================================
+ *  RENDU GÉNÉRAL
+ * ================================================================= */
+function renderAll() {
+  renderLive();
+  if (tab === 'routes') renderRoutes();
+  if (tab === 'waves') renderWaves();
+  if (tab === 'plan') renderPlan();
+  if (tab === 'blocks') renderBlocks();
+  if (!$('waveModal').classList.contains('hidden')) renderWaveEditor();
+  if (!$('routeModal').classList.contains('hidden')) renderRouteEditor();
+}
+function renderLive() {
+  var dot = $('dot'), txt = $('live-txt');
+  if (!lastOk) { dot.className = 'dot off'; txt.textContent = CONN.api ? (lastErr ? 'Hors ligne' : 'Connexion…') : 'Non connecté'; return; }
+  dot.className = (lastErr || (Date.now() - lastOk) / 1000 > 70) ? 'dot stale' : 'dot';
+  txt.textContent = new Date(lastOk).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
+function renderBanners() {
+  var b = [];
+  if (S && S.dups.length) b.push('<div class="banner warn">⚠️ Route(s) en double, seule la 1re feuille compte : ' + esc(S.dups.join(' ; ')) + '</div>');
+  if (lastErr) b.push('<div class="banner err">Mise à jour impossible : ' + esc(lastErr) + (lastOk ? ' — dernières données affichées' : '') + '</div>');
+  if (S && C && C.vanscan) Object.keys(S.vanscan).forEach(function (st) {
+    var v = S.vanscan[st];
+    if (!v.ok) b.push('<div class="banner warn">Vanscan ' + esc(st) + ' : ' + esc(v.error) + '</div>');
+    else if (v.stale) b.push('<div class="banner warn">Vanscan ' + esc(st) + ' : pas de réponse (' + esc(v.error || '') + '), données de ' + hhmm(v.fetched) + '</div>');
+  });
+  $('banners').innerHTML = b.join('');
+}
+
+/* =================================================================
+ *  ROUTES
+ * ================================================================= */
+function fillSelect(id, values, lbl) {
+  var sel = $(id), prev = sel.value;
+  sel.innerHTML = '<option value="">— ' + lbl + ' —</option>' + values.map(function (v) { return '<option value="' + esc(v) + '">' + esc(v) + '</option>'; }).join('');
+  if (prev && values.indexOf(prev) >= 0) sel.value = prev;
+}
+function filteredRoutes() {
+  var q = $('r-q').value.trim().toLowerCase(), tg = $('r-tag').value, wv = $('r-wave').value, idc = $('r-idc').value;
+  return S.routes.filter(function (r) {
+    if (tg && r.tag !== tg) return false;
+    if (wv && r.wave !== wv) return false;
+    if (idc && r.idc !== idc) return false;
+    if (ui.alertsOnly && !alertFor(r)) return false;
+    if (!q) return true;
+    return (r.route + ' ' + r.idc + ' ' + r.wave + ' ' + r.tag + ' ' + r.place).toLowerCase().indexOf(q) !== -1;
+  });
+}
+function renderRoutes() {
+  renderBanners();
+  if (!S) { $('r-list').innerHTML = '<p class="empty-msg">' + (CONN.api ? 'Chargement…' : 'Non connecté') + '</p>'; return; }
+  var tags = {}, idcs = {};
+  S.routes.forEach(function (r) { tags[r.tag] = 1; idcs[r.idc] = 1; });
+  fillSelect('r-tag', Object.keys(tags).sort(), 'Tags');
+  fillSelect('r-wave', S.waveList, 'Vagues');
+  fillSelect('r-idc', Object.keys(idcs).sort(natCmp), 'Tous IDC');
+
+  var list = filteredRoutes(), nIn = 0, nOut = 0, durs = [], nAl = 0;
+  S.routes.forEach(function (r) { if (alertFor(r)) nAl++; });
+  list.forEach(function (r) { if (r.in) nIn++; if (r.out) nOut++; if (r.lo) durs.push(r.lo); });
+  var avg = durs.length ? durs.reduce(function (a, b) { return a + b; }, 0) / durs.length : 0;
+  $('r-stats').innerHTML =
+    '<span class="chip c-total">📦 ' + list.length + ' routes</span><span class="chip c-in">🟢 ' + nIn + ' IN</span><span class="chip c-out">🔴 ' + nOut + ' OUT</span>' +
+    (avg ? '<span class="chip c-avg">⏱️ moy ' + durText(avg) + '</span>' : '') +
+    (C.vanscan ? '<button class="chip c-alert' + (nAl ? '' : ' off') + '" data-act="alerts-only">' + (ui.alertsOnly ? '✕ ' : '⚠️ ') + nAl + ' alerte' + (nAl > 1 ? 's' : '') + '</button>' : '');
+
+  var vsh = '';
+  if (C.vanscan) Object.keys(S.vanscan).sort().forEach(function (st) {
+    var v = S.vanscan[st];
+    if (!v.ok) return;
+    var p = v.total ? Math.round(v.scanned / v.total * 100) : 0;
+    vsh += '<span class="chip c-vs">' + tagBadge(st) + ' Vanscan <b>' + p + '%</b> · ' + v.scanned.toLocaleString('fr-CA') + '/' + v.total.toLocaleString('fr-CA') + (v.stale ? ' ⚠️' : '') + '</span>';
+  });
+  $('r-vs').innerHTML = vsh;
+  $('r-list').innerHTML = list.length ? list.map(routeCard).join('') : '<p class="empty-msg">Aucune route</p>';
+}
+function routeCard(r) {
+  var al = alertFor(r), w = S.waves[r.wave];
+  var off = r.place && w && S.rangeOf[r.wave].indexOf(r.place) < 0;
+  var h = '<div class="route-card' + (al ? ' al-' + al.k : '') + '"><div class="rc-main">';
+  h += '<div class="route-name">' + tagBadge(r.tag) + esc(r.disp) +
+       (r.place ? ' <span class="place-badge' + (off ? ' off' : '') + '"' + (off ? ' title="Hors plage"' : '') + '>' + esc(r.place) + '</span>' : '') + ' ' + waveBadge(r.wave) + '</div>';
+  h += '<div class="route-idc"><span class="idc-dot" style="background:' + idcColor(r.idc) + '"></span>' + esc(r.idc) + (r.idcAuto ? ' <span class="hint" title="IDC lu dans Vanscan">(Vanscan)</span>' : '') + '</div>';
+  var st = r.out ? '<span class="st-out">🔴 Sorti WH</span>' : (r.in ? '<span class="st-in">🟢 Stationné' + (r.place ? '' : ' (sans place)') + '</span>' : '<span class="st-none">⚪ En attente</span>');
+  h += '<div class="route-status">' + st + '</div>';
+  if (r.tIn || r.tOut) {
+    h += '<div class="route-times">' + (r.tIn ? '<span class="t-in">🟢 IN ' + esc(r.tIn) + '</span>' : '') +
+         (r.tOut ? '<span class="t-out">🔴 OUT ' + esc(r.tOut) + '</span>' : '') +
+         (r.lo ? '<span class="' + durClass(r.lo) + '">⏱️ ' + durText(r.lo) + '</span>' : '') + '</div>';
+  }
+  if (C.vanscan) h += vsLine(r);
+  if (al) h += '<div class="al-pill ' + al.k + '">' + esc(al.txt) + '</div>';
+  h += '</div><div class="btn-group">' +
+       '<button class="btn btn-edit" data-act="route-edit" data-id="' + esc(r.id) + '" title="Modifier place / heures">✏️</button>' +
+       '<button class="btn btn-in' + (r.in ? ' active' : '') + '" data-act="check" data-id="' + esc(r.id) + '" data-col="IN">IN</button>' +
+       '<button class="btn btn-out' + (r.out ? ' active' : '') + '" data-act="check" data-id="' + esc(r.id) + '" data-col="OUT">OUT</button>' +
+       '</div></div>';
+  return h;
+}
+function vsLine(r) {
+  var v = r.vs;
+  if (!v) return '<div class="vs-line vs-none">Vanscan : —</div>';
+  if (!v.st) return '<div class="vs-line vs-none">Vanscan : pas commencé · ' + v.t + ' colis</div>';
+  var p = vsPct(r), bd = band(p, v.done);
+  var scanMin = v.done || !v.st ? null : (now() - Date.parse(v.st)) / 60000;
+  return '<div class="vs-line"><div class="vs-bar b-' + bd + '"><i style="width:' + p + '%"></i></div>' +
+    '<div class="vs-txt"><span><b>' + v.s + '/' + v.t + '</b> · <b class="pct-' + bd + '">' + p + '%</b></span>' +
+    (scanMin != null ? '<span>⏱️ ' + durText(scanMin) + '</span>' : '') +
+    (v.done ? '<span>✓ chargé ' + hhmm(v.end) + '</span>' : '<span>' + (v.t - v.s) + ' restants</span>') +
+    (v.ppm != null ? '<span>' + v.ppm.toFixed(1) + ' PPM</span>' : '') +
+    (v.wr ? '<span style="color:var(--red-txt)">WR ' + v.wr + '</span>' : '') + '</div></div>';
+}
+function toggleCheck(id, col) {
+  var r = S && S.byId[id]; if (!r) return;
+  var nv = col === 'IN' ? !r.in : !r.out;
+  var hm = nowHM();
+  if (col === 'IN') { r.in = nv; r.tIn = nv ? hm : ''; r.inMs = nv ? now() : null; if (!nv) { r.out = false; r.tOut = ''; } }
+  else { r.out = nv; r.tOut = nv ? hm : ''; }
+  renderAll();
+  pending++;
+  api('check', { id: id, col: col, v: nv ? 1 : 0 }).then(function (res) {
+    toast(res.warn || res.msg || (res.ok ? '✅' : '❌'));
+  }).catch(function (e) { toast('❌ ' + e.message); })
+    .then(function () { pending--; loadState(false); });
+}
+
+/* =================================================================
+ *  MODIF MANUELLE D'UNE ROUTE (place + heures)
+ * ================================================================= */
+var RE = { id: null, target: '', remove: false };
+function openRouteEditor(id) {
+  var r = S && S.byId[id]; if (!r) return;
+  RE.id = id; RE.target = r.place || ''; RE.remove = false;
+  $('re-tin').value = pad2(r.tIn); $('re-tout').value = pad2(r.tOut);
+  $('routeModal').classList.remove('hidden');
+  renderRouteEditor();
+}
+function renderRouteEditor() {
+  var r = S && S.byId[RE.id]; if (!r) return;
+  $('re-title').innerHTML = '✏️ ' + tagBadge(r.tag) + ' ' + esc(r.disp) + ' ' + waveBadge(r.wave);
+  var t = RE.remove ? '' : RE.target;
+  $('re-place').innerHTML = 'Place : <span class="big">' + (t ? esc(t) : '—') + '</span>' +
+    (RE.remove ? '<span class="chip c-out">sera retirée du plan</span>' : (t && t !== r.place ? '<span class="chip c-avg">avant : ' + esc(r.place || 'aucune') + '</span>' : '')) +
+    (!t && !RE.remove && !r.place ? '<span class="hint">aucune — une place sera donnée automatiquement si l\'heure IN est remplie</span>' : '');
+  $('re-grid').innerHTML = gridHTML('mini', { cw: 40, ch: 38 }, function (l) {
+    var occ = S.plan[l], o = occ && S.byKey[occ];
+    var cls = 'place click' + (isFront(l) ? ' front' : '');
+    if (S.blocked.has(l)) cls += ' mini-blk';
+    else if (occ === r.key) cls += ' m-cur';
+    else if (occ && S.outKeys[occ]) cls += ' m-out';
+    else if (occ) cls += ' m-busy';
+    if (t === l) cls += ' m-sel';
+    return '<div class="' + cls + '" data-l="' + l + '" title="' + l + (o ? ' — ' + esc(o.disp) + (S.outKeys[occ] ? ' (sorti)' : '') : '') + '"><span class="pl-label">' + l + '</span>' +
+      (o ? '<span class="occ">' + esc(o.disp) + '</span>' : '') + '</div>';
+  });
+}
+function onRouteGridClick(l) {
+  var r = S.byId[RE.id]; if (!r) return;
+  if (S.blocked.has(l)) { toast('⛔ ' + l + ' est bloquée'); return; }
+  var occ = S.plan[l];
+  if (occ && occ !== r.key && !S.outKeys[occ]) { toast('⛔ ' + l + ' occupée par ' + (S.byKey[occ] ? S.byKey[occ].disp : occ) + ' — pour échanger : Plan WH → Modifier le stationnement'); return; }
+  RE.target = l; RE.remove = false;
+  if (!$('re-tin').value) $('re-tin').value = nowHM();
+  renderRouteEditor();
+}
+function saveRouteEditor() {
+  var r = S.byId[RE.id]; if (!r) return;
+  var place = RE.remove ? '-' : (RE.target && RE.target !== r.place ? RE.target : '');
+  var id = RE.id;
+  closeModals();
+  runAction('route_edit', { id: id, place: place, tin: $('re-tin').value, tout: $('re-tout').value });
+}
+
+/* =================================================================
+ *  VAGUES
+ * ================================================================= */
+function waveStats(w, labels) {
+  var rs = S.routes.filter(function (r) { return r.wave === w; });
+  var o = { routes: rs.length, in: 0, out: 0, wait: 0, s: 0, t: 0 };
+  rs.forEach(function (r) {
+    if (r.out) o.out++; else if (r.in) o.in++; else o.wait++;
+    if (r.vs) { o.s += r.vs.s; o.t += r.vs.t; }
+  });
+  labels = labels || S.rangeOf[w] || [];
+  o.places = labels.length;
+  o.free = labels.filter(isFreeLabel).length;
+  o.overlap = {};
+  labels.forEach(function (l) { (S.ownersOf[l] || []).forEach(function (x) { if (x !== w) o.overlap[x] = (o.overlap[x] || 0) + 1; }); });
+  return o;
+}
+function renderWaves() {
+  if (!S) { $('w-list').innerHTML = '<p class="empty-msg">Chargement…</p>'; return; }
+  if (!S.waveList.length) { $('w-list').innerHTML = '<p class="empty-msg">Aucune vague. Crée une feuille par vague dans le Sheet (LAVL1, MONT1…) — menu ParK → Nouvelle feuille de vague.</p>'; return; }
+  $('w-list').innerHTML = S.waveList.map(function (w) {
+    var o = waveStats(w), z = S.waves[w], col = waveColor(w);
+    var tag = (S.routes.filter(function (r) { return r.wave === w; })[0] || {}).tag || '';
+    var h = '<div class="wave-card" style="border-top-color:' + col + '">';
+    h += '<div class="wave-top"><span class="wdot" style="background:' + col + ';width:12px;height:12px"></span><span class="wave-name">' + esc(w) + '</span>' + tagBadge(tag) +
+         (o.t ? '<span class="wave-vs">Vanscan ' + Math.round(o.s / o.t * 100) + '%</span>' : '') + '</div>';
+    h += '<div class="wave-counts"><span class="chip c-total">📦 ' + o.routes + ' routes</span><span class="chip c-in">🟢 ' + o.in + ' IN</span>' +
+         '<span class="chip c-out">🔴 ' + o.out + ' OUT</span><span class="chip c-free">⏳ ' + o.wait + ' à stationner</span></div>';
+    h += '<div class="wave-range">Plage ' + rangeHTML(z) + (z ? '<span class="hint">' + o.places + ' places · ' + o.free + ' libres</span>' : '<span class="hint">les vans iront dans les places hors plage</span>') + '</div>';
+    if (z) {
+      if (o.wait > o.free) h += '<div class="wave-msg bad">⚠️ Il manque ' + (o.wait - o.free) + ' place' + (o.wait - o.free > 1 ? 's' : '') + ' — le surplus ira hors plage</div>';
+      else if (o.wait) h += '<div class="wave-msg ok">✅ Assez de places pour ' + (o.wait > 1 ? 'les ' + o.wait + ' routes restantes' : 'la route restante') + '</div>';
+      var ov = Object.keys(o.overlap);
+      if (ov.length) h += '<div class="wave-msg warn">↔️ Partage ' + ov.map(function (x) { return esc(x) + ' (' + o.overlap[x] + ' pl.)'; }).join(', ') + ' — les vans seront mélangés</div>';
+    }
+    h += '<div class="wave-btns adm"><button class="bbtn b-pri" data-act="wave-edit" data-wave="' + esc(w) + '">✏️ ' + (z ? 'Modifier la plage' : 'Définir la plage') + '</button>' +
+         '<button class="bbtn b-ok" data-act="export" data-wave="' + esc(w) + '">📤 Exporter</button>' +
+         (z ? '<button class="bbtn b-bad" data-act="wave-clear" data-wave="' + esc(w) + '">🗑️ Effacer la plage</button>' : '') + '</div>';
+    return h + '</div>';
+  }).join('');
+}
+
+/* ---------- Éditeur de plage ---------- */
+var WE = { wave: '', s: null, e: null, pt: 's', front: [] };
+function openWaveEditor(w) {
+  WE.wave = w; var z = S.waves[w];
+  WE.s = z && z.main ? { col: z.main.sc, row: z.main.sr } : null;
+  WE.e = z && z.main ? { col: z.main.ec, row: z.main.er } : null;
+  WE.front = z && z.front ? z.front.slice() : [];
+  WE.pt = 's';
+  $('wm-title').textContent = 'Plage — ' + w;
+  $('waveModal').classList.remove('hidden');
+  renderWaveEditor();
+}
+function editorOrder() {
+  var main = (WE.s && WE.e) ? { sc: WE.s.col, sr: WE.s.row, ec: WE.e.col, er: WE.e.row } : null;
+  return { main: main, labels: waveOrder({ main: main, front: WE.front }) };
+}
+function renderWaveEditor() {
+  if (!S) return;
+  var eo = editorOrder(), rng = eo.labels, idx = {};
+  rng.forEach(function (l, i) { idx[l] = i + 1; });
+  var o = waveStats(WE.wave, rng);
+  $('wm-sub').textContent = o.routes + ' routes · ' + o.wait + ' à stationner · ' + o.in + ' déjà IN';
+  $('wm-ptS').classList.toggle('on', WE.pt === 's');
+  $('wm-ptE').classList.toggle('on', WE.pt === 'e');
+  $('wm-ptS').querySelector('span').textContent = WE.s ? label(WE.s.col, WE.s.row) : '—';
+  $('wm-ptE').querySelector('span').textContent = WE.e ? label(WE.e.col, WE.e.row) : '—';
+  var info = '';
+  if (WE.front.length) info += '<span class="chip c-front">Avant : ' + esc(WE.front.join(' ')) + '</span>';
+  if (rng.length) {
+    info += '<span class="chip c-total">' + rng.length + ' places</span><span class="chip c-free">' + o.free + ' libres</span>';
+    info += o.wait > o.free ? '<span class="chip c-out">⚠️ manque ' + (o.wait - o.free) + '</span>' : '<span class="chip c-in">✅ OK pour ' + o.wait + ' route' + (o.wait > 1 ? 's' : '') + '</span>';
+    var k = Object.keys(o.overlap);
+    if (k.length) info += '<span class="chip c-blk">↔️ partage ' + k.map(function (x) { return esc(x) + ' (' + o.overlap[x] + ')'; }).join(', ') + '</span>';
+  }
+  if (WE.s && !WE.e) info += '<span class="chip c-blk">Choisis la place de fin</span>';
+  $('wm-info').innerHTML = info;
+  $('wm-save').disabled = !(rng.length > 0 && !(WE.s && !WE.e));
+
+  $('wm-grid').innerHTML = gridHTML('mini', { cw: 40, ch: 38 }, function (l) {
+    var fr = isFront(l), p = fr ? null : parseLabel(l);
+    var cls = 'place click' + (fr ? ' front' : '');
+    if (S.blocked.has(l)) cls += ' mini-blk';
+    else if (idx[l]) cls += fr ? ' rng-fr' : ' rng' + (S.plan[l] && !S.outKeys[S.plan[l]] ? ' rng-occ' : '');
+    else if (S.ownersOf[l] && S.ownersOf[l].some(function (x) { return x !== WE.wave; })) cls += ' rng-other';
+    if (p && WE.s && WE.s.col === p.col && WE.s.row === p.row) cls += ' pt-start';
+    if (p && WE.e && WE.e.col === p.col && WE.e.row === p.row) cls += ' pt-end';
+    var occ = S.plan[l] && S.byKey[S.plan[l]];
+    return '<div class="' + cls + '" data-l="' + l + '" title="' + l + (occ ? ' — ' + esc(occ.disp) : '') + '"><span class="pl-label">' + l + '</span>' +
+      (idx[l] ? '<span class="ord">' + idx[l] + '</span>' : '') + '</div>';
+  });
+}
+function onWaveGridClick(l) {
+  if (isFront(l)) {
+    var i = WE.front.indexOf(l);
+    if (i >= 0) WE.front.splice(i, 1); else WE.front.push(l);
+  } else {
+    var p = parseLabel(l); if (!p) return;
+    if (WE.pt === 's') { WE.s = p; WE.e = null; WE.pt = 'e'; } else { WE.e = p; WE.pt = 's'; }
+  }
+  renderWaveEditor();
+}
+
+/* =================================================================
+ *  GRILLE (rangées A→G + section avant)
+ * ================================================================= */
+function dispCols() { var a = []; for (var i = 0; i < C.cols; i++) a.push(i); return ui.col0Left ? a : a.reverse(); }
+function dispRows() { var a = []; for (var i = 0; i < C.rows.length; i++) a.push(i); return ui.rowABottom ? a.reverse() : a; }
+function isAisle(cols, i) { return i > 0 && C.blockOf[cols[i - 1]] !== C.blockOf[cols[i]]; }
+function aisleCount() { var cols = dispCols(), n = 0; for (var i = 0; i < cols.length; i++) if (isAisle(cols, i)) n++; return n; }
+
+function gridHTML(kind, sz, cellFn) {
+  var cols = dispCols(), rows = dispRows();
+  var vh = Math.round(sz.ch * 0.42), vw = Math.round(vh * 26 / 42);
+  if (vw > sz.cw - 8) { vw = Math.max(8, sz.cw - 8); vh = Math.round(vw * 42 / 26); }
+  var style = '--cw:' + sz.cw + 'px;--ch:' + sz.ch + 'px;--vw:' + vw + 'px;--vh:' + vh + 'px;' +
+    '--lfs:' + clamp(Math.round(sz.ch * 0.12), 8, 14) + 'px;--rfs:' + clamp(Math.round(Math.min(sz.ch * 0.17, sz.cw * 0.28)), 8, 20) + 'px;' +
+    '--pfs:' + clamp(Math.round(Math.min(sz.ch * 0.15, sz.cw * 0.28)), 9, 18) + 'px';
+  function ais(cell, i) { return isAisle(cols, i) ? cell.replace('class="', 'class="aisle ') : cell; }
+
+  var head = '<div class="g-row"><div class="g-rl"></div>' + cols.map(function (c, i) { return ais('<div class="g-ch">' + c + '</div>', i); }).join('') + '</div>';
+  var main = rows.map(function (r) {
+    return '<div class="g-row"><div class="g-rl">' + C.rows[r] + '</div>' + cols.map(function (c, i) { return ais(cellFn(label(c, r)), i); }).join('') + '</div>';
+  }).join('');
+  var front = '<div class="g-row front-row"><div class="g-rl fr">AV</div>' + cols.map(function (c, i) {
+    var l = C.frontAt[c];
+    return ais(l ? cellFn(l) : '<div class="g-sp"></div>', i);
+  }).join('') + '</div>';
+  // Section avant affichée du côté de la rangée A
+  return '<div class="g ' + kind + '" style="' + style + '">' + (ui.rowABottom ? head + main + front : head + front + main) + '</div>';
+}
+function fitSize(outer, below) {
+  var n = C.cols, nr = C.rows.length + 1, gap = 4;
+  var cw = Math.floor((outer.clientWidth - 8 - 26 - n * gap - aisleCount() * 10) / n);
+  var availH = window.innerHeight - outer.getBoundingClientRect().top - (below || 40);
+  var ch = Math.floor((availH - 26 - nr * gap - 16) / nr);
+  return { cw: clamp(Math.round(cw * ui.zoom), 30, 150), ch: clamp(Math.round(ch * ui.zoom), 46, 170) };
+}
+function updateZoomLabels() { document.querySelectorAll('.zoom-val').forEach(function (e) { e.textContent = Math.round(ui.zoom * 100) + '%'; }); }
+
+var VAN_COLORS = { in: '#80cbc4', out: '#ef9a9a' };
+function vanSVG(body) {
+  var roof = lighten(body, 30), line = lighten(body, -15), out = '#9e9e9e', gl = '#7cb8d9', gld = '#5a9abb';
+  return '<svg class="van-icon" viewBox="0 0 26 42" xmlns="http://www.w3.org/2000/svg">' +
+    '<rect x="2" y="3" width="22" height="37" rx="4" fill="rgba(0,0,0,0.12)"/>' +
+    '<rect x="1.5" y="1.5" width="23" height="37" rx="4" fill="' + body + '" stroke="' + out + '" stroke-width="0.8"/>' +
+    '<rect x="3.5" y="3" width="19" height="33" rx="2.5" fill="' + roof + '" opacity="0.5"/>' +
+    '<line x1="4" y1="17" x2="22" y2="17" stroke="' + line + '" stroke-width="0.3" opacity="0.35"/>' +
+    '<line x1="4" y1="27" x2="22" y2="27" stroke="' + line + '" stroke-width="0.3" opacity="0.35"/>' +
+    '<rect x="3" y="2.5" width="20" height="7" rx="2.5" fill="' + gl + '" stroke="' + gld + '" stroke-width="0.5" opacity="0.9"/>' +
+    '<rect x="5" y="33" width="16" height="4" rx="1.5" fill="' + gl + '" opacity="0.45"/>' +
+    '<rect x="2.5" y="37" width="3.5" height="1.5" rx="0.7" fill="#e57373" opacity="0.8"/>' +
+    '<rect x="20" y="37" width="3.5" height="1.5" rx="0.7" fill="#e57373" opacity="0.8"/></svg>';
+}
+
+/* ---------- Plan WH ---------- */
+function renderPlan() {
+  if (!S) { $('p-grid').innerHTML = '<p class="empty-msg">Chargement…</p>'; return; }
+  $('p-color').value = ui.colorMode;
+  var tot = C.cols * C.rows.length + C.front.labels.length, nIn = 0, nOut = 0, nBlk = S.blocked.size;
+  Object.keys(S.plan).forEach(function (l) { if (S.blocked.has(l)) return; if (S.outKeys[S.plan[l]]) nOut++; else nIn++; });
+  $('p-stats').innerHTML = '<span class="chip c-total">🅿️ ' + tot + '</span><span class="chip c-in">🟢 ' + nIn + '</span><span class="chip c-out">🔴 ' + nOut + '</span>' +
+    '<span class="chip c-blk">🔒 ' + nBlk + '</span><span class="chip c-free">✅ ' + (tot - nIn - nOut - nBlk) + '</span>';
+  $('p-wlegend').innerHTML = Object.keys(S.waves).sort(natCmp).map(function (w) {
+    return '<span><span class="wdot" style="background:' + waveColor(w) + '"></span>' + esc(w) + ' ' + esc(rangeText(S.waves[w])) + '</span>';
+  }).join('');
+  $('move-btn').classList.toggle('on', ui.moveMode);
+  updateMoveBar();
+
+  var q = $('p-q').value.trim().toLowerCase(), found = 0;
+  var outer = $('p-grid');
+  outer.innerHTML = gridHTML('plan', fitSize(outer, 46), function (l) {
+    var key = S.plan[l], ro = key ? S.byKey[key] : null, owners = S.ownersOf[l] || [];
+    var status = S.blocked.has(l) ? 'blocked' : (key ? (S.outKeys[key] ? 'out' : 'in') : 'empty');
+    var cls = 'place ' + status + (isFront(l) ? ' front' : '');
+    if (ui.moveMode && status !== 'blocked') { cls += ' click'; if (ui.moveFrom === l) cls += ' msrc'; }
+    var al = (status === 'in' && ro) ? alertFor(ro) : null;
+    if (al) cls += ' al-' + al.k;
+    if (ro && (!S.waves[ro.wave] || S.rangeOf[ro.wave].indexOf(l) < 0)) cls += ' offzone';
+    var p = (status === 'in' && ro) ? vsPct(ro) : null, bd = p != null ? band(p, ro.vs.done) : '';
+    if (bd) cls += ' vs-' + bd;
+    if (q && ro && (ro.disp + ' ' + ro.route + ' ' + ro.idc + ' ' + ro.wave + ' ' + ro.tag).toLowerCase().indexOf(q) !== -1) { cls += ' hl'; found++; }
+
+    var body = '#e0e0e0';
+    if (status === 'in' || status === 'out') body = ui.colorMode === 'idc' && ro ? idcColor(ro.idc) : (ui.colorMode === 'wave' && ro ? waveColor(ro.wave) : (bd ? BAND_VAN[bd] : VAN_COLORS[status]));
+    var tint = (status === 'empty' && owners.length) ? ' style="background:' + waveColor(owners[0]) + '14"' : '';
+    var tip = l + (ro ? ' — ' + ro.disp + ' — ' + ro.wave + ' — ' + ro.idc + (ro.tIn ? '\nIN ' + ro.tIn : '') + (ro.tOut ? ' · OUT ' + ro.tOut : '') +
+      (ro.vs ? '\nVanscan ' + ro.vs.s + '/' + ro.vs.t + (ro.vs.ppm != null ? ' · ' + ro.vs.ppm + ' PPM' : '') : '') + (al ? '\n' + al.txt : '') : '') +
+      (owners.length ? '\nPlage : ' + owners.join(', ') : '');
+
+    var h = '<div class="' + cls + '" data-l="' + l + '" title="' + esc(tip) + '"' + tint + '>';
+    if (owners.length && status !== 'blocked') h += '<i class="pl-wbar" style="background:' + waveColor(owners[0]) + '"></i>';
+    h += '<span class="pl-label">' + l + '</span>';
+    h += '<div class="van-wrap">' + (status === 'blocked' ? '' : vanSVG(body)) + (p != null ? '<span class="pl-pct">' + (ro.vs.done ? '✓' : p + '%') + '</span>' : '') + '</div>';
+    h += '<span class="pl-route">' + (ro ? esc(ro.disp) : (key ? esc(key.split('-').pop()) : '')) + '</span>';
+    if (p != null) h += '<i class="pl-bar b-' + bd + '" style="width:' + p + '%"></i>';
+    return h + '</div>';
+  });
+  $('p-found').innerHTML = q ? (found ? '<span class="found">' + found + ' trouvé' + (found > 1 ? 's' : '') + '</span>' : '<span style="color:var(--red);font-size:11px">Introuvable</span>') : '';
+}
+
+/* ---------- Modifier le stationnement sur le plan ---------- */
+function updateMoveBar() {
+  $('move-bar').classList.toggle('show', ui.moveMode);
+  if (!ui.moveMode) return;
+  var m = $('move-msg'), show = !!ui.moveFrom;
+  ['move-free', 'move-cancel', 'move-edit'].forEach(function (id) { $(id).style.display = show ? '' : 'none'; });
+  if (show) {
+    var key = S.plan[ui.moveFrom], ro = key && S.byKey[key];
+    m.innerHTML = '<b>' + esc(ui.moveFrom) + '</b> ' + (ro ? '→ ' + esc(ro.disp) : '') + ' — tape la destination (place libre = déplacer, van = échanger)';
+  } else {
+    m.textContent = 'Tape un van pour le déplacer / échanger, ou une place libre pour y mettre une route (oubliée ou en attente)';
+  }
+}
+function onPlanClick(l) {
+  if (!ui.moveMode || pending) return;
+  if (S.blocked.has(l)) { toast('⛔ Place bloquée'); return; }
+  var occ = S.plan[l];
+  if (!ui.moveFrom) {
+    // place vide ou place d'un van sorti → y poser une route
+    if (!occ || S.outKeys[occ]) { openPick(l); return; }
+    ui.moveFrom = l; renderPlan(); return;
+  }
+  if (ui.moveFrom === l) { ui.moveFrom = null; renderPlan(); return; }
+  var from = ui.moveFrom; ui.moveFrom = null;
+  runAction('move', { from: from, to: l });
+}
+
+var PICK = [];
+function openPick(l) {
+  ui.pickTarget = l;
+  var occ = S.plan[l];
+  $('pick-title').textContent = 'Placer sur ' + l + (occ ? ' (remplace ' + (S.byKey[occ] ? S.byKey[occ].disp : '') + ', sorti)' : '');
+  $('pick-q').value = '';
+  $('pick-list').innerHTML = '<p class="hint" style="padding:10px">Chargement…</p>';
+  $('pickModal').classList.remove('hidden');
+  api('unplaced').then(function (res) {
+    PICK = (res && res.list) || [];
+    renderPick();
+  }).catch(function (e) { $('pick-list').innerHTML = '<p style="color:red;font-size:12px">' + esc(e.message) + '</p>'; });
+}
+function renderPick() {
+  var q = $('pick-q').value.trim().toLowerCase();
+  var rows = PICK.filter(function (r) { return !q || (r.disp + ' ' + r.wave + ' ' + r.idc + ' ' + r.tag).toLowerCase().indexOf(q) !== -1; });
+  if (!rows.length) { $('pick-list').innerHTML = '<p class="hint" style="padding:10px">Aucune route sans place.</p>'; return; }
+  var h = '', sec = null;
+  rows.forEach(function (r) {
+    var s = r.in ? 'IN sans place' : 'En attente (passera IN)';
+    if (s !== sec) { sec = s; h += '<div class="pick-sec">' + s + '</div>'; }
+    h += '<div class="pick-item" data-act="pick" data-key="' + esc(r.key) + '">' + tagBadge(r.tag) + '<b>' + esc(r.disp) + '</b>' + waveBadge(r.wave) + '<span class="hint">' + esc(r.idc || '') + '</span></div>';
+  });
+  $('pick-list').innerHTML = h;
+}
+
+/* ---------- Blocages ---------- */
+function renderBlocks() {
+  if (!S) { $('b-grid').innerHTML = '<p class="empty-msg">Chargement…</p>'; return; }
+  var rs = $('b-row'), cs = $('b-col'), pr = rs.value, pc = cs.value;
+  rs.innerHTML = '<option value="">— Rangée —</option>' + C.rows.map(function (x, i) { return '<option value="' + i + '">Rangée ' + x + '</option>'; }).join('') + '<option value="AV">Section avant</option>';
+  var cl = []; for (var c = 0; c < C.cols; c++) cl.push(c);
+  cs.innerHTML = '<option value="">— Colonne —</option>' + cl.map(function (c) { return '<option value="' + c + '">Colonne ' + c + '</option>'; }).join('');
+  rs.value = pr; cs.value = pc;
+  var outer = $('b-grid');
+  outer.innerHTML = gridHTML('blk', fitSize(outer, 40), function (l) {
+    var b = S.blocked.has(l);
+    return '<div class="place click ' + (b ? 'blk-on' : '') + (isFront(l) ? ' front' : '') + '" data-l="' + l + '" title="' + l + '"><span class="pl-label">' + l + '</span>' +
+      '<div class="van-wrap">' + (b ? '<span class="blk-ico">🔒</span>' : vanSVG('#d0d0d0')) + '</div><span class="pl-route"></span></div>';
+  });
+}
+function bulkBlock(kind, v) {
+  var labels = [];
+  if (kind === 'row') {
+    var r = $('b-row').value; if (r === '') { toast('⚠️ Choisir une rangée'); return; }
+    if (r === 'AV') labels = C.front.labels.slice();
+    else for (var c = 0; c < C.cols; c++) labels.push(label(c, +r));
+  } else {
+    var cc = $('b-col').value; if (cc === '') { toast('⚠️ Choisir une colonne'); return; }
+    for (var rr = 0; rr < C.rows.length; rr++) labels.push(label(+cc, rr));
+  }
+  runAction('block', { labels: labels.join(','), v: v });
+}
+
+/* =================================================================
+ *  ACTIONS
+ * ================================================================= */
+function runAction(name, params, opts) {
+  pending++;
+  if (!opts || opts.loader !== false) loader(true);
+  return api(name, params).then(function (res) {
+    toast((res && (res.warn || res.msg)) || (res && res.ok ? '✅' : '❌'));
+    return res;
+  }).catch(function (e) { toast('❌ ' + e.message); })
+    .then(function (res) { pending--; loader(false); return loadState(false).then(function () { return res; }); });
+}
+/* ---------- Connexion / rôle ---------- */
+var ROLE = 'admin';
+var WRITE_ACTS = { check: 1, 'route-edit': 1, 're-save': 1, 're-remove': 1, undo: 1, reset: 1, 'reset-yes': 1, export: 1, 'wave-edit': 1, 'wave-clear': 1,
+  'wm-save': 1, 'wm-clear': 1, 'move-mode': 1, 'move-free': 1, 'move-edit': 1, pick: 1, 'blk-row': 1, 'blk-col': 1 };
+function setRole(r) {
+  ROLE = r === 'view' ? 'view' : 'admin';
+  document.body.classList.toggle('ro', ROLE !== 'admin');
+  $('role-badge').style.display = ROLE === 'admin' ? 'none' : '';
+  if (ROLE !== 'admin') { ui.moveMode = false; ui.moveFrom = null; if (tab === 'blocks') showTab('routes'); }
+}
+function showLogin(err) {
+  closeModals();
+  $('login').classList.remove('hidden');
+  $('l-err').textContent = err || '';
+  $('l-api').value = CONN.api || '';
+  $('l-advbtn').style.display = CONN.fixed ? 'none' : '';
+  $('l-adv').classList.toggle('hidden', !!CONN.api);
+  if (!CONN.api && !CONN.fixed) $('l-adv').classList.remove('hidden');
+  setTimeout(function () { $('l-key').focus(); }, 50);
+}
+function doLogin() {
+  var k = $('l-key').value.trim().toUpperCase();
+  if (!CONN.fixed) { var a = $('l-api').value.trim(); if (a) { CONN.api = a; LS.set('park_api', a); } }
+  if (!CONN.api) { $('l-err').textContent = 'Indique l\'URL du serveur'; $('l-adv').classList.remove('hidden'); return; }
+  if (!k) { $('l-err').textContent = 'Entre la clé d\'accès'; return; }
+  $('l-btn').disabled = true; $('l-err').textContent = '';
+  var prev = CONN.key; CONN.key = k;
+  jsonp({ api: 'login' }, 20000).then(function (res) {
+    if (res && res.ok) {
+      LS.set('park_key', k);
+      setRole(res.role);
+      $('login').classList.add('hidden'); $('l-key').value = '';
+      lastOk = 0; loadState(true);
+    } else { CONN.key = prev; $('l-err').textContent = '🔒 Clé invalide'; }
+  }).catch(function (e) { CONN.key = prev; $('l-err').textContent = '❌ ' + e.message + ' — vérifie l\'URL du serveur'; })
+    .then(function () { $('l-btn').disabled = false; });
+}
+function logout() {
+  LS.set('park_key', ''); CONN.key = ''; S = null; lastOk = 0;
+  renderAll(); showLogin('');
+}
+function closeModals() {
+  document.querySelectorAll('.modal').forEach(function (m) { m.classList.add('hidden'); });
+  ui.pickTarget = null;
+}
+function showTab(name) {
+  tab = name;
+  document.querySelectorAll('.tab').forEach(function (t) { t.classList.toggle('active', t.getAttribute('data-tab') === name); });
+  ['routes', 'waves', 'plan', 'blocks'].forEach(function (v) { $(v + '-view').classList.toggle('hidden', v !== name); });
+  if (name !== 'plan') { ui.moveMode = false; ui.moveFrom = null; }
+  updateZoomLabels();
+  renderAll();
+}
+
+document.addEventListener('click', function (e) {
+  var t = e.target.closest('[data-act],[data-tab],[data-l]');
+  if (!t) return;
+  if (t.hasAttribute('data-tab')) { showTab(t.getAttribute('data-tab')); return; }
+  var act = t.getAttribute('data-act');
+  if (ROLE !== 'admin' && (WRITE_ACTS[act] || (!act && t.closest('#b-grid')))) { toast('👁️ Accès lecture seule'); return; }
+  if (!act && t.hasAttribute('data-l')) {
+    var l = t.getAttribute('data-l');
+    if (t.closest('#p-grid')) onPlanClick(l);
+    else if (t.closest('#b-grid')) { if (!pending) runAction('block', { labels: l, v: S.blocked.has(l) ? 0 : 1 }, { loader: false }); }
+    else if (t.closest('#wm-grid')) onWaveGridClick(l);
+    else if (t.closest('#re-grid')) onRouteGridClick(l);
+    return;
+  }
+  switch (act) {
+    case 'check': if (!pending) toggleCheck(t.getAttribute('data-id'), t.getAttribute('data-col')); break;
+    case 'route-edit': openRouteEditor(t.getAttribute('data-id')); break;
+    case 're-save': saveRouteEditor(); break;
+    case 're-remove': RE.remove = true; renderRouteEditor(); break;
+    case 'alerts-only': ui.alertsOnly = !ui.alertsOnly; renderRoutes(); break;
+    case 'refresh': loadState(true); break;
+    case 'undo': runAction('undo'); break;
+    case 'reset': $('resetModal').classList.remove('hidden'); break;
+    case 'reset-yes': closeModals(); runAction('reset'); break;
+    case 'close-modal': closeModals(); break;
+    case 'login-adv': $('l-adv').classList.toggle('hidden'); break;
+    case 'logout': if (confirm('Se déconnecter de ParK sur cet appareil ?')) logout(); break;
+    case 'export': runAction('export', { wave: t.getAttribute('data-wave') || '' }); break;
+    case 'wave-edit': openWaveEditor(t.getAttribute('data-wave')); break;
+    case 'wave-clear': runAction('wave_clear', { wave: t.getAttribute('data-wave') }); break;
+    case 'wm-pt': WE.pt = t.getAttribute('data-pt'); renderWaveEditor(); break;
+    case 'wm-nomain': WE.s = null; WE.e = null; WE.pt = 's'; renderWaveEditor(); break;
+    case 'wm-save': {
+      var eo = editorOrder();
+      if (!eo.labels.length || (WE.s && !WE.e)) return;
+      var m = eo.main || {};
+      closeModals();
+      runAction('wave_save', { wave: WE.wave, sc: m.sc === undefined ? '' : m.sc, sr: m.sr === undefined ? '' : m.sr, ec: m.ec === undefined ? '' : m.ec, er: m.er === undefined ? '' : m.er, front: WE.front.join(',') });
+      break;
+    }
+    case 'wm-clear': closeModals(); runAction('wave_clear', { wave: WE.wave }); break;
+    case 'move-mode': ui.moveMode = !ui.moveMode; ui.moveFrom = null; renderPlan(); if (ui.moveMode) toast('✋ Modification du stationnement'); break;
+    case 'move-cancel': ui.moveFrom = null; renderPlan(); break;
+    case 'move-free': if (ui.moveFrom) { var f = ui.moveFrom; ui.moveFrom = null; runAction('free', { label: f }); } break;
+    case 'move-edit': {
+      var k = ui.moveFrom && S.plan[ui.moveFrom], ro = k && S.byKey[k];
+      ui.moveFrom = null; renderPlan();
+      if (ro) openRouteEditor(ro.id);
+      break;
+    }
+    case 'pick': { var tgt = ui.pickTarget; closeModals(); if (tgt) runAction('assign', { key: t.getAttribute('data-key'), label: tgt }); break; }
+    case 'flip-x': ui.col0Left = !ui.col0Left; LS.set('park_col0_left', ui.col0Left ? '1' : '0'); renderAll(); break;
+    case 'flip-y': ui.rowABottom = !ui.rowABottom; LS.set('park_rowA_bottom', ui.rowABottom ? '1' : '0'); renderAll(); break;
+    case 'zoom':
+      ui.zoom = clamp(Math.round((ui.zoom + 0.15 * parseInt(t.getAttribute('data-z'), 10)) * 100) / 100, 0.55, 2);
+      LS.set('park_zoom2', String(ui.zoom)); updateZoomLabels(); renderAll(); break;
+    case 'blk-row': bulkBlock('row', t.getAttribute('data-v')); break;
+    case 'blk-col': bulkBlock('col', t.getAttribute('data-v')); break;
+  }
+});
+['r-q', 'r-tag', 'r-wave', 'r-idc'].forEach(function (id) {
+  $(id).addEventListener(id === 'r-q' ? 'input' : 'change', function () { if (S) renderRoutes(); });
+});
+$('p-q').addEventListener('input', function () { if (S) renderPlan(); });
+$('pick-q').addEventListener('input', renderPick);
+$('p-color').addEventListener('change', function (e) { ui.colorMode = e.target.value; LS.set('park_color', ui.colorMode); renderPlan(); });
+var rzT = null;
+window.addEventListener('resize', function () { clearTimeout(rzT); rzT = setTimeout(function () { if (tab === 'plan' || tab === 'blocks') renderAll(); }, 150); });
+
+/* =================================================================
+ *  LIVE : état toutes les 20 s, alertes recalculées toutes les 30 s
+ *  (pause pendant qu'une fenêtre est ouverte)
+ * ================================================================= */
+function modalOpen() { return !!document.querySelector('.modal:not(.hidden)'); }
+setInterval(function () { if (!document.hidden && !pending && CONN.api && !modalOpen()) loadState(false); }, 20000);
+setInterval(function () { if (!document.hidden && S && !pending && !modalOpen()) renderAll(); else renderLive(); }, 30000);
+document.addEventListener('visibilitychange', function () { if (!document.hidden && Date.now() - lastOk > 20000) loadState(false); });
+
+$('l-show').addEventListener('change', function (e) { $('l-key').type = e.target.checked ? 'text' : 'password'; });
+$('l-form').addEventListener('submit', function (e) { e.preventDefault(); doLogin(); });
+
+/* Application installable (GitHub Pages / site web) */
+if (!BOOT && 'serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
+}
+
+updateZoomLabels();
+if (!CONN.api || !CONN.key) { showLogin(''); if (CONN.api) loadState(false); }
+else loadState(true);
+})();
+</script>
+</body>
+</html>
