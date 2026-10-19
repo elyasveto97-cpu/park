@@ -7,17 +7,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="icon" type="image/png" href="https://i.ibb.co/YF7ygL4w/Designer.png">
-<link rel="apple-touch-icon" href="https://i.ibb.co/YF7ygL4w/Designer.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="theme-color" content="#00A68F">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.webmanifest">
-<script>
-  /* ⚙️ URL de l'application web Apps Script (Déployer → Gérer les déploiements → URL /exec).
-     À remplir dans la copie hébergée sur GitHub Pages. Inutile quand la page est servie par Apps Script. */
-  window.PARK_API = 'https://script.google.com/macros/s/AKfycbyl4W9diQk7504vFYZBojCAXkqMyweawUiOvNE1bWkAESMQz5Or3WS0qbfyuaH1IURS/exec';
-</script>
+<!-- L'URL du serveur est dans config.js (à remplir une seule fois, jamais écrasé par les mises à jour) -->
+<script src="Config.js"></script>
 <script>/*__PARK_BOOT__*/</script>
 <style>
 :root{
@@ -253,6 +250,7 @@ button.chip{cursor:pointer}
 .pt-btn.s.on{border-color:#16a34a;background:#e8f7ee;color:#166534}
 .pt-btn.e.on{border-color:var(--red);background:var(--red-bg);color:var(--red-txt)}
 .pt-btn.f{flex:0 1 auto;border-color:#5eead4;color:var(--front)}
+.pt-btn.m.on{border-color:var(--tq);background:var(--tq);color:#fff}
 .rng-info{font-size:13px;font-weight:700;margin:6px 0 10px;display:flex;gap:8px;flex-wrap:wrap}
 .re-row{display:flex;gap:10px;flex-wrap:wrap}
 .re-row>div{flex:1;min-width:130px}
@@ -343,12 +341,19 @@ button.chip{cursor:pointer}
     <h3 id="wm-title">Zone</h3>
     <p id="wm-sub"></p>
     <div class="pt-btns">
+      <button class="pt-btn m" id="wm-mRange" data-act="wm-mode" data-mode="range">&#8596;&#65039; D&#233;but &#8594; fin</button>
+      <button class="pt-btn m" id="wm-mPick" data-act="wm-mode" data-mode="pick">&#128070; Place par place</button>
+    </div>
+    <div class="pt-btns" id="wm-rangeBtns">
       <button class="pt-btn s" id="wm-ptS" data-act="wm-pt" data-pt="s">&#9654; D&#233;but : <span>&#8212;</span></button>
       <button class="pt-btn e" id="wm-ptE" data-act="wm-pt" data-pt="e">&#9632; Fin : <span>&#8212;</span></button>
-      <button class="pt-btn f" data-act="wm-nomain">Sans zone grille</button>
+      <button class="pt-btn f" data-act="wm-nomain">Effacer d&#233;but/fin</button>
     </div>
-    <div class="hint">Grille : tape la place de d&#233;but puis la place de fin. Remplissage colonne par colonne : toute la colonne de d&#233;but (ex. 1A &#8594; 1G), puis la suivante (2A &#8594; 2G)&#8230;
-      <b style="color:var(--front)">Section avant : tape les places une par une</b> &#8212; elles sont stationn&#233;es en premier, dans l'ordre choisi.</div>
+    <div class="pt-btns" id="wm-pickBtns" style="display:none">
+      <button class="pt-btn f" data-act="wm-undo-pick">&#8617;&#65039; Retirer la derni&#232;re</button>
+      <button class="pt-btn f" data-act="wm-clear-picks">&#128465;&#65039; Vider les places choisies</button>
+    </div>
+    <div class="hint" id="wm-hint"></div>
     <div class="rng-info" id="wm-info"></div>
     <div class="g-outer" id="wm-grid" style="max-height:52vh"></div>
     <div class="mbtns">
@@ -565,27 +570,64 @@ function prepare(st) {
   for (var c = 0; c < C.cols; c++) if (C.blockOf[c] === undefined) C.blockOf[c] = 'x' + c;
 
   var s = { routes: st.routes, plan: st.plan || {}, blocked: new Set(st.blocked || []), waves: st.waves || {}, vanscan: st.vanscan || {}, station: st.station };
-  s.byKey = {}; s.byId = {}; s.placeByKey = {}; s.outKeys = {};
-  s.routes.forEach(function (r) { s.byKey[r.key] = r; s.byId[r.id] = r; if (r.out) s.outKeys[r.key] = 1; });
+  s.byKey = {}; s.byId = {};
+  s.routes.forEach(function (r) { s.byKey[r.key] = r; s.byId[r.id] = r; });
   s.dups = st.dups || [];
-  Object.keys(s.plan).forEach(function (l) { s.placeByKey[s.plan[l]] = l; });
-  s.routes.forEach(function (r) { r.place = s.placeByKey[r.key] || ''; });
+  deriveOut(s); derivePlan(s);
 
   var set = {};
   (st.waveSheets || []).forEach(function (w) { set[w] = 1; });
   s.routes.forEach(function (r) { set[r.wave] = 1; });
   s.waveList = Object.keys(set).sort(natCmp);
+  deriveWaves(s);
+  var idcs = {};
+  s.routes.forEach(function (r) { idcs[r.idc] = 1; });
+  buildIdcColors(Object.keys(idcs));
+  return s;
+}
 
+function deriveOut(s) { s.outKeys = {}; s.routes.forEach(function (r) { if (r.out) s.outKeys[r.key] = 1; }); }
+function derivePlan(s) {
+  s.placeByKey = {};
+  Object.keys(s.plan).forEach(function (l) { s.placeByKey[s.plan[l]] = l; });
+  s.routes.forEach(function (r) { r.place = s.placeByKey[r.key] || ''; });
+}
+function deriveWaves(s) {
   s.rangeOf = {}; s.ownersOf = {};
   Object.keys(s.waves).forEach(function (w) {
     var labels = waveOrder(s.waves[w]);
     s.rangeOf[w] = labels;
     labels.forEach(function (l) { (s.ownersOf[l] = s.ownersOf[l] || []).push(w); });
   });
-  var idcs = {};
-  s.routes.forEach(function (r) { idcs[r.idc] = 1; });
-  buildIdcColors(Object.keys(idcs));
-  return s;
+}
+/* Applique tout de suite la réponse d'une action (plan, route, blocages, zones) — pas de rechargement complet */
+function applyResult(res) {
+  if (!S || !res) return;
+  if (res.route && S.byId[res.route.id]) {
+    var r = S.byId[res.route.id], x = res.route;
+    if (x.in && (!r.in || x.tIn !== r.tIn)) r.inMs = now();
+    if (!x.in) r.inMs = null;
+    r.in = x.in; r.out = x.out; r.tIn = x.tIn; r.tOut = x.tOut;
+    deriveOut(S);
+  }
+  if (res.plan) { S.plan = res.plan; derivePlan(S); }
+  if (res.blocked) S.blocked = new Set(res.blocked);
+  if (res.waves) { S.waves = res.waves; deriveWaves(S); }
+  renderAll();
+}
+
+/* File d'attente : les actions partent dans l'ordre, sans bloquer l'écran.
+   Le rechargement complet se fait en arrière-plan quand la file est vide. */
+var Q = Promise.resolve(), actSeq = 0, refT = null;
+function enqueue(fn) {
+  pending++; actSeq++;
+  Q = Q.then(fn).catch(function (e) { toast('❌ ' + (e && e.message || e)); })
+       .then(function (v) { pending--; scheduleRefresh(); return v; });
+  return Q;
+}
+function scheduleRefresh(ms) {
+  clearTimeout(refT);
+  refT = setTimeout(function () { if (!pending) loadState(false); else scheduleRefresh(); }, ms || 2500);
 }
 
 function loadState(showLoader) {
@@ -593,9 +635,10 @@ function loadState(showLoader) {
   if (loading) return Promise.resolve();
   loading = true;
   if (showLoader) loader(true);
-  var t0 = Date.now();
+  var t0 = Date.now(), seq = actSeq;
   return api('state').then(function (st) {
     if (!st || !st.ok) throw new Error((st && st.msg) || 'Réponse invalide');
+    if (seq !== actSeq || pending) { scheduleRefresh(); return; }   // une action est passée entre-temps : on garde l'affichage local
     skew = st.serverNow - Math.round((t0 + Date.now()) / 2);
     S = prepare(st);
     if (st.role) setRole(st.role);
@@ -658,17 +701,24 @@ function mainOrder(m) {
   }
   return out;
 }
-function waveOrder(w) { return w ? (w.front || []).filter(isFront).concat(mainOrder(w.main)) : []; }
+function isAnyLabel(l) { return isFront(l) || !!parseLabel(l); }
+/* Places choisies une par une (dans l'ordre), puis la zone début → fin (sans doublon) */
+function waveOrder(w) {
+  if (!w) return [];
+  var picks = (w.front || []).filter(isAnyLabel);
+  return picks.concat(mainOrder(w.main).filter(function (l) { return picks.indexOf(l) < 0; }));
+}
+function picksText(list) { return list.length + ' place' + (list.length > 1 ? 's' : '') + ' : ' + list.slice(0, 8).join(' ') + (list.length > 8 ? ' … +' + (list.length - 8) : ''); }
 function rangeHTML(w) {
   if (!w) return '<span class="rng none">Pas de zone</span>';
   var h = '';
-  if (w.front && w.front.length) h += '<span class="rng fr">Avant ' + esc(w.front.join(' ')) + '</span>';
+  if (w.front && w.front.length) h += '<span class="rng fr">👆 ' + esc(picksText(w.front)) + '</span>';
   if (w.main) h += '<span class="rng">' + esc(label(w.main.sc, w.main.sr) + ' → ' + label(w.main.ec, w.main.er)) + '</span>';
   return h;
 }
 function rangeText(w) {
   var p = [];
-  if (w && w.front && w.front.length) p.push('Avant ' + w.front.join(' '));
+  if (w && w.front && w.front.length) p.push(picksText(w.front));
   if (w && w.main) p.push(label(w.main.sc, w.main.sr) + ' → ' + label(w.main.ec, w.main.er));
   return p.join(' + ');
 }
@@ -835,12 +885,15 @@ function toggleCheck(id, col) {
   var hm = nowHM();
   if (col === 'IN') { r.in = nv; r.tIn = nv ? hm : ''; r.inMs = nv ? now() : null; if (!nv) { r.out = false; r.tOut = ''; } }
   else { r.out = nv; r.tOut = nv ? hm : ''; }
+  if (col === 'IN' && !nv) Object.keys(S.plan).forEach(function (l) { if (S.plan[l] === r.key) delete S.plan[l]; });
+  deriveOut(S); derivePlan(S);
   renderAll();
-  pending++;
-  api('check', { id: id, col: col, v: nv ? 1 : 0 }).then(function (res) {
-    toast(res.warn || res.msg || (res.ok ? '✅' : '❌'));
-  }).catch(function (e) { toast('❌ ' + e.message); })
-    .then(function () { pending--; loadState(false); });
+  enqueue(function () {
+    return api('check', { id: id, col: col, v: nv ? 1 : 0 }).then(function (res) {
+      toast(res.warn || res.msg || (res.ok ? '✅' : '❌'));
+      applyResult(res);
+    });
+  });
 }
 
 /* =================================================================
@@ -933,13 +986,14 @@ function renderWaves() {
 }
 
 /* ---------- Éditeur de zone ---------- */
-var WE = { wave: '', s: null, e: null, pt: 's', front: [] };
+var WE = { wave: '', s: null, e: null, pt: 's', front: [], mode: 'range' };
 function openWaveEditor(w) {
   WE.wave = w; var z = S.waves[w];
   WE.s = z && z.main ? { col: z.main.sc, row: z.main.sr } : null;
   WE.e = z && z.main ? { col: z.main.ec, row: z.main.er } : null;
   WE.front = z && z.front ? z.front.slice() : [];
   WE.pt = 's';
+  WE.mode = (WE.front.some(function (l) { return !isFront(l); }) && !WE.s) ? 'pick' : 'range';
   $('wm-title').textContent = 'Zone — ' + w;
   $('waveModal').classList.remove('hidden');
   renderWaveEditor();
@@ -954,12 +1008,19 @@ function renderWaveEditor() {
   rng.forEach(function (l, i) { idx[l] = i + 1; });
   var o = waveStats(WE.wave, rng);
   $('wm-sub').textContent = o.routes + ' routes · ' + o.wait + ' à stationner · ' + o.in + ' déjà IN';
+  $('wm-mRange').classList.toggle('on', WE.mode === 'range');
+  $('wm-mPick').classList.toggle('on', WE.mode === 'pick');
+  $('wm-rangeBtns').style.display = WE.mode === 'range' ? '' : 'none';
+  $('wm-pickBtns').style.display = WE.mode === 'pick' ? '' : 'none';
+  $('wm-hint').innerHTML = WE.mode === 'range'
+    ? 'Tape la place de <b>début</b> puis la place de <b>fin</b> : remplissage colonne par colonne (ex. 1A → 1G, puis 2A → 2G…). <b style="color:var(--front)">Section avant</b> : tape les places une par une, elles passent en premier.'
+    : 'Tape les places <b>une par une</b>, dans l\'ordre où tu veux les remplir (grille ou section avant). Retape une place pour l\'enlever. Les places choisies passent avant la zone début → fin.';
   $('wm-ptS').classList.toggle('on', WE.pt === 's');
   $('wm-ptE').classList.toggle('on', WE.pt === 'e');
   $('wm-ptS').querySelector('span').textContent = WE.s ? label(WE.s.col, WE.s.row) : '—';
   $('wm-ptE').querySelector('span').textContent = WE.e ? label(WE.e.col, WE.e.row) : '—';
   var info = '';
-  if (WE.front.length) info += '<span class="chip c-front">Avant : ' + esc(WE.front.join(' ')) + '</span>';
+  if (WE.front.length) info += '<span class="chip c-front">👆 ' + esc(picksText(WE.front)) + '</span>';
   if (rng.length) {
     info += '<span class="chip c-total">' + rng.length + ' places</span><span class="chip c-free">' + o.free + ' libres</span>';
     info += o.wait > o.free ? '<span class="chip c-out">⚠️ manque ' + (o.wait - o.free) + '</span>' : '<span class="chip c-in">✅ OK pour ' + o.wait + ' route' + (o.wait > 1 ? 's' : '') + '</span>';
@@ -974,7 +1035,7 @@ function renderWaveEditor() {
     var fr = isFront(l), p = fr ? null : parseLabel(l);
     var cls = 'place click' + (fr ? ' front' : '');
     if (S.blocked.has(l)) cls += ' mini-blk';
-    else if (idx[l]) cls += fr ? ' rng-fr' : ' rng' + (S.plan[l] && !S.outKeys[S.plan[l]] ? ' rng-occ' : '');
+    else if (idx[l]) cls += (fr || WE.front.indexOf(l) >= 0) ? ' rng-fr' : ' rng' + (S.plan[l] && !S.outKeys[S.plan[l]] ? ' rng-occ' : '');
     else if (S.ownersOf[l] && S.ownersOf[l].some(function (x) { return x !== WE.wave; })) cls += ' rng-other';
     if (p && WE.s && WE.s.col === p.col && WE.s.row === p.row) cls += ' pt-start';
     if (p && WE.e && WE.e.col === p.col && WE.e.row === p.row) cls += ' pt-end';
@@ -984,7 +1045,7 @@ function renderWaveEditor() {
   });
 }
 function onWaveGridClick(l) {
-  if (isFront(l)) {
+  if (isFront(l) || WE.mode === 'pick') {
     var i = WE.front.indexOf(l);
     if (i >= 0) WE.front.splice(i, 1); else WE.front.push(l);
   } else {
@@ -1106,7 +1167,7 @@ function updateMoveBar() {
   }
 }
 function onPlanClick(l) {
-  if (!ui.moveMode || pending) return;
+  if (!ui.moveMode) return;
   if (S.blocked.has(l)) { toast('⛔ Place bloquée'); return; }
   var occ = S.plan[l];
   if (!ui.moveFrom) {
@@ -1176,14 +1237,17 @@ function bulkBlock(kind, v) {
 /* =================================================================
  *  ACTIONS
  * ================================================================= */
-function runAction(name, params, opts) {
-  pending++;
-  if (!opts || opts.loader !== false) loader(true);
-  return api(name, params).then(function (res) {
-    toast((res && (res.warn || res.msg)) || (res && res.ok ? '✅' : '❌'));
-    return res;
-  }).catch(function (e) { toast('❌ ' + e.message); })
-    .then(function (res) { pending--; loader(false); return loadState(false).then(function () { return res; }); });
+var FULL_RELOAD = { undo: 1, reset: 1 };
+function runAction(name, params) {
+  var full = FULL_RELOAD[name];
+  if (full) loader(true);
+  return enqueue(function () {
+    return api(name, params).then(function (res) {
+      toast((res && (res.warn || res.msg)) || (res && res.ok ? '✅' : '❌'));
+      if (full) { loader(false); scheduleRefresh(50); } else applyResult(res);
+      return res;
+    }, function (e) { loader(false); throw e; });
+  });
 }
 /* ---------- Connexion / rôle ---------- */
 var ROLE = 'admin';
@@ -1248,13 +1312,13 @@ document.addEventListener('click', function (e) {
   if (!act && t.hasAttribute('data-l')) {
     var l = t.getAttribute('data-l');
     if (t.closest('#p-grid')) onPlanClick(l);
-    else if (t.closest('#b-grid')) { if (!pending) runAction('block', { labels: l, v: S.blocked.has(l) ? 0 : 1 }, { loader: false }); }
+    else if (t.closest('#b-grid')) { var nb = S.blocked.has(l); if (nb) S.blocked.delete(l); else S.blocked.add(l); renderBlocks(); runAction('block', { labels: l, v: nb ? 0 : 1 }); }
     else if (t.closest('#wm-grid')) onWaveGridClick(l);
     else if (t.closest('#re-grid')) onRouteGridClick(l);
     return;
   }
   switch (act) {
-    case 'check': if (!pending) toggleCheck(t.getAttribute('data-id'), t.getAttribute('data-col')); break;
+    case 'check': toggleCheck(t.getAttribute('data-id'), t.getAttribute('data-col')); break;
     case 'route-edit': openRouteEditor(t.getAttribute('data-id')); break;
     case 're-save': saveRouteEditor(); break;
     case 're-remove': RE.remove = true; renderRouteEditor(); break;
@@ -1271,6 +1335,9 @@ document.addEventListener('click', function (e) {
     case 'wave-clear': runAction('wave_clear', { wave: t.getAttribute('data-wave') }); break;
     case 'wm-pt': WE.pt = t.getAttribute('data-pt'); renderWaveEditor(); break;
     case 'wm-nomain': WE.s = null; WE.e = null; WE.pt = 's'; renderWaveEditor(); break;
+    case 'wm-mode': WE.mode = t.getAttribute('data-mode'); renderWaveEditor(); break;
+    case 'wm-undo-pick': WE.front.pop(); renderWaveEditor(); break;
+    case 'wm-clear-picks': WE.front = []; renderWaveEditor(); break;
     case 'wm-save': {
       var eo = editorOrder();
       if (!eo.labels.length || (WE.s && !WE.e)) return;
@@ -1313,7 +1380,7 @@ window.addEventListener('resize', function () { clearTimeout(rzT); rzT = setTime
  *  (pause pendant qu'une fenêtre est ouverte)
  * ================================================================= */
 function modalOpen() { return !!document.querySelector('.modal:not(.hidden)'); }
-setInterval(function () { if (!document.hidden && !pending && CONN.api && !modalOpen()) loadState(false); }, 20000);
+setInterval(function () { if (!document.hidden && !pending && CONN.api && !modalOpen() && Date.now() - lastOk > 15000) loadState(false); }, 20000);
 setInterval(function () { if (!document.hidden && S && !pending && !modalOpen()) renderAll(); else renderLive(); }, 30000);
 document.addEventListener('visibilitychange', function () { if (!document.hidden && Date.now() - lastOk > 20000) loadState(false); });
 
