@@ -7,8 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="icon" type="image/png" href="icon-192.png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="https://i.ibb.co/YF7ygL4w/Designer.png">
+<link rel="apple-touch-icon" href="https://i.ibb.co/YF7ygL4w/Designer.png">
 <meta name="theme-color" content="#00A68F">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -16,7 +16,7 @@
 <script>
   /* ⚙️ URL de l'application web Apps Script (Déployer → Gérer les déploiements → URL /exec).
      À remplir dans la copie hébergée sur GitHub Pages. Inutile quand la page est servie par Apps Script. */
-  window.PARK_API = 'https://script.google.com/macros/s/AKfycbx05K_TLxQAeuvAb3y74UmJW7aTRchF1EaNV9fouZLo_6ke4imnrlDFBNGngXEKYO9U/exec';
+  window.PARK_API = 'https://script.google.com/macros/s/AKfycbyl4W9diQk7504vFYZBojCAXkqMyweawUiOvNE1bWkAESMQz5Or3WS0qbfyuaH1IURS/exec';
 </script>
 <script>/*__PARK_BOOT__*/</script>
 <style>
@@ -202,7 +202,7 @@ button.chip{cursor:pointer}
 .place.blk-on .pl-label{color:var(--red)}
 .blk-ico{font-size:calc(var(--vh) * .45)}
 
-/* mini-grilles (éditeur de plage, modif route) */
+/* mini-grilles (éditeur de zone, modif route) */
 .g.mini .place{padding:2px;justify-content:center;gap:1px}
 .g.mini .pl-label{color:#999}
 .g.mini .ord{font-size:10px;font-weight:900;color:var(--tq-d);line-height:1}
@@ -298,7 +298,7 @@ button.chip{cursor:pointer}
 <div id="resetModal" class="modal hidden">
   <div class="mbox">
     <h3>&#128260; Reset All</h3>
-    <p>Vider le plan et d&#233;cocher toutes les cases ?<br><small>Les blocages et les plages de vagues sont conserv&#233;s.</small></p>
+    <p>Vider le plan et d&#233;cocher toutes les cases ?<br><small>Les blocages et les zones de vagues sont conserv&#233;s.</small></p>
     <div class="mbtns">
       <button data-act="reset-yes" style="background:var(--red);color:#fff">&#9989; Oui</button>
       <button class="b-neu" data-act="close-modal">&#10060; Non</button>
@@ -337,23 +337,23 @@ button.chip{cursor:pointer}
   </div>
 </div>
 
-<!-- Plage de vague -->
+<!-- Zone de vague -->
 <div id="waveModal" class="modal hidden">
   <div class="mbox wide">
-    <h3 id="wm-title">Plage</h3>
+    <h3 id="wm-title">Zone</h3>
     <p id="wm-sub"></p>
     <div class="pt-btns">
       <button class="pt-btn s" id="wm-ptS" data-act="wm-pt" data-pt="s">&#9654; D&#233;but : <span>&#8212;</span></button>
       <button class="pt-btn e" id="wm-ptE" data-act="wm-pt" data-pt="e">&#9632; Fin : <span>&#8212;</span></button>
-      <button class="pt-btn f" data-act="wm-nomain">Sans plage grille</button>
+      <button class="pt-btn f" data-act="wm-nomain">Sans zone grille</button>
     </div>
-    <div class="hint">Grille : tape la place de d&#233;but puis la place de fin. Remplissage par bloc de colonnes (rang&#233;e A, B, C&#8230; jusqu'&#224; ce que le bloc soit plein, puis bloc suivant).
+    <div class="hint">Grille : tape la place de d&#233;but puis la place de fin. Remplissage colonne par colonne : toute la colonne de d&#233;but (ex. 1A &#8594; 1G), puis la suivante (2A &#8594; 2G)&#8230;
       <b style="color:var(--front)">Section avant : tape les places une par une</b> &#8212; elles sont stationn&#233;es en premier, dans l'ordre choisi.</div>
     <div class="rng-info" id="wm-info"></div>
     <div class="g-outer" id="wm-grid" style="max-height:52vh"></div>
     <div class="mbtns">
       <button class="b-pri" id="wm-save" data-act="wm-save">&#128190; Enregistrer</button>
-      <button class="b-bad" data-act="wm-clear">&#128465;&#65039; Effacer la plage</button>
+      <button class="b-bad" data-act="wm-clear">&#128465;&#65039; Effacer la zone</button>
       <button class="b-neu" data-act="close-modal">Annuler</button>
     </div>
   </div>
@@ -412,7 +412,7 @@ button.chip{cursor:pointer}
   <!-- VAGUES -->
   <section id="waves-view" class="view hidden">
     <div class="waves-head">
-      <div class="hint" style="flex:1;min-width:220px">Avant chaque vague, choisis les places de la section avant (stationn&#233;es en premier) et la plage sur la grille. Les vans prennent la premi&#232;re place libre. Si deux vagues partagent des places, elles se m&#233;langent.</div>
+      <div class="hint" style="flex:1;min-width:220px">Avant chaque vague, choisis les places de la section avant (stationn&#233;es en premier) et la zone sur la grille. Les vans prennent la premi&#232;re place libre. Si deux vagues partagent des places, elles se m&#233;langent.</div>
       <button class="bbtn b-ok adm" data-act="export" data-wave="">&#128228; Exporter tout</button>
     </div>
     <div id="w-list"></div>
@@ -452,7 +452,7 @@ button.chip{cursor:pointer}
       <span><i style="background:var(--g100);border:2px solid var(--g300)"></i>Libre</span>
       <span><i style="background:var(--g100);border:2px dashed #5eead4"></i>Section avant</span>
       <span><i style="background:var(--g200);border:2px solid var(--g400)"></i>Bloqu&#233;</span>
-      <span><i style="border:2px solid var(--orange)"></i>Hors plage</span>
+      <span><i style="border:2px solid var(--orange)"></i>Hors zone</span>
       <span><i style="background:#fee2e2;border:2px solid #f87171"></i>0&#8211;40 %</span>
       <span><i style="background:#ffedd5;border:2px solid #fb923c"></i>40&#8211;60 %</span>
       <span><i style="background:#dcfce7;border:2px solid #22c55e"></i>60&#8211;100 %</span>
@@ -648,23 +648,19 @@ function parseLabel(l) {
   return { col: parseInt(m[1], 10), row: C.rows.indexOf(m[2]) };
 }
 
-/* Même logique que Code.gs : blocs de colonnes, rangée par rangée dans chaque bloc */
+/* Même logique que Code.gs : colonne par colonne (1A→1G, puis 2A→2G…) */
 function mainOrder(m) {
   var out = []; if (!m) return out;
-  var cs = m.ec >= m.sc ? 1 : -1, rs = m.er >= m.sr ? 1 : -1, groups = [];
+  var cs = m.ec >= m.sc ? 1 : -1, rs = m.er >= m.sr ? 1 : -1;
   for (var c = m.sc; ; c += cs) {
-    var g = groups[groups.length - 1];
-    if (g && C.blockOf[g[0]] === C.blockOf[c]) g.push(c); else groups.push([c]);
+    for (var r = m.sr; ; r += rs) { out.push(label(c, r)); if (r === m.er) break; }
     if (c === m.ec) break;
   }
-  groups.forEach(function (g) {
-    for (var r = m.sr; ; r += rs) { g.forEach(function (cc) { out.push(label(cc, r)); }); if (r === m.er) break; }
-  });
   return out;
 }
 function waveOrder(w) { return w ? (w.front || []).filter(isFront).concat(mainOrder(w.main)) : []; }
 function rangeHTML(w) {
-  if (!w) return '<span class="rng none">Pas de plage</span>';
+  if (!w) return '<span class="rng none">Pas de zone</span>';
   var h = '';
   if (w.front && w.front.length) h += '<span class="rng fr">Avant ' + esc(w.front.join(' ')) + '</span>';
   if (w.main) h += '<span class="rng">' + esc(label(w.main.sc, w.main.sr) + ' → ' + label(w.main.ec, w.main.er)) + '</span>';
@@ -802,7 +798,7 @@ function routeCard(r) {
   var off = r.place && w && S.rangeOf[r.wave].indexOf(r.place) < 0;
   var h = '<div class="route-card' + (al ? ' al-' + al.k : '') + '"><div class="rc-main">';
   h += '<div class="route-name">' + tagBadge(r.tag) + esc(r.disp) +
-       (r.place ? ' <span class="place-badge' + (off ? ' off' : '') + '"' + (off ? ' title="Hors plage"' : '') + '>' + esc(r.place) + '</span>' : '') + ' ' + waveBadge(r.wave) + '</div>';
+       (r.place ? ' <span class="place-badge' + (off ? ' off' : '') + '"' + (off ? ' title="Hors zone"' : '') + '>' + esc(r.place) + '</span>' : '') + ' ' + waveBadge(r.wave) + '</div>';
   h += '<div class="route-idc"><span class="idc-dot" style="background:' + idcColor(r.idc) + '"></span>' + esc(r.idc) + (r.idcAuto ? ' <span class="hint" title="IDC lu dans Vanscan">(Vanscan)</span>' : '') + '</div>';
   var st = r.out ? '<span class="st-out">🔴 Sorti WH</span>' : (r.in ? '<span class="st-in">🟢 Stationné' + (r.place ? '' : ' (sans place)') + '</span>' : '<span class="st-none">⚪ En attente</span>');
   h += '<div class="route-status">' + st + '</div>';
@@ -922,21 +918,21 @@ function renderWaves() {
          (o.t ? '<span class="wave-vs">Vanscan ' + Math.round(o.s / o.t * 100) + '%</span>' : '') + '</div>';
     h += '<div class="wave-counts"><span class="chip c-total">📦 ' + o.routes + ' routes</span><span class="chip c-in">🟢 ' + o.in + ' IN</span>' +
          '<span class="chip c-out">🔴 ' + o.out + ' OUT</span><span class="chip c-free">⏳ ' + o.wait + ' à stationner</span></div>';
-    h += '<div class="wave-range">Plage ' + rangeHTML(z) + (z ? '<span class="hint">' + o.places + ' places · ' + o.free + ' libres</span>' : '<span class="hint">les vans iront dans les places hors plage</span>') + '</div>';
+    h += '<div class="wave-range">Zone ' + rangeHTML(z) + (z ? '<span class="hint">' + o.places + ' places · ' + o.free + ' libres</span>' : '<span class="hint">les vans iront dans les places hors zone</span>') + '</div>';
     if (z) {
-      if (o.wait > o.free) h += '<div class="wave-msg bad">⚠️ Il manque ' + (o.wait - o.free) + ' place' + (o.wait - o.free > 1 ? 's' : '') + ' — le surplus ira hors plage</div>';
+      if (o.wait > o.free) h += '<div class="wave-msg bad">⚠️ Il manque ' + (o.wait - o.free) + ' place' + (o.wait - o.free > 1 ? 's' : '') + ' — le surplus ira hors zone</div>';
       else if (o.wait) h += '<div class="wave-msg ok">✅ Assez de places pour ' + (o.wait > 1 ? 'les ' + o.wait + ' routes restantes' : 'la route restante') + '</div>';
       var ov = Object.keys(o.overlap);
       if (ov.length) h += '<div class="wave-msg warn">↔️ Partage ' + ov.map(function (x) { return esc(x) + ' (' + o.overlap[x] + ' pl.)'; }).join(', ') + ' — les vans seront mélangés</div>';
     }
-    h += '<div class="wave-btns adm"><button class="bbtn b-pri" data-act="wave-edit" data-wave="' + esc(w) + '">✏️ ' + (z ? 'Modifier la plage' : 'Définir la plage') + '</button>' +
+    h += '<div class="wave-btns adm"><button class="bbtn b-pri" data-act="wave-edit" data-wave="' + esc(w) + '">✏️ ' + (z ? 'Modifier la zone' : 'Définir la zone') + '</button>' +
          '<button class="bbtn b-ok" data-act="export" data-wave="' + esc(w) + '">📤 Exporter</button>' +
-         (z ? '<button class="bbtn b-bad" data-act="wave-clear" data-wave="' + esc(w) + '">🗑️ Effacer la plage</button>' : '') + '</div>';
+         (z ? '<button class="bbtn b-bad" data-act="wave-clear" data-wave="' + esc(w) + '">🗑️ Effacer la zone</button>' : '') + '</div>';
     return h + '</div>';
   }).join('');
 }
 
-/* ---------- Éditeur de plage ---------- */
+/* ---------- Éditeur de zone ---------- */
 var WE = { wave: '', s: null, e: null, pt: 's', front: [] };
 function openWaveEditor(w) {
   WE.wave = w; var z = S.waves[w];
@@ -944,7 +940,7 @@ function openWaveEditor(w) {
   WE.e = z && z.main ? { col: z.main.ec, row: z.main.er } : null;
   WE.front = z && z.front ? z.front.slice() : [];
   WE.pt = 's';
-  $('wm-title').textContent = 'Plage — ' + w;
+  $('wm-title').textContent = 'Zone — ' + w;
   $('waveModal').classList.remove('hidden');
   renderWaveEditor();
 }
@@ -1083,7 +1079,7 @@ function renderPlan() {
     var tint = (status === 'empty' && owners.length) ? ' style="background:' + waveColor(owners[0]) + '14"' : '';
     var tip = l + (ro ? ' — ' + ro.disp + ' — ' + ro.wave + ' — ' + ro.idc + (ro.tIn ? '\nIN ' + ro.tIn : '') + (ro.tOut ? ' · OUT ' + ro.tOut : '') +
       (ro.vs ? '\nVanscan ' + ro.vs.s + '/' + ro.vs.t + (ro.vs.ppm != null ? ' · ' + ro.vs.ppm + ' PPM' : '') : '') + (al ? '\n' + al.txt : '') : '') +
-      (owners.length ? '\nPlage : ' + owners.join(', ') : '');
+      (owners.length ? '\nZone : ' + owners.join(', ') : '');
 
     var h = '<div class="' + cls + '" data-l="' + l + '" title="' + esc(tip) + '"' + tint + '>';
     if (owners.length && status !== 'blocked') h += '<i class="pl-wbar" style="background:' + waveColor(owners[0]) + '"></i>';
