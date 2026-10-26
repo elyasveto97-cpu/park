@@ -269,6 +269,42 @@ button.chip{cursor:pointer}
   .btn-group .btn{flex:1}
   .btn-group .btn-edit{flex:0 0 auto}
 }
+/* ---------- Réglages ---------- */
+.set-wrap{max-width:820px;margin:0 auto}
+.set-card{background:#fff;border-radius:var(--r-md);padding:14px 16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.set-card h4{font-size:14px;font-weight:800;margin-bottom:4px}
+.set-card .sub{font-size:12px;color:var(--g500);margin-bottom:10px}
+.set-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 0;border-top:1px solid var(--g200);font-size:13px;font-weight:600}
+.set-row:first-of-type{border-top:0}
+.set-row .lbl{flex:1;min-width:200px}
+.set-row input[type=number]{width:80px;padding:8px;border:1.5px solid var(--g300);border-radius:8px;font-size:14px;font-weight:700;text-align:center}
+.set-row input[type=text]{width:200px;padding:8px;border:1.5px solid var(--g300);border-radius:8px;font-size:14px}
+.set-row .unit{font-size:12px;color:var(--g500);font-weight:600}
+.sw{position:relative;width:44px;height:24px;flex-shrink:0}
+.sw input{opacity:0;width:0;height:0}
+.sw i{position:absolute;inset:0;background:var(--g300);border-radius:99px;transition:.2s;cursor:pointer}
+.sw i:before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+.sw input:checked+i{background:var(--tq)}
+.sw input:checked+i:before{transform:translateX(20px)}
+.set-actions{display:flex;gap:8px;flex-wrap:wrap;position:sticky;bottom:0;background:var(--bg);padding:10px 0}
+.set-actions button{flex:1;min-width:150px;padding:12px;border:0;border-radius:10px;font-weight:800;font-size:14px;cursor:pointer}
+.noblink .al-red,.noblink .al-or,.noblink .place.pend{animation:none!important}
+
+/* ---------- Mode TV ---------- */
+.tv-only{display:none!important}
+body.tv .tv-only{display:inline-flex!important}
+body.tv .tabs,body.tv .hbtns,body.tv #plan-view .plan-tools,body.tv #move-bar,body.tv #banners{display:none!important}
+body.tv header{padding:8px 16px;gap:14px}
+body.tv header h1{font-size:24px}
+body.tv #plan-view{padding:8px 12px}
+body.tv .legend{font-size:13px;gap:14px}
+body.tv .wave-legend{font-size:14px}
+body.tv.idle,body.tv.idle *{cursor:none!important}
+.tv-clock{font-size:26px;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:.5px}
+.tv-bar{align-items:center;gap:8px;flex-wrap:wrap}
+.tv-bar .chip{font-size:14px;padding:6px 12px}
+.tv-btn{background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.5);color:#fff;padding:6px 12px;border-radius:999px;font-weight:700;cursor:pointer;font-size:13px}
+
 /* ---------- Connexion ---------- */
 .login{position:fixed;inset:0;z-index:2000;background:linear-gradient(160deg,#00A68F 0%,#007a69 100%);display:flex;align-items:center;justify-content:center;padding:16px}
 .login.hidden{display:none}
@@ -388,7 +424,11 @@ button.chip{cursor:pointer}
   <header>
     <h1>&#128667; ParK <span id="station-name"></span><span class="role-badge" id="role-badge" style="display:none">&#128065;&#65039; Lecture seule</span></h1>
     <div class="hspace"></div>
+    <div class="tv-only tv-bar" id="tv-bar"></div>
     <div class="live"><span class="dot off" id="dot"></span><span id="live-txt">Connexion&#8230;</span></div>
+    <span class="tv-only tv-clock" id="tv-clock"></span>
+    <button class="tv-only tv-btn" data-act="tv-full" title="Plein &#233;cran">&#9974; Plein &#233;cran</button>
+    <button class="tv-only tv-btn" data-act="tv-exit" title="Quitter le mode TV">&#10005;</button>
     <div class="hbtns">
       <button class="hdr-btn adm" data-act="undo">&#8617;&#65039; Retour</button>
       <button class="hdr-btn danger adm" data-act="reset">&#128260; Reset</button>
@@ -401,6 +441,7 @@ button.chip{cursor:pointer}
     <button class="tab" data-tab="waves">&#127754; Vagues</button>
     <button class="tab" data-tab="plan">Plan WH</button>
     <button class="tab adm" data-tab="blocks">&#128274; Blocages</button>
+    <button class="tab adm" data-tab="settings">&#9881;&#65039; R&#233;glages</button>
   </nav>
 
   <!-- ROUTES -->
@@ -439,6 +480,7 @@ button.chip{cursor:pointer}
     <div class="plan-tools">
       <div class="stats-bar" id="p-stats"></div>
       <div class="hspace"></div>
+      <button class="tool-btn" data-act="tv-open" title="Ouvrir le plan en plein &#233;cran pour une TV">&#128250; Mode TV</button>
       <button class="tool-btn adm" id="move-btn" data-act="move-mode">&#9995; Modifier le stationnement</button>
       <button class="tool-btn" data-act="flip-x" title="Inverser gauche / droite">&#8644;</button>
       <button class="tool-btn" data-act="flip-y" title="Inverser haut / bas">&#8645;</button>
@@ -468,6 +510,9 @@ button.chip{cursor:pointer}
       <span><i style="background:#ffe7cf;border:2px solid var(--orange)"></i>Charg&#233;, pas sorti</span>
     </div>
   </section>
+
+  <!-- RÉGLAGES -->
+  <section id="settings-view" class="view hidden"><div class="set-wrap" id="set-form"></div></section>
 
   <!-- BLOCAGES -->
   <section id="blocks-view" class="view hidden">
@@ -524,6 +569,7 @@ function readConn() {
   return { api: api || cfg || LS.get('park_api', ''), key: key || LS.get('park_key', ''), fixed: !!cfg && !api };
 }
 var CONN = readConn();
+var TV = !!(BOOT && BOOT.tv) || /(^|[?&#])tv=1/.test(location.search + location.hash);
 
 function jsonp(params, timeout) {
   return new Promise(function (resolve, reject) {
@@ -572,7 +618,7 @@ function prepare(st) {
   C.blocks.forEach(function (b, i) { b.forEach(function (c) { C.blockOf[c] = i; }); });
   for (var c = 0; c < C.cols; c++) if (C.blockOf[c] === undefined) C.blockOf[c] = 'x' + c;
 
-  var s = { routes: st.routes, plan: st.plan || {}, blocked: new Set(st.blocked || []), waves: st.waves || {}, vanscan: st.vanscan || {}, station: st.station };
+  var s = { routes: st.routes, plan: st.plan || {}, blocked: new Set(st.blocked || []), waves: st.waves || {}, vanscan: st.vanscan || {}, station: st.station, settings: st.settings || {} };
   s.byKey = {}; s.byId = {};
   s.routes.forEach(function (r) { s.byKey[r.key] = r; s.byId[r.id] = r; });
   s.dups = st.dups || [];
@@ -618,6 +664,7 @@ function applyResult(res) {
   if (res.plan) { S.plan = res.plan; derivePlan(S); }
   if (res.blocked) S.blocked = new Set(res.blocked);
   if (res.waves) { S.waves = res.waves; deriveWaves(S); }
+  if (res.settings) { S.settings = res.settings; Object.assign(C, res.settings); S.station = res.settings.stationName; $('station-name').textContent = S.station; SETDRAFT = null; }
   renderAll();
 }
 
@@ -769,23 +816,23 @@ function idcColor(n) { return idcMap[n] || IDC_PAL[hashStr(n || '') % IDC_PAL.le
  * ================================================================= */
 function vsPct(r) { var v = r.vs; return v && v.t ? Math.min(100, Math.round(v.s / v.t * 100)) : null; }
 /* 0-40 rouge, 40-60 orange, 60-100 vert */
-function band(p, done) { if (done) return 'g'; if (p == null) return ''; return p < C.pctRed ? 'r' : (p < C.pctOrange ? 'o' : 'g'); }
+function band(p, done) { if (!C.colorBands) return ''; if (done) return 'g'; if (p == null) return ''; return p < C.pctRed ? 'r' : (p < C.pctOrange ? 'o' : 'g'); }
 var BAND_VAN = { r: '#f87171', o: '#fdba74', g: '#86efac' };
 function alertFor(r) {
   if (!C || !C.vanscan || !r.in || r.out) return null;
   var v = r.vs, t = now();
   if (v && v.done) {
     var m = v.end ? (t - Date.parse(v.end)) / 60000 : null;
-    return (m != null && m >= C.loadedAlertMin) ? { k: 'or', txt: '📦 Chargé, pas sorti (' + durText(m) + ')' } : null;
+    return (C.alLoaded && m != null && m >= C.loadedAlertMin) ? { k: 'or', txt: '📦 Chargé, pas sorti (' + durText(m) + ')' } : null;
   }
   var inMin = r.inMs ? (t - r.inMs) / 60000 : null;
   if (!v || !v.st) {
     var sess = S.vanscan[r.tag];
-    return (inMin != null && inMin >= C.parkedAlertMin && sess && sess.ok) ? { k: 'red', txt: '🔴 Scan pas commencé (stationné ' + durText(inMin) + ')' } : null;
+    return (C.alNotStarted && inMin != null && inMin >= C.parkedAlertMin && sess && sess.ok) ? { k: 'red', txt: '🔴 Scan pas commencé (stationné ' + durText(inMin) + ')' } : null;
   }
   var scanMin = (t - Date.parse(v.st)) / 60000;
-  if (scanMin > C.maxScanMin) return { k: 'red', txt: '⏱️ Scan trop long : ' + durText(scanMin) + ' (' + vsPct(r) + '%)' };
-  if (v.ppm != null && v.ppm < C.slowPpm && scanMin >= C.ppmGraceMin) return { k: 'red', txt: '🐢 Scan lent : ' + v.ppm.toFixed(1) + ' PPM' };
+  if (C.alTooLong && scanMin > C.maxScanMin) return { k: 'red', txt: '⏱️ Scan trop long : ' + durText(scanMin) + ' (' + vsPct(r) + '%)' };
+  if (C.alSlow && v.ppm != null && v.ppm < C.slowPpm && scanMin >= C.ppmGraceMin) return { k: 'red', txt: '🐢 Scan lent : ' + v.ppm.toFixed(1) + ' PPM' };
   return null;
 }
 
@@ -798,6 +845,9 @@ function renderAll() {
   if (tab === 'waves') renderWaves();
   if (tab === 'plan') renderPlan();
   if (tab === 'blocks') renderBlocks();
+  if (tab === 'settings') renderSettings();
+  if (TV) renderTvBar();
+  document.body.classList.toggle('noblink', !!(C && !C.blink));
   if (!$('waveModal').classList.contains('hidden')) renderWaveEditor();
   if (!$('routeModal').classList.contains('hidden')) renderRouteEditor();
 }
@@ -1282,6 +1332,100 @@ function bulkBlock(kind, v) {
 }
 
 /* =================================================================
+ *  RÉGLAGES
+ * ================================================================= */
+var SETDRAFT = null;
+function swHTML(k, on) { return '<label class="sw"><input type="checkbox" data-set="' + k + '"' + (on ? ' checked' : '') + '><i></i></label>'; }
+function numHTML(k, v, unit) { return '<input type="number" data-set="' + k + '" value="' + esc(v) + '" step="1"> <span class="unit">' + unit + '</span>'; }
+function renderSettings() {
+  if (!S) { $('set-form').innerHTML = '<p class="empty-msg">Chargement…</p>'; return; }
+  var v = SETDRAFT || Object.assign({}, S.settings);
+  SETDRAFT = v;
+  var row = function (label, ctrl) { return '<div class="set-row"><span class="lbl">' + label + '</span>' + ctrl + '</div>'; };
+  var h = '';
+  h += '<div class="set-card"><h4>🚨 Alertes (cartes et vans qui clignotent)</h4><div class="sub">Pour tous les écrans. Rouge = problème de scan, orange = chargé mais pas sorti.</div>' +
+    row('Clignotement activé', swHTML('blink', v.blink)) +
+    row('🔴 Scan pas commencé — après', numHTML('parkedAlertMin', v.parkedAlertMin, 'min stationné') + swHTML('alNotStarted', v.alNotStarted)) +
+    row('🐢 Scan lent — PPM sous', numHTML('slowPpm', v.slowPpm, 'colis/min') + numHTML('ppmGraceMin', v.ppmGraceMin, 'min de scan avant de juger') + swHTML('alSlow', v.alSlow)) +
+    row('⏱️ Scan trop long — plus de', numHTML('maxScanMin', v.maxScanMin, 'min') + swHTML('alTooLong', v.alTooLong)) +
+    row('📦 Chargé mais pas sorti — après', numHTML('loadedAlertMin', v.loadedAlertMin, 'min') + swHTML('alLoaded', v.alLoaded)) + '</div>';
+  h += '<div class="set-card"><h4>🎨 Couleurs selon le % chargé</h4><div class="sub">Sur les vans du plan et les barres des cartes.</div>' +
+    row('Couleurs activées', swHTML('colorBands', v.colorBands)) +
+    row('🔴 Rouge de 0 à', numHTML('pctRed', v.pctRed, '%')) +
+    row('🟠 Orange jusqu\'à', numHTML('pctOrange', v.pctOrange, '%  (vert au-dessus)')) + '</div>';
+  h += '<div class="set-card"><h4>⏱️ Temps IN → OUT</h4><div class="sub">Couleur de la durée sur les cartes de route.</div>' +
+    row('🟢 Vert jusqu\'à', numHTML('loOk', v.loOk, 'min')) +
+    row('🟠 Orange jusqu\'à', numHTML('loWarn', v.loWarn, 'min  (rouge au-delà)')) + '</div>';
+  h += '<div class="set-card"><h4>📡 Vanscan & TV</h4>' +
+    row('Suivi Vanscan (%, PPM, alertes)', swHTML('vanscan', v.vanscan)) +
+    row('📺 Mode TV : vérifier les changements toutes les', numHTML('tvRefreshSec', v.tvRefreshSec, 's')) +
+    row('Nom de la station affiché', '<input type="text" data-set="stationName" value="' + esc(v.stationName) + '">') + '</div>';
+  h += '<div class="set-card"><h4>📱 Cet appareil seulement</h4><div class="sub">Enregistré sur cet appareil, pas pour les autres.</div>' +
+    row('Couleur des vans par défaut', '<select class="sel" data-local="colorMode"><option value="status"' + (ui.colorMode === 'status' ? ' selected' : '') + '>Statut / % chargé</option><option value="wave"' + (ui.colorMode === 'wave' ? ' selected' : '') + '>Vague</option><option value="idc"' + (ui.colorMode === 'idc' ? ' selected' : '') + '>IDC</option></select>') +
+    row('Colonne 0 à gauche', '<label class="sw"><input type="checkbox" data-local="col0Left"' + (ui.col0Left ? ' checked' : '') + '><i></i></label>') +
+    row('Rangée A en bas', '<label class="sw"><input type="checkbox" data-local="rowABottom"' + (ui.rowABottom ? ' checked' : '') + '><i></i></label>') + '</div>';
+  h += '<div class="set-actions"><button class="b-pri" data-act="settings-save" style="background:var(--tq);color:#fff">💾 Enregistrer pour tous les écrans</button>' +
+    '<button class="b-neu" data-act="settings-reset" style="background:var(--g200)">↩︎ Valeurs par défaut</button></div>';
+  $('set-form').innerHTML = h;
+}
+document.addEventListener('change', function (e) {
+  var t = e.target;
+  if (t.hasAttribute && t.hasAttribute('data-set') && SETDRAFT) {
+    var k = t.getAttribute('data-set');
+    SETDRAFT[k] = t.type === 'checkbox' ? t.checked : (t.type === 'number' ? Number(t.value) : t.value);
+  }
+  if (t.hasAttribute && t.hasAttribute('data-local')) {
+    var lk = t.getAttribute('data-local');
+    if (lk === 'colorMode') { ui.colorMode = t.value; LS.set('park_color', t.value); }
+    if (lk === 'col0Left') { ui.col0Left = t.checked; LS.set('park_col0_left', t.checked ? '1' : '0'); }
+    if (lk === 'rowABottom') { ui.rowABottom = t.checked; LS.set('park_rowA_bottom', t.checked ? '1' : '0'); }
+    toast('📱 Enregistré sur cet appareil');
+  }
+});
+
+/* =================================================================
+ *  MODE TV — plan en direct, plein écran, sans boutons
+ * ================================================================= */
+function baseUrl() { return (BOOT && BOOT.api) ? BOOT.api : location.origin + location.pathname; }
+function renderTvBar() {
+  if (!S || !C) return;
+  var tot = C.cols * C.rows.length + C.front.labels.length, nIn = 0, nOut = 0, nBlk = S.blocked.size, nAl = 0;
+  Object.keys(S.plan).forEach(function (l) { if (S.blocked.has(l)) return; if (S.outKeys[S.plan[l]]) nOut++; else nIn++; });
+  S.routes.forEach(function (r) { if (alertFor(r)) nAl++; });
+  var h = '<span class="chip c-in">🟢 ' + nIn + ' IN</span><span class="chip c-out">🔴 ' + nOut + ' OUT</span>' +
+    '<span class="chip c-free">✅ ' + (tot - nIn - nOut - nBlk) + ' libres</span>' +
+    (nAl ? '<span class="chip c-alert">⚠️ ' + nAl + ' alerte' + (nAl > 1 ? 's' : '') + '</span>' : '');
+  if (C.vanscan) Object.keys(S.vanscan).sort().forEach(function (st) {
+    var v = S.vanscan[st]; if (!v.ok) return;
+    h += '<span class="chip c-vs">' + tagBadge(st) + ' <b>' + (v.total ? Math.round(v.scanned / v.total * 100) : 0) + '%</b></span>';
+  });
+  $('tv-bar').innerHTML = h;
+}
+function tvClock() { if (TV) $('tv-clock').textContent = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }); }
+var wakeLock = null;
+function keepAwake() {
+  try { if (navigator.wakeLock && !document.hidden) navigator.wakeLock.request('screen').then(function (w) { wakeLock = w; }).catch(function () {}); } catch (_) {}
+}
+var idleT = null;
+function tvActivity() { document.body.classList.remove('idle'); clearTimeout(idleT); idleT = setTimeout(function () { document.body.classList.add('idle'); }, 3000); }
+function startTV() {
+  document.body.classList.add('tv');
+  tab = 'plan';
+  ['routes', 'waves', 'plan', 'blocks', 'settings'].forEach(function (v) { $(v + '-view').classList.toggle('hidden', v !== 'plan'); });
+  tvClock(); setInterval(tvClock, 1000);
+  keepAwake(); document.addEventListener('visibilitychange', keepAwake);
+  ['mousemove', 'touchstart', 'keydown'].forEach(function (ev) { document.addEventListener(ev, tvActivity); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'f' || e.key === 'F') toggleFull(); });
+  tvActivity();
+}
+function toggleFull() {
+  try {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+    else document.exitFullscreen();
+  } catch (_) {}
+}
+
+/* =================================================================
  *  ACTIONS
  * ================================================================= */
 var FULL_RELOAD = { undo: 1, reset: 1 };
@@ -1299,7 +1443,7 @@ function runAction(name, params) {
 /* ---------- Connexion / rôle ---------- */
 var ROLE = 'admin';
 var WRITE_ACTS = { check: 1, 'route-edit': 1, 're-save': 1, 're-remove': 1, undo: 1, reset: 1, 'reset-yes': 1, export: 1, 'wave-edit': 1, 'wave-clear': 1,
-  'wm-save': 1, 'wm-clear': 1, 'move-mode': 1, 'move-free': 1, 'move-edit': 1, pick: 1, 'blk-row': 1, 'blk-col': 1 };
+  'wm-save': 1, 'wm-clear': 1, 'settings-save': 1, 'settings-reset': 1, 'move-mode': 1, 'move-free': 1, 'move-edit': 1, pick: 1, 'blk-row': 1, 'blk-col': 1 };
 function setRole(r) {
   ROLE = r === 'view' ? 'view' : 'admin';
   document.body.classList.toggle('ro', ROLE !== 'admin');
@@ -1344,7 +1488,8 @@ function closeModals() {
 function showTab(name) {
   tab = name;
   document.querySelectorAll('.tab').forEach(function (t) { t.classList.toggle('active', t.getAttribute('data-tab') === name); });
-  ['routes', 'waves', 'plan', 'blocks'].forEach(function (v) { $(v + '-view').classList.toggle('hidden', v !== name); });
+  ['routes', 'waves', 'plan', 'blocks', 'settings'].forEach(function (v) { $(v + '-view').classList.toggle('hidden', v !== name); });
+  if (name === 'settings') SETDRAFT = null;
   if (name !== 'plan') { ui.moveMode = false; ui.moveFrom = null; }
   updateZoomLabels();
   renderAll();
@@ -1355,6 +1500,7 @@ document.addEventListener('click', function (e) {
   if (!t) return;
   if (t.hasAttribute('data-tab')) { showTab(t.getAttribute('data-tab')); return; }
   var act = t.getAttribute('data-act');
+  if (TV && !/^(tv-|login|logout)/.test(act || '')) return;
   if (ROLE !== 'admin' && (WRITE_ACTS[act] || (!act && t.closest('#b-grid')))) { toast('👁️ Accès lecture seule'); return; }
   if (!act && t.hasAttribute('data-l')) {
     var l = t.getAttribute('data-l');
@@ -1376,6 +1522,11 @@ document.addEventListener('click', function (e) {
     case 'reset-yes': closeModals(); runAction('reset'); break;
     case 'close-modal': closeModals(); break;
     case 'login-adv': $('l-adv').classList.toggle('hidden'); break;
+    case 'tv-open': window.open(baseUrl() + '?tv=1', '_blank'); break;
+    case 'tv-exit': location.href = baseUrl(); break;
+    case 'tv-full': toggleFull(); break;
+    case 'settings-save': if (SETDRAFT) runAction('settings_save', { s: JSON.stringify(SETDRAFT) }); break;
+    case 'settings-reset': if (confirm('Remettre tous les réglages par défaut (pour tous les écrans) ?')) runAction('settings_reset'); break;
     case 'logout': if (confirm('Se déconnecter de ParK sur cet appareil ?')) logout(); break;
     case 'export': runAction('export', { wave: t.getAttribute('data-wave') || '' }); break;
     case 'wave-edit': openWaveEditor(t.getAttribute('data-wave')); break;
@@ -1427,15 +1578,17 @@ window.addEventListener('resize', function () { clearTimeout(rzT); rzT = setTime
  *  (pause pendant qu'une fenêtre est ouverte)
  * ================================================================= */
 function modalOpen() { return !!document.querySelector('.modal:not(.hidden)'); }
-var verBusy = false;
+var verBusy = false, nextVer = 0;
 setInterval(function () {
   if (document.hidden || pending || !CONN.api || !CONN.key || modalOpen() || verBusy || loading || !S) return;
+  if (Date.now() < nextVer) return;
+  nextVer = Date.now() + (TV ? Math.max(3, (C && C.tvRefreshSec) || 5) : 4) * 1000;
   if (Date.now() - lastOk > 30000) { loadState(false); return; }          // Vanscan à jour
   verBusy = true;
   jsonp({ api: 'ver' }, 10000).then(function (res) {
     if (res && res.ok && res.v && res.v !== VER && !pending) loadState(false);   // un autre écran a changé quelque chose
   }).catch(function () {}).then(function () { verBusy = false; });
-}, 4000);
+}, 1000);
 setInterval(function () { if (!document.hidden && S && !pending && !modalOpen()) renderAll(); else renderLive(); }, 30000);
 document.addEventListener('visibilitychange', function () { if (!document.hidden && Date.now() - lastOk > 20000) loadState(false); });
 
@@ -1448,6 +1601,7 @@ if (!BOOT && 'serviceWorker' in navigator && /^https?:$/.test(location.protocol)
 }
 
 updateZoomLabels();
+if (TV) startTV();
 if (!CONN.api || !CONN.key) { showLogin(''); if (CONN.api) loadState(false); }
 else loadState(true);
 })();
