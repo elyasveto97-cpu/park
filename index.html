@@ -304,6 +304,8 @@ button.chip{cursor:pointer}
 .set-actions{display:flex;gap:8px;flex-wrap:wrap;position:sticky;bottom:0;background:var(--bg);padding:10px 0}
 .set-actions button{flex:1;min-width:150px;padding:12px;border:0;border-radius:10px;font-weight:800;font-size:14px;cursor:pointer}
 .noblink .al-red,.noblink .al-or,.noblink .place.pend{animation:none!important}
+.pl-spd{position:absolute;top:-3px;right:0;font-size:calc(var(--pfs) * 1.35);line-height:1;filter:drop-shadow(0 0 2px #fff)}
+.set-row input[type=color]{width:46px;height:34px;padding:2px;border:1.5px solid var(--g300);border-radius:8px;background:#fff;cursor:pointer}
 
 /* ---------- Mode TV ---------- */
 .tv-only{display:none!important}
@@ -525,8 +527,9 @@ body.tv.idle,body.tv.idle *{cursor:none!important}
       <span><i style="background:#fee2e2;border:2px solid #f87171"></i>0&#8211;40 %</span>
       <span><i style="background:#ffedd5;border:2px solid #fb923c"></i>40&#8211;60 %</span>
       <span><i style="background:#dcfce7;border:2px solid #22c55e"></i>60&#8211;100 %</span>
-      <span><i style="background:#ffd9d5;border:2px solid var(--red)"></i>Clignote : pas commenc&#233;, PPM &lt; 5 ou scan &gt; 75 min</span>
-      <span><i style="background:#ffe7cf;border:2px solid var(--orange)"></i>Charg&#233;, pas sorti</span>
+      <span><i class="lg-red" style="background:#ffd9d5;border:2px solid var(--red)"></i>Clignote : pas commenc&#233;, PPM &lt; 5 ou scan &gt; 75 min</span>
+      <span><i class="lg-or" style="background:#ffe7cf;border:2px solid var(--orange)"></i>Charg&#233;, pas sorti</span>
+      <span>&#128007; Scan rapide</span><span>&#128034; Scan lent</span>
     </div>
   </section>
 
@@ -648,6 +651,15 @@ var EN = {
   "Suivi Vanscan (%, PPM, alertes)": "Vanscan tracking (%, PPM, alerts)",
   "Couleurs selon le % chargé": "Colors by % loaded",
   "Chargé mais pas sorti — après": "Loaded but not out — after",
+  "Pas de clignotement rouge si le chauffeur a déjà scanné": "No red blinking if the driver has already scanned",
+  "% ou plus": "% or more",
+  "Couleur du clignotement rouge (problème de scan)": "Red blinking color (scan problem)",
+  "Couleur du clignotement orange (chargé, pas sorti)": "Orange blinking color (loaded, not out)",
+  "Vitesse de scan sur les vans": "Scan speed on vans",
+  "Icône sur le van du plan pendant le scan (après les minutes « avant de juger »).": "Icon on the plan van while scanning (after the “before judging” minutes).",
+  "Lapin si le PPM est plus de": "Rabbit if PPM is more than",
+  "Tortue si le PPM est sous le seuil « scan lent »": "Turtle if PPM is under the “slow scan” threshold",
+  "Scan rapide": "Fast scan",
   "Scan pas commencé — après": "Scan not started — after",
   "Scan trop long — plus de": "Scan too long — more than",
   "Scan lent — PPM sous": "Slow scan — PPM under",
@@ -1170,6 +1182,35 @@ function vsPct(r) { var v = r.vs; return v && v.t ? Math.min(100, Math.round(v.s
 /* 0-40 rouge, 40-60 orange, 60-100 vert */
 function band(p, done) { if (!C.colorBands) return ''; if (done) return 'g'; if (p == null) return ''; return p < C.pctRed ? 'r' : (p < C.pctOrange ? 'o' : 'g'); }
 var BAND_VAN = { r: '#f87171', o: '#fdba74', g: '#86efac' };
+/* 🐇 / 🐢 sur le van pendant le scan */
+function speedIcon(r) {
+  var v = r.vs;
+  if (!C || !C.vanscan || !v || !v.st || v.done || v.ppm == null || !r.in || r.out) return '';
+  if ((now() - Date.parse(v.st)) / 60000 < C.ppmGraceMin) return '';
+  if (C.rabbitOn && v.ppm > C.rabbitPpm) return '🐇';
+  if (C.turtleOn && v.ppm < C.slowPpm) return '🐢';
+  return '';
+}
+/* couleurs du clignotement choisies dans les réglages */
+var blinkKey = '';
+function hexRgb(h) { h = String(h || '').replace('#', ''); return [parseInt(h.slice(0, 2), 16) || 0, parseInt(h.slice(2, 4), 16) || 0, parseInt(h.slice(4, 6), 16) || 0].join(','); }
+function applyBlinkStyle() {
+  if (!C) return;
+  var r = /^#[0-9a-f]{6}$/i.test(C.blinkRedColor || '') ? C.blinkRedColor : '#F24438';
+  var o = /^#[0-9a-f]{6}$/i.test(C.blinkOrColor || '') ? C.blinkOrColor : '#F88223';
+  if (blinkKey === r + o) return;
+  blinkKey = r + o;
+  var rr = hexRgb(r), oo = hexRgb(o), el = $('blink-style');
+  if (!el) { el = document.createElement('style'); el.id = 'blink-style'; document.head.appendChild(el); }
+  el.textContent =
+    '@keyframes blinkRed{0%,100%{box-shadow:0 0 0 0 rgba(' + rr + ',0)}50%{box-shadow:0 0 0 4px rgba(' + rr + ',.6)}}' +
+    '@keyframes blinkOr{0%,100%{box-shadow:0 0 0 0 rgba(' + oo + ',0)}50%{box-shadow:0 0 0 4px rgba(' + oo + ',.6)}}' +
+    '.place.al-red{border-color:' + r + '!important;background:rgba(' + rr + ',.2)}' +
+    '.place.al-or{border-color:' + o + '!important;background:rgba(' + oo + ',.2)}' +
+    '.route-card.al-red{border-left-color:' + r + '}.route-card.al-or{border-left-color:' + o + '}' +
+    '.legend .lg-red{background:rgba(' + rr + ',.2)!important;border-color:' + r + '!important}' +
+    '.legend .lg-or{background:rgba(' + oo + ',.2)!important;border-color:' + o + '!important}';
+}
 function alertFor(r) {
   if (!C || !C.vanscan || !r.in || r.out) return null;
   var v = r.vs, t = now();
@@ -1183,6 +1224,8 @@ function alertFor(r) {
     return (C.alNotStarted && inMin != null && inMin >= C.parkedAlertMin && sess && sess.ok) ? { k: 'red', txt: '🔴 Scan pas commencé (stationné ' + durText(inMin) + ')' } : null;
   }
   var scanMin = (t - Date.parse(v.st)) / 60000;
+  var pc = vsPct(r);
+  if (C.noBlinkHigh && pc != null && pc >= C.noBlinkPct) return null;   // presque fini : on ne le dérange pas
   if (C.alTooLong && scanMin > C.maxScanMin) return { k: 'red', txt: '⏱️ Scan trop long : ' + durText(scanMin) + ' (' + vsPct(r) + '%)' };
   if (C.alSlow && v.ppm != null && v.ppm < C.slowPpm && scanMin >= C.ppmGraceMin) return { k: 'red', txt: '🐢 Scan lent : ' + v.ppm.toFixed(1) + ' PPM' };
   return null;
@@ -1192,6 +1235,7 @@ function alertFor(r) {
  *  RENDU GÉNÉRAL
  * ================================================================= */
 function renderAll() {
+  applyBlinkStyle();
   renderLive();
   if (tab === 'routes') renderRoutes();
   if (tab === 'waves') renderWaves();
@@ -1213,11 +1257,7 @@ function renderBanners() {
   var b = [];
   if (S && S.dups.length) b.push('<div class="banner warn">⚠️ Route(s) en double, seule la 1re feuille compte : ' + esc(S.dups.join(' ; ')) + '</div>');
   if (lastErr) b.push('<div class="banner err">Mise à jour impossible : ' + esc(lastErr) + (lastOk ? ' — dernières données affichées' : '') + '</div>');
-  if (S && C && C.vanscan) Object.keys(S.vanscan).forEach(function (st) {
-    var v = S.vanscan[st];
-    if (!v.ok) b.push('<div class="banner warn">Vanscan ' + esc(st) + ' : ' + esc(v.error) + '</div>');
-    else if (v.stale) b.push('<div class="banner warn">Vanscan ' + esc(st) + ' : pas de réponse (' + esc(v.error || '') + '), données de ' + hhmm(v.fetched) + '</div>');
-  });
+  // (messages d'erreur Vanscan retirés : le ⚠️ sur la pastille Vanscan suffit)
   $('banners').innerHTML = b.join('');
 }
 
@@ -1610,7 +1650,9 @@ function renderPlan() {
     var h = '<div class="' + cls + '" data-l="' + l + '" title="' + esc(tip) + '"' + tint + '>';
     if (owners.length && status !== 'blocked') h += '<i class="pl-wbar" style="background:' + waveColor(owners[0]) + '"></i>';
     h += '<span class="pl-label">' + l + '</span>';
-    h += '<div class="van-wrap">' + (status === 'blocked' ? '' : vanSVG(body)) + (p != null ? '<span class="pl-pct">' + (ro.vs.done ? '✓' : p + '%') + '</span>' : '') + '</div>';
+    var spd = (status === 'in' && ro) ? speedIcon(ro) : '';
+    h += '<div class="van-wrap">' + (status === 'blocked' ? '' : vanSVG(body)) + (p != null ? '<span class="pl-pct">' + (ro.vs.done ? '✓' : p + '%') + '</span>' : '') +
+      (spd ? '<span class="pl-spd">' + spd + '</span>' : '') + '</div>';
     h += '<span class="pl-route">' + (ro ? esc(ro.disp) : (key ? esc(key.split('-').pop()) : '')) + '</span>';
     if (p != null) h += '<i class="pl-bar b-' + bd + '" style="width:' + p + '%"></i>';
     return h + '</div>';
@@ -1709,6 +1751,7 @@ function bulkBlock(kind, v) {
  * ================================================================= */
 var SETDRAFT = null;
 function swHTML(k, on) { return '<label class="sw"><input type="checkbox" data-set="' + k + '"' + (on ? ' checked' : '') + '><i></i></label>'; }
+function colorHTML(k, v) { return '<input type="color" data-set="' + k + '" value="' + esc(v || '#F24438') + '">'; }
 function numHTML(k, v, unit) { return '<input type="number" data-set="' + k + '" value="' + esc(v) + '" step="1"> <span class="unit">' + unit + '</span>'; }
 function renderSettings() {
   if (!S) { $('set-form').innerHTML = '<p class="empty-msg">Chargement…</p>'; return; }
@@ -1721,7 +1764,13 @@ function renderSettings() {
     row('🔴 Scan pas commencé — après', numHTML('parkedAlertMin', v.parkedAlertMin, 'min stationné') + swHTML('alNotStarted', v.alNotStarted)) +
     row('🐢 Scan lent — PPM sous', numHTML('slowPpm', v.slowPpm, 'colis/min') + numHTML('ppmGraceMin', v.ppmGraceMin, 'min de scan avant de juger') + swHTML('alSlow', v.alSlow)) +
     row('⏱️ Scan trop long — plus de', numHTML('maxScanMin', v.maxScanMin, 'min') + swHTML('alTooLong', v.alTooLong)) +
-    row('📦 Chargé mais pas sorti — après', numHTML('loadedAlertMin', v.loadedAlertMin, 'min') + swHTML('alLoaded', v.alLoaded)) + '</div>';
+    row('📦 Chargé mais pas sorti — après', numHTML('loadedAlertMin', v.loadedAlertMin, 'min') + swHTML('alLoaded', v.alLoaded)) +
+    row('🔕 Pas de clignotement rouge si le chauffeur a déjà scanné', numHTML('noBlinkPct', v.noBlinkPct, '% ou plus') + swHTML('noBlinkHigh', v.noBlinkHigh)) +
+    row('🎨 Couleur du clignotement rouge (problème de scan)', colorHTML('blinkRedColor', v.blinkRedColor)) +
+    row('🎨 Couleur du clignotement orange (chargé, pas sorti)', colorHTML('blinkOrColor', v.blinkOrColor)) + '</div>';
+  h += '<div class="set-card"><h4>🐇 🐢 Vitesse de scan sur les vans</h4><div class="sub">Icône sur le van du plan pendant le scan (après les minutes « avant de juger »).</div>' +
+    row('🐇 Lapin si le PPM est plus de', numHTML('rabbitPpm', v.rabbitPpm, 'colis/min') + swHTML('rabbitOn', v.rabbitOn)) +
+    row('🐢 Tortue si le PPM est sous le seuil « scan lent » (' + esc(v.slowPpm) + ' colis/min)', swHTML('turtleOn', v.turtleOn)) + '</div>';
   h += '<div class="set-card"><h4>🎨 Couleurs selon le % chargé</h4><div class="sub">Sur les vans du plan et les barres des cartes.</div>' +
     row('Couleurs activées', swHTML('colorBands', v.colorBands)) +
     row('🔴 Rouge de 0 à', numHTML('pctRed', v.pctRed, '%')) +
