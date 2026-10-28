@@ -35,6 +35,21 @@ button,input,select{font-family:inherit}
 header{flex-shrink:0;background:var(--tq);color:#fff;padding:10px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 header h1{font-size:18px;font-weight:800;white-space:nowrap}
 header h1 span{font-size:11px;font-weight:600;opacity:.85;margin-left:4px}
+header h1 #station-name{font-size:21px;font-weight:800;opacity:1;margin-left:8px;letter-spacing:.3px}
+@media(max-width:600px){header h1 #station-name{font-size:16px}}
+body.tv header h1 #station-name{font-size:30px}
+.lang-btn{display:inline-flex;border:1.5px solid rgba(255,255,255,.55);border-radius:999px;overflow:hidden;flex-shrink:0;cursor:pointer;background:transparent;padding:0}
+.lang-btn span{padding:5px 9px;font-size:12px;font-weight:800;color:#fff;opacity:.7}
+.lang-btn span.on{background:#fff;color:var(--tq-d);opacity:1}
+.login .lang-btn{position:absolute;top:12px;right:12px;border-color:var(--g300)}
+.login .lang-btn span{color:var(--g500)}
+.login .lang-btn span.on{background:var(--tq);color:#fff}
+.wl-row{display:flex;align-items:center;gap:8px}
+.wl-row .wave-legend{flex:1}
+.tools-tg{margin-left:auto;background:var(--g100);border:1.5px solid var(--g300);color:var(--g600);border-radius:999px;padding:4px 10px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0}
+#plan-view.tools-off .plan-tools{display:none!important}
+.place.dim{filter:blur(1.6px) grayscale(.7);opacity:.28}
+.place.idc-hl{box-shadow:0 0 0 3px var(--idc,#6366f1);z-index:2}
 .hspace{flex:1}
 .live{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;background:rgba(255,255,255,.16);padding:5px 10px;border-radius:999px;white-space:nowrap}
 .dot{width:8px;height:8px;border-radius:50%;background:#8dffc4;animation:pulse 2s infinite}
@@ -186,8 +201,8 @@ button.chip{cursor:pointer}
 .pl-wbar{position:absolute;left:0;right:0;top:0;height:3px}
 .place.in{background:var(--tq-l);border-color:var(--tq);border-style:solid}
 .place.in .pl-label{color:var(--tq)}.place.in .pl-route{color:var(--tq-d)}
-.place.out{background:var(--red-bg);border-color:#ef9a9a;border-style:solid}
-.place.out .pl-label{color:#ef9a9a}.place.out .pl-route{color:var(--red-txt)}
+.place.out{background:#fff;border-color:var(--g300);border-style:solid}
+.place.out .pl-label{color:var(--g400)}.place.out .pl-route{color:var(--g500);font-weight:700}
 .place.blocked{background:var(--g200);border-color:var(--g400)}
 .place.blocked .pl-label{color:#bbb}
 .place.offzone{box-shadow:inset 0 0 0 2px var(--orange)}
@@ -405,7 +420,8 @@ body.tv.idle,body.tv.idle *{cursor:none!important}
 
 <!-- Connexion -->
 <div id="login" class="login hidden">
-  <form class="lbox" id="l-form" autocomplete="on" onsubmit="return false">
+  <form class="lbox" id="l-form" autocomplete="on" onsubmit="return false" style="position:relative">
+    <button class="lang-btn" type="button" data-act="lang"><span data-lg="fr">FR</span><span data-lg="en">EN</span></button>
     <div class="llogo">&#128667; ParK</div>
     <div class="lsub" id="l-sub">Stationnement &#8212; Intelcom</div>
     <input type="password" id="l-key" placeholder="Cl&#233; d'acc&#232;s" autocomplete="current-password" autocapitalize="characters" spellcheck="false">
@@ -425,6 +441,7 @@ body.tv.idle,body.tv.idle *{cursor:none!important}
     <h1>&#128667; ParK <span id="station-name"></span><span class="role-badge" id="role-badge" style="display:none">&#128065;&#65039; Lecture seule</span></h1>
     <div class="hspace"></div>
     <div class="tv-only tv-bar" id="tv-bar"></div>
+    <button class="lang-btn" data-act="lang" title="Langue / Language"><span data-lg="fr">FR</span><span data-lg="en">EN</span></button>
     <div class="live"><span class="dot off" id="dot"></span><span id="live-txt">Connexion&#8230;</span></div>
     <span class="tv-only tv-clock" id="tv-clock"></span>
     <button class="tv-only tv-btn" data-act="tv-full" title="Plein &#233;cran">&#9974; Plein &#233;cran</button>
@@ -438,7 +455,7 @@ body.tv.idle,body.tv.idle *{cursor:none!important}
   </header>
   <nav class="tabs">
     <button class="tab active" data-tab="routes">Routes</button>
-    <button class="tab" data-tab="waves">&#127754; Vagues</button>
+    <button class="tab" data-tab="waves">&#127919; Set zone</button>
     <button class="tab" data-tab="plan">Plan WH</button>
     <button class="tab adm" data-tab="blocks">&#128274; Blocages</button>
     <button class="tab adm" data-tab="settings">&#9881;&#65039; R&#233;glages</button>
@@ -463,6 +480,7 @@ body.tv.idle,body.tv.idle *{cursor:none!important}
     <div class="waves-head">
       <div class="hint" style="flex:1;min-width:220px">Avant chaque vague, choisis les places de la section avant (stationn&#233;es en premier) et la zone sur la grille. Les vans prennent la premi&#232;re place libre. Si deux vagues partagent des places, elles se m&#233;langent.</div>
       <button class="bbtn b-ok adm" data-act="export" data-wave="">&#128228; Exporter tout</button>
+      <button class="bbtn b-bad adm" data-act="zones-reset">&#128465;&#65039; Reset toutes les zones</button>
     </div>
     <div id="w-list"></div>
   </section>
@@ -476,6 +494,7 @@ body.tv.idle,body.tv.idle *{cursor:none!important}
         <option value="wave">Couleur : vague</option>
         <option value="idc">Couleur : IDC</option>
       </select>
+      <select class="sel" id="p-idc" title="Mettre en évidence les routes d'un IDC"><option value="">&#8212; Tous IDC &#8212;</option></select>
     </div>
     <div class="plan-tools">
       <div class="stats-bar" id="p-stats"></div>
@@ -494,11 +513,11 @@ body.tv.idle,body.tv.idle *{cursor:none!important}
       <button class="bbtn b-bad" id="move-free" data-act="move-free" style="display:none">&#129529; Vider</button>
       <button class="bbtn b-neu" id="move-cancel" data-act="move-cancel" style="display:none">&#10006; Annuler</button>
     </div>
-    <div class="wave-legend" id="p-wlegend"></div>
+    <div class="wl-row"><div class="wave-legend" id="p-wlegend"></div><button class="tools-tg" id="tools-tg" data-act="tools-toggle">&#9650; Masquer les options</button></div>
     <div class="g-outer" id="p-grid"></div>
     <div class="legend">
       <span><i style="background:var(--tq-l);border:2px solid var(--tq)"></i>IN</span>
-      <span><i style="background:var(--red-bg);border:2px solid #ef9a9a"></i>OUT</span>
+      <span><i style="background:#fff;border:2px solid var(--g300)"></i>OUT (place r&#233;utilisable)</span>
       <span><i style="background:var(--g100);border:2px solid var(--g300)"></i>Libre</span>
       <span><i style="background:var(--g100);border:2px dashed #5eead4"></i>Section avant</span>
       <span><i style="background:var(--g200);border:2px solid var(--g400)"></i>Bloqu&#233;</span>
@@ -571,6 +590,337 @@ function readConn() {
 var CONN = readConn();
 var TV = !!(BOOT && BOOT.tv) || /(^|[?&#])tv=1/.test(location.search + location.hash);
 
+/* =================================================================
+ *  LANGUE FR / EN — l'interface est écrite en français, traduite à l'affichage
+ * ================================================================= */
+var LANG = /[?&#]lang=en/.test(location.search + location.hash) ? 'en' : (/[?&#]lang=fr/.test(location.search + location.hash) ? 'fr' : LS.get('park_lang', 'fr'));
+var EN = {
+  // ---- phrases longues (statiques) ----
+  "Avant chaque vague, choisis les places de la section avant (stationnées en premier) et la zone sur la grille. Les vans prennent la première place libre. Si deux vagues partagent des places, elles se mélangent.":
+    "Before each wave, pick the front-section spots (parked first) and the zone on the grid. Vans take the first free spot. If two waves share spots, they mix.",
+  "Heure IN vide = route en attente (retirée du plan). Heure OUT vide = pas sortie.": "Empty IN time = route waiting (removed from the plan). Empty OUT time = not out yet.",
+  "La clé est mémorisée sur cet appareil. Bouton 🚪 pour se déconnecter.": "The key is saved on this device. Use the 🚪 button to log out.",
+  "Les blocages et les zones de vagues sont conservés.": "Blocks and wave zones are kept.",
+  "Tape une place libre (ou la place d'un van sorti) pour y mettre la route.": "Tap a free spot (or the spot of a van that left) to put the route there.",
+  "Tape une place pour la bloquer / débloquer": "Tap a spot to block / unblock it",
+  "Une route en attente passera IN maintenant.": "A waiting route will go IN now.",
+  "Vider le plan et décocher toutes les cases ?": "Clear the plan and uncheck all boxes?",
+  "Clignote : pas commencé, PPM < 5 ou scan > 75 min": "Blinks: not started, PPM < 5 or scan > 75 min",
+  "Tape un van pour le déplacer / échanger, ou une place libre pour y mettre une route (oubliée ou en attente)": "Tap a van to move / swap it, or a free spot to put a route there (forgotten or waiting)",
+  "tape la destination (place libre = déplacer, van = échanger)": "tap the destination (free spot = move, van = swap)",
+  "Aucune vague. Crée une feuille par vague dans le Sheet (LAVL1, MONT1…) — menu ParK → Nouvelle feuille de vague.": "No waves. Create one sheet per wave in the Sheet (LAVL1, MONT1…) — ParK menu → New wave sheet.",
+  "la zone se sélectionne colonne par colonne (ex. 1C → 2B = 1C…1G puis 2A, 2B). Les numéros montrent l'ordre de stationnement (par bloc, rangée par rangée : 17A, 16A, 15A, 17B…).": "the zone is selected column by column (e.g. 1C → 2B = 1C…1G then 2A, 2B). The numbers show the parking order (by block, row by row: 17A, 16A, 15A, 17B…).",
+  "tape les places une par une, elles passent en premier.": "tap the spots one by one, they are filled first.",
+  "dans l'ordre où tu veux les remplir (grille ou section avant). Retape une place pour l'enlever. Les places choisies passent avant la zone début → fin.": "in the order you want them filled (grid or front section). Tap a spot again to remove it. Picked spots come before the start → end zone.",
+  "aucune — une place sera donnée automatiquement si l'heure IN est remplie": "none — a spot will be given automatically if the IN time is set",
+  "Pour tous les écrans. Rouge = problème de scan, orange = chargé mais pas sorti.": "For all screens. Red = scan problem, orange = loaded but not out.",
+  "Remettre tous les réglages par défaut (pour tous les écrans) ?": "Reset all settings to default (for all screens)?",
+  "Se déconnecter de ParK sur cet appareil ?": "Log out of ParK on this device?",
+  "Effacer TOUTES les zones de toutes les vagues ?": "Delete ALL zones of all waves?",
+  "pour échanger : Plan WH → Modifier le stationnement": "to swap: WH Plan → Edit parking",
+  "Route(s) en double, seule la 1re feuille compte :": "Duplicate route(s), only the 1st sheet counts:",
+  "attente : les actions partent dans l": "waiting: actions are sent in the",
+  "Ouvrir le plan en plein écran pour une TV": "Open the plan full screen for a TV",
+  "Mettre en évidence les routes d'un IDC": "Highlight the routes of one IDC",
+  "Route introuvable (feuille modifiée ?) — rafraîchis": "Route not found (sheet changed?) — refresh",
+  "Route introuvable — rafraîchis": "Route not found — refresh",
+  "Choisis une zone ou des places avant": "Pick a zone or spots first",
+  "Aucune route stationnée à exporter": "No parked route to export",
+  "Toutes les zones sont effacées": "All zones deleted",
+  "Système occupé, réessaie": "System busy, try again",
+  "vérifie l'URL du serveur": "check the server URL",
+  "Indique l'URL du serveur": "Enter the server URL",
+  "Entre la clé d'accès": "Enter the access key",
+  "Clé invalide ou changée": "Invalid or changed key",
+  "Mise à jour impossible :": "Update failed:",
+  "Serveur non configuré": "Server not configured",
+  "dernières données affichées": "showing last data",
+  "les vans iront dans les places hors zone": "vans will go to spots outside zones",
+  "le surplus ira hors zone": "the extra will go outside the zone",
+  "les vans seront mélangés": "vans will be mixed",
+  "Enregistré sur cet appareil, pas pour les autres.": "Saved on this device, not for the others.",
+  "Couleur de la durée sur les cartes de route.": "Color of the duration on route cards.",
+  "Sur les vans du plan et les barres des cartes.": "On the plan vans and the card bars.",
+  "Mode TV : vérifier les changements toutes les": "TV mode: check for changes every",
+  "Alertes (cartes et vans qui clignotent)": "Alerts (blinking cards and vans)",
+  "Enregistrer pour tous les écrans": "Save for all screens",
+  "Enregistré sur cet appareil": "Saved on this device",
+  "Suivi Vanscan (%, PPM, alertes)": "Vanscan tracking (%, PPM, alerts)",
+  "Couleurs selon le % chargé": "Colors by % loaded",
+  "Chargé mais pas sorti — après": "Loaded but not out — after",
+  "Scan pas commencé — après": "Scan not started — after",
+  "Scan trop long — plus de": "Scan too long — more than",
+  "Scan lent — PPM sous": "Slow scan — PPM under",
+  "min de scan avant de juger": "min of scanning before judging",
+  "Nom de la station affiché": "Station name shown",
+  "Couleur des vans par défaut": "Default van color",
+  "Cet appareil seulement": "This device only",
+  "OUT (place réutilisable)": "OUT (spot reusable)",
+  "Reset toutes les zones": "Reset all zones",
+  "Modification du stationnement": "Editing parking",
+  "Modifier le stationnement": "Edit parking",
+  "Modifier place / heures": "Edit spot / times",
+  "Afficher les options": "Show options",
+  "Masquer les options": "Hide options",
+  "Quitter le mode TV": "Exit TV mode",
+  "Aucune route sans place.": "No route without a spot.",
+  "Assez de places pour": "Enough spots for",
+  "Assez de places pour les": "Enough spots for the",
+  "Route, IDC, vague ou place...": "Route, IDC, wave or spot...",
+  "Route, IDC, vague...": "Route, IDC, wave...",
+  "Route, vague, IDC...": "Route, wave, IDC...",
+  "pas encore dans Vanscan": "not in Vanscan yet",
+  "Valeurs par défaut": "Default values",
+  "Réglages par défaut": "Default settings",
+  "Réglages enregistrés": "Settings saved",
+  "Réglages invalides": "Invalid settings",
+  "Valeur invalide :": "Invalid value:",
+  "Clignotement activé": "Blinking on",
+  "Couleurs activées": "Colors on",
+  "Colonne 0 à gauche": "Column 0 on the left",
+  "Rangée A en bas": "Row A at the bottom",
+  "Statut / % chargé": "Status / % loaded",
+  "Inverser gauche / droite": "Flip left / right",
+  "Inverser haut / bas": "Flip top / bottom",
+  "Stationnement — Intelcom": "Parking — Intelcom",
+  "Accès lecture seule": "Read-only access",
+  "Lecture seule": "Read only",
+  "afficher la clé": "show key",
+  "Clé d'accès": "Access key",
+  "Clé invalide": "Invalid key",
+  "Se déconnecter": "Log out",
+  "Placer une route": "Place a route",
+  "Placer sur": "Place on",
+  "Effacer début/fin": "Clear start/end",
+  "Retirer la dernière": "Remove the last one",
+  "Vider les places choisies": "Clear picked spots",
+  "Effacer la zone": "Delete zone",
+  "Définir la zone": "Set the zone",
+  "Modifier la zone": "Edit zone",
+  "Pas de zone": "No zone",
+  "Zone invalide": "Invalid zone",
+  "Vague invalide": "Invalid wave",
+  "Place invalide": "Invalid spot",
+  "Même place": "Same spot",
+  "Place bloquée": "Spot blocked",
+  "Déjà vide": "Already empty",
+  "Heure invalide (HH:MM)": "Invalid time (HH:MM)",
+  "Heure OUT sans heure IN": "OUT time without IN time",
+  "Aucune place libre pour": "No free spot for",
+  "aucune place libre": "no free spot",
+  "Aucune action à annuler": "Nothing to undo",
+  "Action annulée": "Action undone",
+  "Reset effectué": "Reset done",
+  "Route introuvable": "Route not found",
+  "API inconnue": "Unknown API",
+  "Choisis la place de fin": "Pick the end spot",
+  "Choisir une colonne": "Pick a column",
+  "Choisir une rangée": "Pick a row",
+  "Tape la place de": "Tap the",
+  "puis la place de": "then the",
+  "Tape les places": "Tap the spots",
+  "une par une": "one by one",
+  "Exporter tout": "Export all",
+  "Exporter": "Export",
+  "routes exportées": "routes exported",
+  "Par rangée": "By row",
+  "Par colonne": "By column",
+  "Début → fin": "Start → end",
+  "Place par place": "Spot by spot",
+  "Plein écran": "Full screen",
+  "Mode TV": "TV mode",
+  "Plan WH": "WH Plan",
+  "Section avant": "Front section",
+  "Hors zone": "Outside zone",
+  "hors zone": "outside zone",
+  "Chargé, pas sorti": "Loaded, not out",
+  "Scan pas commencé": "Scan not started",
+  "Scan trop long": "Scan too long",
+  "Scan lent": "Slow scan",
+  "Vanscan : pas commencé": "Vanscan: not started",
+  "pas commencé": "not started",
+  "En attente (passera IN)": "Waiting (will go IN)",
+  "En attente": "Waiting",
+  "en attente": "waiting",
+  "IN sans place": "IN without spot",
+  "sans place": "no spot",
+  "sans zone": "no zone",
+  "Sorti WH": "Left WH",
+  "Stationné": "Parked",
+  "stationné": "parked",
+  "sorti": "out",
+  "sortie": "out",
+  "chargé": "loaded",
+  "déjà IN": "already IN",
+  "est bloquée": "is blocked",
+  "est vide": "is empty",
+  "occupée par": "taken by",
+  "occupée": "taken",
+  "libérée": "freed",
+  "modifiée": "edited",
+  "effacée": "deleted",
+  "sera retirée du plan": "will be removed from the plan",
+  "remplace": "replaces",
+  "avant :": "before:",
+  "à stationner": "to park",
+  "la route restante": "the remaining route",
+  "routes restantes": "remaining routes",
+  "restants": "left",
+  "restant": "left",
+  "colis": "parcels",
+  "dans": "in",
+  "Il manque": "Missing",
+  "manque": "missing",
+  "OK pour": "OK for",
+  "Partage": "Shared",
+  "partage": "shared",
+  "moy": "avg",
+  "trouvés": "found",
+  "trouvé": "found",
+  "Introuvable": "Not found",
+  "Aucune route": "No route",
+  "Chargement…": "Loading…",
+  "Chargement...": "Loading...",
+  "Connexion…": "Connecting…",
+  "Non connecté": "Not connected",
+  "Hors ligne": "Offline",
+  "Erreur réseau": "Network error",
+  "Délai dépassé": "Timed out",
+  "Réponse invalide": "Invalid response",
+  "pas de réponse": "no response",
+  "données de": "data from",
+  "Rouge de 0 à": "Red from 0 to",
+  "Orange jusqu'à": "Orange up to",
+  "Vert jusqu'à": "Green up to",
+  "(vert au-dessus)": "(green above)",
+  "(rouge au-delà)": "(red beyond)",
+  "min stationné": "min parked",
+  "colis/min": "parcels/min",
+  "Temps IN → OUT": "IN → OUT time",
+  "Vanscan & TV": "Vanscan & TV",
+  "Couleur des vans": "Van color",
+  "Couleur : statut": "Color: status",
+  "Couleur : vague": "Color: wave",
+  "Couleur : IDC": "Color: IDC",
+  "Tous IDC": "All IDCs",
+  "Colonne": "Column",
+  "Rangée": "Row",
+  "Vagues": "Waves",
+  "Vague": "Wave",
+  "Tags": "Tags",
+  "Libre": "Free",
+  "libres": "free",
+  "libre": "free",
+  "Bloqué": "Blocked",
+  "Bloquées :": "Blocked:",
+  "Occupées :": "Taken:",
+  "Blocages": "Blocks",
+  "Bloquer": "Block",
+  "Débloquer": "Unblock",
+  "Réglages": "Settings",
+  "Retour": "Undo",
+  "Annuler": "Cancel",
+  "Enregistrer": "Save",
+  "Modifier": "Edit",
+  "Heures": "Times",
+  "Vider": "Clear",
+  "Retirer du plan": "Remove from plan",
+  "Heure IN": "IN time",
+  "Heure OUT": "OUT time",
+  "Entrer": "Enter",
+  "Serveur…": "Server…",
+  "Oui": "Yes",
+  "Non": "No",
+  "Fin :": "End:",
+  "Début :": "Start:",
+  "début": "start",
+  "fin": "end",
+  "Place :": "Spot:",
+  "places choisies": "spots picked",
+  "place choisie": "spot picked",
+  "places": "spots",
+  "place": "spot",
+  "Places": "Spots",
+  "Place": "Spot",
+  "routes": "routes",
+  "alertes": "alerts",
+  "alerte": "alert",
+  "Feuille": "Sheet",
+  "introuvable": "not found",
+  "pleine": "full",
+  "Zone": "Zone",
+  "Routes": "Routes"
+};
+var EN_RE = null;
+(function () {
+  try {
+    var keys = Object.keys(EN).sort(function (a, b) { return b.length - a.length; });
+    var esc = function (s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); };
+    EN_RE = new RegExp('(^|[^\\p{L}\\p{N}])(' + keys.map(esc).join('|') + ')(?=$|[^\\p{L}\\p{N}])', 'gu');
+  } catch (_) { EN_RE = null; }
+})();
+var trCache = new Map();
+function T(s) {
+  if (LANG !== 'en' || !s || !EN_RE) return s;
+  var c = trCache.get(s);
+  if (c !== undefined) return c;
+  var out = s.replace(EN_RE, function (m, pre, w) { return pre + EN[w]; }).replace(/ :(?=\s|$)/g, ':');
+  if (trCache.size > 4000) trCache.clear();
+  trCache.set(s, out);
+  return out;
+}
+var TR_ATTRS = ['placeholder', 'title'];
+var ORIG = new WeakMap();   // nœud → { fr, en }
+function trNode(n) {
+  if (n.nodeType === 3) {
+    var v = n.nodeValue, o = ORIG.get(n);
+    if (o && o.en === v) return;
+    if (!/[A-Za-zÀ-ÿ]/.test(v)) return;
+    var en = T(v);
+    if (en !== v) { ORIG.set(n, { fr: v, en: en }); n.nodeValue = en; }
+    return;
+  }
+  if (n.nodeType !== 1 || n.tagName === 'SCRIPT' || n.tagName === 'STYLE') return;
+  for (var i = 0; i < TR_ATTRS.length; i++) trAttr(n, TR_ATTRS[i]);
+  for (var c = n.firstChild; c; c = c.nextSibling) trNode(c);
+}
+function trAttr(el, a) {
+  var v = el.getAttribute(a);
+  if (!v) return;
+  var o = ORIG.get(el) || {};
+  if (o[a] && o[a].en === v) return;
+  var en = T(v);
+  if (en !== v) { o[a] = { fr: v, en: en }; ORIG.set(el, o); el.setAttribute(a, en); }
+}
+function untrNode(n) {
+  if (n.nodeType === 3) { var o = ORIG.get(n); if (o && n.nodeValue === o.en) n.nodeValue = o.fr; return; }
+  if (n.nodeType !== 1) return;
+  var oa = ORIG.get(n);
+  if (oa) TR_ATTRS.forEach(function (a) { if (oa[a] && n.getAttribute(a) === oa[a].en) n.setAttribute(a, oa[a].fr); });
+  for (var c = n.firstChild; c; c = c.nextSibling) untrNode(c);
+}
+if (window.MutationObserver) new MutationObserver(function (muts) {
+  if (LANG !== 'en') return;
+  for (var i = 0; i < muts.length; i++) {
+    var m = muts[i];
+    if (m.type === 'childList') for (var j = 0; j < m.addedNodes.length; j++) trNode(m.addedNodes[j]);
+    else if (m.type === 'characterData') trNode(m.target);
+    else if (m.type === 'attributes') trAttr(m.target, m.attributeName);
+  }
+}).observe(document.documentElement, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: TR_ATTRS });
+var _confirm = window.confirm.bind(window);
+window.confirm = function (m) { return _confirm(T(m)); };
+function applyLang() {
+  document.documentElement.lang = LANG;
+  document.querySelectorAll('.lang-btn span').forEach(function (s) { s.classList.toggle('on', s.getAttribute('data-lg') === LANG); });
+  if (LANG === 'en') trNode(document.body); else untrNode(document.body);
+}
+function setLang(l) {
+  LANG = l === 'en' ? 'en' : 'fr';
+  LS.set('park_lang', LANG);
+  applyLang();
+}
+
 function jsonp(params, timeout) {
   return new Promise(function (resolve, reject) {
     var cb = '__pk' + Date.now() + Math.floor(Math.random() * 1e6);
@@ -606,7 +956,9 @@ var ui = {
   col0Left: LS.get('park_col0_left', '1') === '1',
   rowABottom: LS.get('park_rowA_bottom', '1') === '1',
   zoom: parseFloat(LS.get('park_zoom2', '1')) || 1,
-  moveMode: false, moveFrom: null, pickTarget: null
+  moveMode: false, moveFrom: null, pickTarget: null,
+  toolsOff: LS.get('park_tools_off', '0') === '1',
+  idcSel: ''
 };
 function now() { return Date.now() + skew; }
 
@@ -1208,9 +1560,23 @@ function renderPlan() {
   if (!S) { $('p-grid').innerHTML = '<p class="empty-msg">Chargement…</p>'; return; }
   $('p-color').value = ui.colorMode;
   var tot = C.cols * C.rows.length + C.front.labels.length, nIn = 0, nOut = 0, nBlk = S.blocked.size;
-  Object.keys(S.plan).forEach(function (l) { if (S.blocked.has(l)) return; if (S.outKeys[S.plan[l]]) nOut++; else nIn++; });
-  $('p-stats').innerHTML = '<span class="chip c-total">🅿️ ' + tot + '</span><span class="chip c-in">🟢 ' + nIn + '</span><span class="chip c-out">🔴 ' + nOut + '</span>' +
-    '<span class="chip c-blk">🔒 ' + nBlk + '</span><span class="chip c-free">✅ ' + (tot - nIn - nOut - nBlk) + '</span>';
+  var idcCount = {};
+  Object.keys(S.plan).forEach(function (l) {
+    if (S.blocked.has(l)) return;
+    var k = S.plan[l], ro = S.byKey[k];
+    if (S.outKeys[k]) { nOut++; return; }
+    nIn++;
+    if (ro && ro.idc) idcCount[ro.idc] = (idcCount[ro.idc] || 0) + 1;
+  });
+  // place d'un van sorti = libre (on peut y mettre un autre camion)
+  $('p-stats').innerHTML = '<span class="chip c-total">🅿️ ' + tot + '</span><span class="chip c-in">🟢 ' + nIn + '</span><span class="chip c-out">↗️ ' + nOut + ' OUT</span>' +
+    '<span class="chip c-blk">🔒 ' + nBlk + '</span><span class="chip c-free">✅ ' + (tot - nIn - nBlk) + '</span>';
+  var idcSel = $('p-idc'), idcs = Object.keys(idcCount).sort(natCmp);
+  if (ui.idcSel && !idcCount[ui.idcSel]) idcs.push(ui.idcSel);
+  idcSel.innerHTML = '<option value="">— Tous IDC —</option>' + idcs.map(function (n) { return '<option value="' + esc(n) + '">' + esc(n) + ' (' + (idcCount[n] || 0) + ')</option>'; }).join('');
+  idcSel.value = ui.idcSel;
+  $('plan-view').classList.toggle('tools-off', ui.toolsOff);
+  $('tools-tg').textContent = ui.toolsOff ? '▼ Afficher les options' : '▲ Masquer les options';
   $('p-wlegend').innerHTML = Object.keys(S.waves).sort(natCmp).map(function (w) {
     return '<span><span class="wdot" style="background:' + waveColor(w) + '"></span>' + esc(w) + ' ' + esc(rangeText(S.waves[w])) + '</span>';
   }).join('');
@@ -1226,19 +1592,21 @@ function renderPlan() {
     if (ui.moveMode && status !== 'blocked') { cls += ' click'; if (ui.moveFrom === l) cls += ' msrc'; }
     var al = (status === 'in' && ro) ? alertFor(ro) : null;
     if (al) cls += ' al-' + al.k;
-    if (ro && (!S.waves[ro.wave] || S.rangeOf[ro.wave].indexOf(l) < 0)) cls += ' offzone';
+    if (status === 'in' && ro && (!S.waves[ro.wave] || S.rangeOf[ro.wave].indexOf(l) < 0)) cls += ' offzone';
+    if (ui.idcSel) { if (status === 'in' && ro && ro.idc === ui.idcSel) cls += ' idc-hl'; else cls += ' dim'; }
     var p = (status === 'in' && ro) ? vsPct(ro) : null, bd = p != null ? band(p, ro.vs.done) : '';
     if (bd) cls += ' vs-' + bd;
     if (ro && ro._pend) cls += ' pend';
     if (q && ro && (ro.disp + ' ' + ro.route + ' ' + ro.idc + ' ' + ro.wave + ' ' + ro.tag).toLowerCase().indexOf(q) !== -1) { cls += ' hl'; found++; }
 
     var body = '#e0e0e0';
-    if (status === 'in' || status === 'out') body = ui.colorMode === 'idc' && ro ? idcColor(ro.idc) : (ui.colorMode === 'wave' && ro ? waveColor(ro.wave) : (bd ? BAND_VAN[bd] : VAN_COLORS[status]));
+    if (status === 'in') body = ui.colorMode === 'idc' && ro ? idcColor(ro.idc) : (ui.colorMode === 'wave' && ro ? waveColor(ro.wave) : (bd ? BAND_VAN[bd] : VAN_COLORS[status]));
     var tint = (status === 'empty' && owners.length) ? ' style="background:' + waveColor(owners[0]) + '14"' : '';
     var tip = l + (ro ? ' — ' + ro.disp + ' — ' + ro.wave + ' — ' + ro.idc + (ro.tIn ? '\nIN ' + ro.tIn : '') + (ro.tOut ? ' · OUT ' + ro.tOut : '') +
       (ro.vs ? '\nVanscan ' + ro.vs.s + '/' + ro.vs.t + (ro.vs.ppm != null ? ' · ' + ro.vs.ppm + ' PPM' : '') : '') + (al ? '\n' + al.txt : '') : '') +
       (owners.length ? '\nZone : ' + owners.join(', ') : '');
 
+    if (cls.indexOf('idc-hl') >= 0) tint = ' style="--idc:' + idcColor(ro.idc) + '"';
     var h = '<div class="' + cls + '" data-l="' + l + '" title="' + esc(tip) + '"' + tint + '>';
     if (owners.length && status !== 'blocked') h += '<i class="pl-wbar" style="background:' + waveColor(owners[0]) + '"></i>';
     h += '<span class="pl-label">' + l + '</span>';
@@ -1247,7 +1615,8 @@ function renderPlan() {
     if (p != null) h += '<i class="pl-bar b-' + bd + '" style="width:' + p + '%"></i>';
     return h + '</div>';
   });
-  $('p-found').innerHTML = q ? (found ? '<span class="found">' + found + ' trouvé' + (found > 1 ? 's' : '') + '</span>' : '<span style="color:var(--red);font-size:11px">Introuvable</span>') : '';
+  if (ui.idcSel && !q) $('p-found').innerHTML = '<span class="found">' + (idcCount[ui.idcSel] || 0) + ' route' + ((idcCount[ui.idcSel] || 0) > 1 ? 's' : '') + '</span>';
+  else $('p-found').innerHTML = q ? (found ? '<span class="found">' + found + ' trouvé' + (found > 1 ? 's' : '') + '</span>' : '<span style="color:var(--red);font-size:11px">Introuvable</span>') : '';
 }
 
 /* ---------- Modifier le stationnement sur le plan ---------- */
@@ -1264,9 +1633,13 @@ function updateMoveBar() {
   }
 }
 function onPlanClick(l) {
-  if (!ui.moveMode) return;
-  if (S.blocked.has(l)) { toast('⛔ Place bloquée'); return; }
   var occ = S.plan[l];
+  if (!ui.moveMode) {
+    // place libre ou place d'un van sorti → on y met directement un autre camion
+    if (ROLE === 'admin' && !S.blocked.has(l) && (!occ || S.outKeys[occ])) openPick(l);
+    return;
+  }
+  if (S.blocked.has(l)) { toast('⛔ Place bloquée'); return; }
   if (!ui.moveFrom) {
     // place vide ou place d'un van sorti → y poser une route
     if (!occ || S.outKeys[occ]) { openPick(l); return; }
@@ -1392,8 +1765,8 @@ function renderTvBar() {
   var tot = C.cols * C.rows.length + C.front.labels.length, nIn = 0, nOut = 0, nBlk = S.blocked.size, nAl = 0;
   Object.keys(S.plan).forEach(function (l) { if (S.blocked.has(l)) return; if (S.outKeys[S.plan[l]]) nOut++; else nIn++; });
   S.routes.forEach(function (r) { if (alertFor(r)) nAl++; });
-  var h = '<span class="chip c-in">🟢 ' + nIn + ' IN</span><span class="chip c-out">🔴 ' + nOut + ' OUT</span>' +
-    '<span class="chip c-free">✅ ' + (tot - nIn - nOut - nBlk) + ' libres</span>' +
+  var h = '<span class="chip c-in">🟢 ' + nIn + ' IN</span><span class="chip c-out">↗️ ' + nOut + ' OUT</span>' +
+    '<span class="chip c-free">✅ ' + (tot - nIn - nBlk) + ' libres</span>' +
     (nAl ? '<span class="chip c-alert">⚠️ ' + nAl + ' alerte' + (nAl > 1 ? 's' : '') + '</span>' : '');
   if (C.vanscan) Object.keys(S.vanscan).sort().forEach(function (st) {
     var v = S.vanscan[st]; if (!v.ok) return;
@@ -1443,7 +1816,7 @@ function runAction(name, params) {
 /* ---------- Connexion / rôle ---------- */
 var ROLE = 'admin';
 var WRITE_ACTS = { check: 1, 'route-edit': 1, 're-save': 1, 're-remove': 1, undo: 1, reset: 1, 'reset-yes': 1, export: 1, 'wave-edit': 1, 'wave-clear': 1,
-  'wm-save': 1, 'wm-clear': 1, 'settings-save': 1, 'settings-reset': 1, 'move-mode': 1, 'move-free': 1, 'move-edit': 1, pick: 1, 'blk-row': 1, 'blk-col': 1 };
+  'wm-save': 1, 'wm-clear': 1, 'zones-reset': 1, 'settings-save': 1, 'settings-reset': 1, 'move-mode': 1, 'move-free': 1, 'move-edit': 1, pick: 1, 'blk-row': 1, 'blk-col': 1 };
 function setRole(r) {
   ROLE = r === 'view' ? 'view' : 'admin';
   document.body.classList.toggle('ro', ROLE !== 'admin');
@@ -1500,7 +1873,7 @@ document.addEventListener('click', function (e) {
   if (!t) return;
   if (t.hasAttribute('data-tab')) { showTab(t.getAttribute('data-tab')); return; }
   var act = t.getAttribute('data-act');
-  if (TV && !/^(tv-|login|logout)/.test(act || '')) return;
+  if (TV && !/^(tv-|login|logout|lang)/.test(act || '')) return;
   if (ROLE !== 'admin' && (WRITE_ACTS[act] || (!act && t.closest('#b-grid')))) { toast('👁️ Accès lecture seule'); return; }
   if (!act && t.hasAttribute('data-l')) {
     var l = t.getAttribute('data-l');
@@ -1529,6 +1902,9 @@ document.addEventListener('click', function (e) {
     case 'settings-reset': if (confirm('Remettre tous les réglages par défaut (pour tous les écrans) ?')) runAction('settings_reset'); break;
     case 'logout': if (confirm('Se déconnecter de ParK sur cet appareil ?')) logout(); break;
     case 'export': runAction('export', { wave: t.getAttribute('data-wave') || '' }); break;
+    case 'lang': setLang(LANG === 'en' ? 'fr' : 'en'); renderAll(); break;
+    case 'zones-reset': if (confirm('Effacer TOUTES les zones de toutes les vagues ?')) runAction('waves_reset'); break;
+    case 'tools-toggle': ui.toolsOff = !ui.toolsOff; LS.set('park_tools_off', ui.toolsOff ? '1' : '0'); renderPlan(); break;
     case 'wave-edit': openWaveEditor(t.getAttribute('data-wave')); break;
     case 'wave-clear': runAction('wave_clear', { wave: t.getAttribute('data-wave') }); break;
     case 'wm-pt': WE.pt = t.getAttribute('data-pt'); renderWaveEditor(); break;
@@ -1569,6 +1945,7 @@ document.addEventListener('click', function (e) {
 });
 $('p-q').addEventListener('input', function () { if (S) renderPlan(); });
 $('pick-q').addEventListener('input', renderPick);
+$('p-idc').addEventListener('change', function (e) { ui.idcSel = e.target.value; renderPlan(); });
 $('p-color').addEventListener('change', function (e) { ui.colorMode = e.target.value; LS.set('park_color', ui.colorMode); renderPlan(); });
 var rzT = null;
 window.addEventListener('resize', function () { clearTimeout(rzT); rzT = setTimeout(function () { if (tab === 'plan' || tab === 'blocks') renderAll(); }, 150); });
@@ -1601,6 +1978,7 @@ if (!BOOT && 'serviceWorker' in navigator && /^https?:$/.test(location.protocol)
 }
 
 updateZoomLabels();
+applyLang();
 if (TV) startTV();
 if (!CONN.api || !CONN.key) { showLogin(''); if (CONN.api) loadState(false); }
 else loadState(true);
