@@ -13,7 +13,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.webmanifest">
-<!-- L'URL du serveur est dans config.js (à remplir une seule fois, jamais écrasé par les mises à jour) -->
+
 <script src="config.js"></script>
 <script>/*__PARK_BOOT__*/</script>
 <style>
@@ -31,7 +31,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,BlinkMac
 button,input,select{font-family:inherit}
 #app{display:flex;flex-direction:column;height:100vh;height:100dvh}
 
-/* ---------- Header ---------- */
+
 header{flex-shrink:0;background:var(--tq);color:#fff;padding:10px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 header h1{font-size:18px;font-weight:800;white-space:nowrap}
 header h1 span{font-size:11px;font-weight:600;opacity:.85;margin-left:4px}
@@ -74,7 +74,7 @@ body.tv header h1 #station-name{font-size:30px}
 .banner.info{background:#e7eefc;color:#2f63c9}
 .banner button{border:0;background:#fff;border-radius:999px;padding:5px 12px;font-weight:700;cursor:pointer;color:inherit}
 
-/* ---------- Commun ---------- */
+
 .search-bar,.sel{padding:10px 12px;border:1.5px solid var(--g300);border-radius:10px;font-size:14px;background:#fff;min-width:0}
 .search-bar:focus,.sel:focus{outline:none;border-color:var(--tq)}
 .sel{font-weight:600;font-size:13px;-webkit-appearance:none;appearance:none;padding-right:26px;
@@ -114,7 +114,7 @@ button.chip{cursor:pointer}
 @keyframes blinkRed{0%,100%{box-shadow:0 0 0 0 rgba(242,68,56,0)}50%{box-shadow:0 0 0 4px rgba(242,68,56,.55)}}
 @keyframes blinkOr{0%,100%{box-shadow:0 0 0 0 rgba(248,130,35,0)}50%{box-shadow:0 0 0 4px rgba(248,130,35,.55)}}
 
-/* ---------- Routes ---------- */
+
 .route-card{background:#fff;border-radius:var(--r-md);padding:12px 14px;margin-bottom:9px;box-shadow:0 1px 4px rgba(0,0,0,.08);display:flex;align-items:center;gap:10px;border-left:4px solid transparent}
 .route-card.al-red{border-left-color:var(--red);animation:blinkRed 1.2s infinite}
 .route-card.al-or{border-left-color:var(--orange);animation:blinkOr 1.6s infinite}
@@ -139,7 +139,7 @@ button.chip{cursor:pointer}
 .al-pill.red{background:var(--red);color:#fff}.al-pill.or{background:var(--orange);color:#fff}
 .btn-group{display:flex;gap:8px;flex-shrink:0}
 
-/* ---------- Vagues ---------- */
+
 .wave-card{background:#fff;border-radius:var(--r-md);padding:13px 14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.08);border-top:4px solid var(--g300)}
 .wave-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .wave-name{font-size:17px;font-weight:900}
@@ -154,7 +154,7 @@ button.chip{cursor:pointer}
 .wave-btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
 .waves-head{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
 
-/* ---------- Grille ---------- */
+
 .plan-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;flex-shrink:0}
 .plan-tools .stats-bar{padding:0;justify-content:flex-start}
 .tool-btn{border:1.5px solid var(--g300);background:#fff;border-radius:var(--r-lg);padding:6px 11px;font-size:12px;font-weight:700;color:#555;cursor:pointer;white-space:nowrap}
@@ -217,7 +217,7 @@ button.chip{cursor:pointer}
 .place.blk-on .pl-label{color:var(--red)}
 .blk-ico{font-size:calc(var(--vh) * .45)}
 
-/* mini-grilles (éditeur de zone, modif route) */
+
 .g.mini .place{padding:2px;justify-content:center;gap:1px}
 .g.mini .pl-label{color:#999}
 .g.mini .ord{font-size:10px;font-weight:900;color:var(--tq-d);line-height:1}
@@ -236,12 +236,12 @@ button.chip{cursor:pointer}
 .place.m-cur{background:#ede7f6;border-color:var(--purple);border-style:solid}
 .place.m-sel{box-shadow:0 0 0 3px var(--purple);background:#d9ccf3;border-color:var(--purple);border-style:solid;z-index:2}
 
-/* ---------- Blocages ---------- */
+/*Blocages */
 .bulk{background:#fff;border-radius:var(--r-md);padding:12px 14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.08);flex-shrink:0}
 .bulk-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:4px 0}
 .bulk-title{font-size:13px;font-weight:700;margin:6px 0}
 
-/* ---------- Modals ---------- */
+
 #loader{position:fixed;inset:0;background:rgba(255,255,255,.85);display:flex;align-items:center;justify-content:center;z-index:999;font-weight:600}
 #loader.hidden{display:none}
 .spinner{width:30px;height:30px;margin-right:10px;border:4px solid #e0e0e0;border-top-color:var(--tq);border-radius:50%;animation:spin .7s linear infinite}
@@ -290,7 +290,7 @@ button.chip{cursor:pointer}
   .btn-group .btn{flex:1}
   .btn-group .btn-edit{flex:0 0 auto}
 }
-/* ---------- Réglages ---------- */
+/* Réglages */
 .set-wrap{max-width:820px;margin:0 auto}
 .set-card{background:#fff;border-radius:var(--r-md);padding:14px 16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
 .set-card h4{font-size:14px;font-weight:800;margin-bottom:4px}
@@ -313,7 +313,7 @@ button.chip{cursor:pointer}
 .pl-spd{position:absolute;top:-3px;right:0;font-size:calc(var(--pfs) * 1.35);line-height:1;filter:drop-shadow(0 0 2px #fff)}
 .set-row input[type=color]{width:46px;height:34px;padding:2px;border:1.5px solid var(--g300);border-radius:8px;background:#fff;cursor:pointer}
 
-/* ---------- Mode TV ---------- */
+/* Mode TV */
 .tv-only{display:none!important}
 body.tv .tv-only{display:inline-flex!important}
 body.tv .tabs,body.tv .hbtns,body.tv #plan-view .plan-tools,body.tv #move-bar,body.tv #banners{display:none!important}
@@ -329,7 +329,7 @@ body.tv.idle,body.tv.idle *{cursor:none!important}
 .tv-bar .chip{font-size:14px;padding:6px 12px}
 .tv-btn{background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.5);color:#fff;padding:6px 12px;border-radius:999px;font-weight:700;cursor:pointer;font-size:13px}
 
-/* ---------- Connexion ---------- */
+
 .login{position:fixed;inset:0;z-index:2000;background:linear-gradient(160deg,#00A68F 0%,#007a69 100%);display:flex;align-items:center;justify-content:center;padding:16px}
 .login.hidden{display:none}
 .lbox{background:#fff;border-radius:18px;padding:28px 22px;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,.25);text-align:center}
@@ -371,7 +371,7 @@ body.tv.idle,body.tv.idle *{cursor:none!important}
   </div>
 </div>
 
-<!-- Placer une route sur une place -->
+
 <div id="pickModal" class="modal hidden">
   <div class="mbox">
     <h3 id="pick-title">Placer une route</h3>
@@ -382,7 +382,7 @@ body.tv.idle,body.tv.idle *{cursor:none!important}
   </div>
 </div>
 
-<!-- Modifier une route (place + heures) -->
+
 <div id="routeModal" class="modal hidden">
   <div class="mbox wide">
     <h3 id="re-title">Modifier</h3>
@@ -402,7 +402,7 @@ body.tv.idle,body.tv.idle *{cursor:none!important}
   </div>
 </div>
 
-<!-- Zone de vague -->
+
 <div id="waveModal" class="modal hidden">
   <div class="mbox wide">
     <h3 id="wm-title">Zone</h3>
@@ -431,7 +431,7 @@ body.tv.idle,body.tv.idle *{cursor:none!important}
   </div>
 </div>
 
-<!-- Connexion -->
+
 <div id="login" class="login hidden">
   <form class="lbox" id="l-form" autocomplete="on" onsubmit="return false" style="position:relative">
     <button class="lang-btn" type="button" data-act="lang"><span data-lg="fr">FR</span><span data-lg="en">EN</span></button>
@@ -583,9 +583,7 @@ body.tv.idle,body.tv.idle *{cursor:none!important}
 (function () {
 'use strict';
 
-/* =================================================================
- *  CONNEXION (servie par Apps Script, ou fichier local)
- * ================================================================= */
+
 var BOOT = window.PARK_BOOT || null;
 var LS = {
   get: function (k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch (_) { return d; } },
@@ -605,9 +603,7 @@ function readConn() {
 var CONN = readConn();
 var TV = !!(BOOT && BOOT.tv) || /(^|[?&#])tv=1/.test(location.search + location.hash);
 
-/* =================================================================
- *  LANGUE FR / EN — l'interface est écrite en français, traduite à l'affichage
- * ================================================================= */
+
 var LANG = /[?&#]lang=en/.test(location.search + location.hash) ? 'en' : (/[?&#]lang=fr/.test(location.search + location.hash) ? 'fr' : LS.get('park_lang', 'fr'));
 var EN = {
   // ---- phrases longues (statiques) ----
@@ -983,9 +979,7 @@ function api(name, params) {
   });
 }
 
-/* =================================================================
- *  ÉTAT
- * ================================================================= */
+
 var S = null, C = null;
 var skew = 0, lastOk = 0, lastErr = '', pending = 0, loading = false;
 var tab = 'routes';
@@ -1040,7 +1034,7 @@ function deriveWaves(s) {
     labels.forEach(function (l) { (s.ownersOf[l] = s.ownersOf[l] || []).push(w); });
   });
 }
-/* Applique tout de suite la réponse d'une action (plan, route, blocages, zones) — pas de rechargement complet */
+
 function applyResult(res) {
   if (!S || !res) return;
   if (res.route && S.byId[res.route.id]) {
@@ -1059,8 +1053,7 @@ function applyResult(res) {
   renderAll();
 }
 
-/* File d'attente : les actions partent dans l'ordre, sans bloquer l'écran.
-   Le rechargement complet se fait en arrière-plan quand la file est vide. */
+
 var Q = Promise.resolve(), actSeq = 0, refT = null, VER = '';
 function enqueue(fn) {
   pending++; actSeq++;
@@ -1081,7 +1074,7 @@ function loadState(showLoader) {
   var t0 = Date.now(), seq = actSeq;
   return api('state').then(function (st) {
     if (!st || !st.ok) throw new Error((st && st.msg) || 'Réponse invalide');
-    if (seq !== actSeq || pending) { scheduleRefresh(); return; }   // une action est passée entre-temps : on garde l'affichage local
+    if (seq !== actSeq || pending) { scheduleRefresh(); return; }   
     skew = st.serverNow - Math.round((t0 + Date.now()) / 2);
     S = prepare(st);
     VER = st.v || VER;
@@ -1135,9 +1128,7 @@ function parseLabel(l) {
   return { col: parseInt(m[1], 10), row: C.rows.indexOf(m[2]) };
 }
 
-/* Même logique que Code.gs.
-   Sélection : colonne par colonne de la place de début à la place de fin (1C→2B = 1C…1G puis 2A, 2B).
-   Stationnement : par bloc de colonnes, rangée par rangée (17A 16A 15A 17B 16B 15B…). */
+
 function zoneSet(m) {
   var set = {}; if (!m) return set;
   var cs = m.ec >= m.sc ? 1 : -1, last = C.rows.length - 1, r;
@@ -1163,7 +1154,7 @@ function mainOrder(m) {
   return out;
 }
 function isAnyLabel(l) { return isFront(l) || !!parseLabel(l); }
-/* Places choisies une par une (dans l'ordre), puis la zone début → fin (sans doublon) */
+
 function waveOrder(w) {
   if (!w) return [];
   var picks = (w.front || []).filter(isAnyLabel);
@@ -1202,14 +1193,12 @@ function buildIdcColors(names) {
 }
 function idcColor(n) { return idcMap[n] || IDC_PAL[hashStr(n || '') % IDC_PAL.length]; }
 
-/* =================================================================
- *  VANSCAN — progression + alertes
- * ================================================================= */
+
 function vsPct(r) { var v = r.vs; return v && v.t ? Math.min(100, Math.round(v.s / v.t * 100)) : null; }
-/* 0-40 rouge, 40-60 orange, 60-100 vert */
+
 function band(p, done) { if (!C.colorBands) return ''; if (done) return 'g'; if (p == null) return ''; return p < C.pctRed ? 'r' : (p < C.pctOrange ? 'o' : 'g'); }
 var BAND_VAN = { r: '#f87171', o: '#fdba74', g: '#86efac' };
-/* 🐇 / 🐢 sur le van pendant le scan */
+
 function speedIcon(r) {
   var v = r.vs;
   if (!C || !C.vanscan || !v || !v.st || v.done || v.ppm == null || !r.in || r.out) return '';
@@ -1218,7 +1207,7 @@ function speedIcon(r) {
   if (C.turtleOn && v.ppm < C.slowPpm) return '🐢';
   return '';
 }
-/* couleurs du clignotement choisies dans les réglages */
+
 var blinkKey = '';
 function hexRgb(h) { h = String(h || '').replace('#', ''); return [parseInt(h.slice(0, 2), 16) || 0, parseInt(h.slice(2, 4), 16) || 0, parseInt(h.slice(4, 6), 16) || 0].join(','); }
 function applyBlinkStyle() {
@@ -1258,9 +1247,7 @@ function alertFor(r) {
   return null;
 }
 
-/* =================================================================
- *  RENDU GÉNÉRAL
- * ================================================================= */
+
 function renderAll() {
   applyBlinkStyle();
   renderLive();
@@ -1284,13 +1271,11 @@ function renderBanners() {
   var b = [];
   if (S && S.dups.length) b.push('<div class="banner warn">⚠️ Route(s) en double, seule la 1re feuille compte : ' + esc(S.dups.join(' ; ')) + '</div>');
   if (lastErr) b.push('<div class="banner err">Mise à jour impossible : ' + esc(lastErr) + (lastOk ? ' — dernières données affichées' : '') + '</div>');
-  // (messages d'erreur Vanscan retirés : le ⚠️ sur la pastille Vanscan suffit)
+  
   $('banners').innerHTML = b.join('');
 }
 
-/* =================================================================
- *  ROUTES
- * ================================================================= */
+
 function fillSelect(id, values, lbl) {
   var sel = $(id), prev = sel.value;
   sel.innerHTML = '<option value="">— ' + lbl + ' —</option>' + values.map(function (v) { return '<option value="' + esc(v) + '">' + esc(v) + '</option>'; }).join('');
@@ -1371,8 +1356,7 @@ function vsLine(r) {
     (v.ppm != null ? '<span>' + v.ppm.toFixed(1) + ' PPM</span>' : '') +
     (v.wr ? '<span style="color:var(--red-txt)">WR ' + v.wr + '</span>' : '') + '</div></div>';
 }
-/* Même logique que assignPlace_ (Code.gs) : la place est affichée tout de suite,
-   puis confirmée (ou corrigée) par le serveur */
+
 function globalOrder() {
   var out = [], seen = {};
   C.blocks.map(function (b) { return b.slice().sort(function (a, c) { return c - a; }); })
@@ -1411,9 +1395,7 @@ function toggleCheck(id, col) {
   });
 }
 
-/* =================================================================
- *  MODIF MANUELLE D'UNE ROUTE (place + heures)
- * ================================================================= */
+
 var RE = { id: null, target: '', remove: false };
 function openRouteEditor(id) {
   var r = S && S.byId[id]; if (!r) return;
@@ -1458,9 +1440,7 @@ function saveRouteEditor() {
   runAction('route_edit', { id: id, place: place, tin: $('re-tin').value, tout: $('re-tout').value });
 }
 
-/* =================================================================
- *  VAGUES
- * ================================================================= */
+
 function waveStats(w, labels) {
   var rs = S.routes.filter(function (r) { return r.wave === w; });
   var o = { routes: rs.length, in: 0, out: 0, wait: 0, s: 0, t: 0 };
@@ -1501,7 +1481,7 @@ function renderWaves() {
   }).join('');
 }
 
-/* ---------- Éditeur de zone ---------- */
+
 var WE = { wave: '', s: null, e: null, pt: 's', front: [], mode: 'range' };
 function openWaveEditor(w) {
   WE.wave = w; var z = S.waves[w];
@@ -1571,9 +1551,7 @@ function onWaveGridClick(l) {
   renderWaveEditor();
 }
 
-/* =================================================================
- *  GRILLE (rangées A→G + section avant)
- * ================================================================= */
+
 function dispCols() { var a = []; for (var i = 0; i < C.cols; i++) a.push(i); return ui.col0Left ? a : a.reverse(); }
 function dispRows() { var a = []; for (var i = 0; i < C.rows.length; i++) a.push(i); return ui.rowABottom ? a.reverse() : a; }
 function isAisle(cols, i) { return i > 0 && C.blockOf[cols[i - 1]] !== C.blockOf[cols[i]]; }
@@ -1596,7 +1574,7 @@ function gridHTML(kind, sz, cellFn) {
     var l = C.frontAt[c];
     return ais(l ? cellFn(l) : '<div class="g-sp"></div>', i);
   }).join('') + '</div>';
-  // Section avant affichée du côté de la rangée A
+ 
   return '<div class="g ' + kind + '" style="' + style + '">' + (ui.rowABottom ? head + main + front : head + front + main) + '</div>';
 }
 function fitSize(outer, below) {
@@ -1623,7 +1601,7 @@ function vanSVG(body) {
     '<rect x="20" y="37" width="3.5" height="1.5" rx="0.7" fill="#e57373" opacity="0.8"/></svg>';
 }
 
-/* ---------- Plan WH ---------- */
+
 function renderPlan() {
   if (!S) { $('p-grid').innerHTML = '<p class="empty-msg">Chargement…</p>'; return; }
   $('p-color').value = ui.colorMode;
@@ -1636,7 +1614,7 @@ function renderPlan() {
     nIn++;
     if (ro && ro.idc) idcCount[ro.idc] = (idcCount[ro.idc] || 0) + 1;
   });
-  // place d'un van sorti = libre (on peut y mettre un autre camion)
+ 
   $('p-stats').innerHTML = '<span class="chip c-total">🅿️ ' + tot + '</span><span class="chip c-in">🟢 ' + nIn + '</span><span class="chip c-out">↗️ ' + nOut + ' OUT</span>' +
     '<span class="chip c-blk">🔒 ' + nBlk + '</span><span class="chip c-free">✅ ' + (tot - nIn - nBlk) + '</span>';
   fillIdc('p-idc', idcCount); fillIdc('tv-idc', idcCount);
@@ -1686,7 +1664,7 @@ function renderPlan() {
   else $('p-found').innerHTML = q ? (found ? '<span class="found">' + found + ' trouvé' + (found > 1 ? 's' : '') + '</span>' : '<span style="color:var(--red);font-size:11px">Introuvable</span>') : '';
 }
 
-/* ---------- Modifier le stationnement sur le plan ---------- */
+
 function updateMoveBar() {
   $('move-bar').classList.toggle('show', ui.moveMode);
   if (!ui.moveMode) return;
@@ -1702,13 +1680,13 @@ function updateMoveBar() {
 function onPlanClick(l) {
   var occ = S.plan[l];
   if (!ui.moveMode) {
-    // place libre ou place d'un van sorti → on y met directement un autre camion
+    
     if (ROLE === 'admin' && !S.blocked.has(l) && (!occ || S.outKeys[occ])) openPick(l);
     return;
   }
   if (S.blocked.has(l)) { toast('⛔ Place bloquée'); return; }
   if (!ui.moveFrom) {
-    // place vide ou place d'un van sorti → y poser une route
+    
     if (!occ || S.outKeys[occ]) { openPick(l); return; }
     ui.moveFrom = l; renderPlan(); return;
   }
@@ -1718,14 +1696,14 @@ function onPlanClick(l) {
 }
 
 var PICK = [];
-/* Parking manuel : on tape une place → les routes non parkées de la vague de cette zone → on choisit */
+
 var PICKW = '';
 function openPick(l) {
   ui.pickTarget = l;
   var occ = S.plan[l], owners = S.ownersOf[l] || [];
   $('pick-title').textContent = 'Placer sur ' + l + (owners.length ? ' — zone ' + owners.join(', ') : '') + (occ ? ' (remplace ' + (S.byKey[occ] ? S.byKey[occ].disp : '') + ', sorti)' : '');
   $('pick-q').value = '';
-  // routes sans place et pas sorties (calcul local : instantané)
+  
   PICK = S.routes.filter(function (r) { return !r.out && !r.place; }).sort(function (a, b) {
     return (b.in - a.in) || natCmp(a.wave, b.wave) || natCmp(a.disp, b.disp);
   });
@@ -1755,7 +1733,7 @@ function renderPick() {
   });
   $('pick-list').innerHTML = h;
 }
-/* place la route tout de suite à l'écran, le serveur confirme derrière */
+
 function pickRoute(key, label) {
   var r = S.byKey[key];
   if (r) {
@@ -1770,7 +1748,7 @@ function pickRoute(key, label) {
   runAction('assign', { key: key, label: label });
 }
 
-/* ---------- Blocages ---------- */
+
 function renderBlocks() {
   if (!S) { $('b-grid').innerHTML = '<p class="empty-msg">Chargement…</p>'; return; }
   var rs = $('b-row'), cs = $('b-col'), pr = rs.value, pc = cs.value;
@@ -1798,9 +1776,7 @@ function bulkBlock(kind, v) {
   runAction('block', { labels: labels.join(','), v: v });
 }
 
-/* =================================================================
- *  RÉGLAGES
- * ================================================================= */
+
 var SETDRAFT = null;
 function swHTML(k, on) { return '<label class="sw"><input type="checkbox" data-set="' + k + '"' + (on ? ' checked' : '') + '><i></i></label>'; }
 function colorHTML(k, v) { return '<input type="color" data-set="' + k + '" value="' + esc(v || '#F24438') + '">'; }
@@ -1857,11 +1833,9 @@ document.addEventListener('change', function (e) {
   }
 });
 
-/* =================================================================
- *  MODE TV — plan en direct, plein écran, sans boutons
- * ================================================================= */
+
 function baseUrl() { return (BOOT && BOOT.api) ? BOOT.api : location.origin + location.pathname; }
-/* liste des IDC présents sur le plan (avec le nombre de vans IN) */
+
 function fillIdc(id, counts) {
   var sel = $(id); if (!sel) return;
   var idcs = Object.keys(counts).sort(natCmp);
@@ -1909,9 +1883,7 @@ function toggleFull() {
   } catch (_) {}
 }
 
-/* =================================================================
- *  ACTIONS
- * ================================================================= */
+
 var FULL_RELOAD = { undo: 1, reset: 1 };
 function runAction(name, params) {
   var full = FULL_RELOAD[name];
@@ -1924,7 +1896,7 @@ function runAction(name, params) {
     }, function (e) { loader(false); throw e; });
   });
 }
-/* Reset All : demande le code (vérifié par le serveur) */
+
 function fillResetWaves(w) {
   var waves = {};
   if (S) S.routes.forEach(function (r) { if (r.wave) waves[r.wave] = 1; });
@@ -1947,13 +1919,13 @@ function doReset() {
       loader(false);
       if (res && res.badCode) { $('reset-err').textContent = '🔒 Code incorrect'; $('reset-code').value = ''; $('reset-code').focus(); toast(res.msg); return res; }
       closeModals(); toast((res && res.msg) || '✅');
-      if (res && res.ok && res.plan) applyResult({ plan: res.plan, v: res.v });   // places libérées tout de suite
-      scheduleRefresh(50);                                                       // puis IN/OUT rechargés
+      if (res && res.ok && res.plan) applyResult({ plan: res.plan, v: res.v });   
+      scheduleRefresh(50);                                                       
       return res;
     }, function (e) { loader(false); throw e; });
   });
 }
-/* ---------- Connexion / rôle ---------- */
+
 var ROLE = 'admin';
 var WRITE_ACTS = { check: 1, 'route-edit': 1, 're-save': 1, 're-remove': 1, undo: 1, reset: 1, 'reset-yes': 1, export: 1, 'wave-edit': 1, 'wave-clear': 1,
   'wm-save': 1, 'wm-clear': 1, 'zones-reset': 1, 'settings-save': 1, 'settings-reset': 1, 'move-mode': 1, 'move-free': 1, 'move-edit': 1, pick: 1, 'blk-row': 1, 'blk-col': 1 };
@@ -2094,20 +2066,17 @@ $('p-color').addEventListener('change', function (e) { ui.colorMode = e.target.v
 var rzT = null;
 window.addEventListener('resize', function () { clearTimeout(rzT); rzT = setTimeout(function () { if (tab === 'plan' || tab === 'blocks') renderAll(); }, 150); });
 
-/* =================================================================
- *  LIVE : état toutes les 20 s, alertes recalculées toutes les 30 s
- *  (pause pendant qu'une fenêtre est ouverte)
- * ================================================================= */
+
 function modalOpen() { return !!document.querySelector('.modal:not(.hidden)'); }
 var verBusy = false, nextVer = 0;
 setInterval(function () {
   if (document.hidden || pending || !CONN.api || !CONN.key || modalOpen() || verBusy || loading || !S) return;
   if (Date.now() < nextVer) return;
   nextVer = Date.now() + (TV ? Math.max(3, (C && C.tvRefreshSec) || 5) : 4) * 1000;
-  if (Date.now() - lastOk > 30000) { loadState(false); return; }          // Vanscan à jour
+  if (Date.now() - lastOk > 30000) { loadState(false); return; }          
   verBusy = true;
   jsonp({ api: 'ver' }, 10000).then(function (res) {
-    if (res && res.ok && res.v && res.v !== VER && !pending) loadState(false);   // un autre écran a changé quelque chose
+    if (res && res.ok && res.v && res.v !== VER && !pending) loadState(false);   
   }).catch(function () {}).then(function () { verBusy = false; });
 }, 1000);
 setInterval(function () { if (!document.hidden && S && !pending && !modalOpen()) renderAll(); else renderLive(); }, 30000);
@@ -2116,7 +2085,7 @@ document.addEventListener('visibilitychange', function () { if (!document.hidden
 $('l-show').addEventListener('change', function (e) { $('l-key').type = e.target.checked ? 'text' : 'password'; });
 $('l-form').addEventListener('submit', function (e) { e.preventDefault(); doLogin(); });
 
-/* Application installable (GitHub Pages / site web) */
+
 if (!BOOT && 'serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
 }
