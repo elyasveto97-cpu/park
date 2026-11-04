@@ -7,17 +7,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="icon" type="image/png" href="https://i.ibb.co/YF7ygL4w/Designer.png">
-<link rel="apple-touch-icon" href="https://i.ibb.co/YF7ygL4w/Designer.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="theme-color" content="#00A68F">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.webmanifest">
-<script>
-  /* ⚙️ URL de l'application web Apps Script (Déployer → Gérer les déploiements → URL /exec).
-     À remplir dans la copie hébergée sur GitHub Pages. Inutile quand la page est servie par Apps Script. */
-  window.PARK_API = '';
-</script>
+<!-- L'URL du serveur est dans config.js (à remplir une seule fois, jamais écrasé par les mises à jour) -->
+<script src="config.js"></script>
 <script>/*__PARK_BOOT__*/</script>
 <style>
 :root{
@@ -641,16 +638,25 @@ var LS = {
   get: function (k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch (_) { return d; } },
   set: function (k, v) { try { localStorage.setItem(k, v); } catch (_) {} }
 };
+/* nettoie une URL de serveur collée (espaces, guillemets, /exec en double…) */
+function cleanApi(u) {
+  var m = String(u || '').trim().match(/https?:\/\/[^\s'"<>]+?\/exec/);
+  return m ? m[0] : '';
+}
 function readConn() {
   var qs = new URLSearchParams(location.search), hs = new URLSearchParams(location.hash.replace(/^#/, ''));
   var key = hs.get('k') || qs.get('k') || (BOOT && BOOT.key) || '';
   if (key) LS.set('park_key', key);
   if (hs.get('k')) try { history.replaceState(null, '', location.pathname + location.search); } catch (_) {}
   if (BOOT && BOOT.api) return { api: BOOT.api, key: key || LS.get('park_key', ''), fixed: true };
-  var api = hs.get('api') || qs.get('api');
-  if (api) LS.set('park_api', api);
-  var cfg = /^https?:\/\/.+\/exec/.test(window.PARK_API || '') ? window.PARK_API : '';
-  return { api: api || cfg || LS.get('park_api', ''), key: key || LS.get('park_key', ''), fixed: !!cfg && !api };
+  var api = cleanApi(hs.get('api') || qs.get('api'));
+  if (api) {
+    LS.set('park_api', api);   // le lien de partage enregistre le serveur sur cet appareil, pour toujours
+    try { history.replaceState(null, '', location.pathname + location.search.replace(/[?&]api=[^&]*/, '').replace(/^&/, '?')); } catch (_) {}
+  }
+  var cfg = cleanApi(window.PARK_API);
+  if (cfg) LS.set('park_api', cfg);
+  return { api: api || cfg || cleanApi(LS.get('park_api', '')), key: key || LS.get('park_key', ''), fixed: !!(cfg || api) };
 }
 var CONN = readConn();
 /* ---------- Mode nuit (enregistré sur cet appareil) ---------- */
@@ -733,6 +739,10 @@ var EN = {
   "Tortue si le PPM est sous le seuil « scan lent »": "Turtle if PPM is under the “slow scan” threshold",
   "Scan rapide": "Fast scan",
   "Mode nuit": "Night mode",
+  "Lien pour les autres appareils": "Link for other devices",
+  "Envoie ce lien (texto, Teams…) : le serveur est déjà dedans, la personne entre seulement la clé. Donne la clé séparément.": "Send this link (text, Teams…): the server is already inside, the person only enters the key. Give the key separately.",
+  "Copier": "Copy",
+  "Lien copié": "Link copied",
   "Mode jour": "Day mode",
   "Entre le code pour faire le reset": "Enter the code to reset",
   "Reset All — toutes les vagues": "Reset All — all waves",
@@ -1900,6 +1910,9 @@ function renderSettings() {
     row('Couleur des vans par défaut', '<select class="sel" data-local="colorMode"><option value="status"' + (ui.colorMode === 'status' ? ' selected' : '') + '>Statut / % chargé</option><option value="wave"' + (ui.colorMode === 'wave' ? ' selected' : '') + '>Vague</option><option value="idc"' + (ui.colorMode === 'idc' ? ' selected' : '') + '>IDC</option></select>') +
     row('Colonne 0 à gauche', '<label class="sw"><input type="checkbox" data-local="col0Left"' + (ui.col0Left ? ' checked' : '') + '><i></i></label>') +
     row('Rangée A en bas', '<label class="sw"><input type="checkbox" data-local="rowABottom"' + (ui.rowABottom ? ' checked' : '') + '><i></i></label>') + '</div>';
+  var share = shareLink();
+  h += '<div class="set-card"><h4>🔗 Lien pour les autres appareils</h4><div class="sub">Envoie ce lien (texto, Teams…) : le serveur est déjà dedans, la personne entre seulement la clé. Donne la clé séparément.</div>' +
+    '<div class="set-row"><input type="text" readonly id="share-link" value="' + esc(share) + '" style="flex:1;width:auto;min-width:200px;font-size:12px"><button class="tool-btn" data-act="share-copy">📋 Copier</button></div></div>';
   h += '<div class="set-actions"><button class="b-pri" data-act="settings-save" style="background:var(--tq);color:#fff">💾 Enregistrer pour tous les écrans</button>' +
     '<button class="b-neu" data-act="settings-reset" style="background:var(--g200)">↩︎ Valeurs par défaut</button></div>';
   $('set-form').innerHTML = h;
@@ -1922,6 +1935,10 @@ document.addEventListener('change', function (e) {
 /* =================================================================
  *  MODE TV — plan en direct, plein écran, sans boutons
  * ================================================================= */
+function shareLink() {
+  if (BOOT && BOOT.api) return BOOT.api;
+  return location.origin + location.pathname + (CONN.api ? '#api=' + encodeURIComponent(CONN.api) : '');
+}
 function baseUrl() { return (BOOT && BOOT.api) ? BOOT.api : location.origin + location.pathname; }
 /* liste des IDC présents sur le plan (avec le nombre de vans IN) */
 function fillIdc(id, counts) {
@@ -2037,7 +2054,7 @@ function showLogin(err) {
 }
 function doLogin() {
   var k = $('l-key').value.trim().toUpperCase();
-  if (!CONN.fixed) { var a = $('l-api').value.trim(); if (a) { CONN.api = a; LS.set('park_api', a); } }
+  if (!CONN.fixed) { var a = cleanApi($('l-api').value); if (a) { CONN.api = a; LS.set('park_api', a); } }
   if (!CONN.api) { $('l-err').textContent = 'Indique l\'URL du serveur'; $('l-adv').classList.remove('hidden'); return; }
   if (!k) { $('l-err').textContent = 'Entre la clé d\'accès'; return; }
   $('l-btn').disabled = true; $('l-err').textContent = '';
@@ -2097,6 +2114,12 @@ document.addEventListener('click', function (e) {
     case 'reset-yes': doReset(); break;
     case 'close-modal': closeModals(); break;
     case 'login-adv': $('l-adv').classList.toggle('hidden'); break;
+    case 'share-copy': {
+      var inp = $('share-link'), done = function () { toast('📋 Lien copié'); };
+      try { navigator.clipboard.writeText(inp.value).then(done, function () { inp.select(); document.execCommand('copy'); done(); }); }
+      catch (_) { inp.select(); document.execCommand('copy'); done(); }
+      break;
+    }
     case 'tv-open': window.open(baseUrl() + '?tv=1', '_blank'); break;
     case 'tv-exit': location.href = baseUrl(); break;
     case 'tv-full': toggleFull(); break;
