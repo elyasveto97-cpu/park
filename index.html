@@ -402,6 +402,7 @@ body.dark .theme-btn{background:rgba(255,255,255,.12)}
 .bb-tag{border:1.5px solid var(--g300);background:#fff;border-radius:999px;padding:7px 13px;font-size:12px;font-weight:800;cursor:pointer;color:#555}
 .bb-tag.on{background:var(--tq);border-color:var(--tq);color:#fff}
 .bb-tag:disabled{opacity:.45;cursor:default}
+.bb-oth{font-size:10px;font-weight:800;color:var(--g500);background:var(--g200);border-radius:999px;padding:1px 5px;margin-right:3px}
 .bb-waves{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding-left:8px;margin-left:2px;border-left:2px solid var(--g300)}
 .bb-waves .bb-tag{display:inline-flex;align-items:center;gap:4px}
 .bb-waves.sm{flex:0 0 100%;border-left:0;padding:0;margin:0 0 4px}
@@ -2232,7 +2233,11 @@ function renderBigBox() {
   if (!BB.loaded) { $('bb-map').innerHTML = '<p class="empty-msg">Chargement…</p>'; $('bb-stats').innerHTML = ''; $('bb-found').innerHTML = ''; return; }
 
   var tag = bbui.tag, q = $('bb-q').value.trim().toLowerCase();
-  var boxes = BB.boxes.filter(function (b) { return b.tag === tag; });
+  var boxes = BB.boxes.filter(function (b) { return b.tag === tag && bbInWave(b); });
+  // colis au sol des AUTRES vagues, par palette (petit « +N » gris quand une vague est choisie)
+  var others = {};
+  if (bbWaveOk()) BB.boxes.forEach(function (b) { if (b.tag === tag && b.st !== 'pris' && !bbInWave(b)) others[b.pal] = (others[b.pal] || 0) + 1; });
+  bbui._others = others;
   var byPal = {}, nSol = 0, nPris = 0, nPerdu = 0, nOut = 0;
   boxes.forEach(function (b) {
     (byPal[b.pal] = byPal[b.pal] || []).push(b);
@@ -2313,6 +2318,7 @@ function renderBigBox() {
         '<button class="bbtn b-pri" data-act="bb-edit">✅ Terminé</button>';
   }
 }
+function bbInWave(b) { var w = bbWaveOk(); if (!w) return true; var r = bbRoute(b); return !!(r && r.wave === w); }
 function bbPalHTML(p, list, q, ek) {
   var left = 0, hit = false;
   list.forEach(function (b) { if (b.st !== 'pris') { left++; if (bbMatch(b, q)) hit = true; } });
@@ -2322,7 +2328,7 @@ function bbPalHTML(p, list, q, ek) {
     return '<span class="' + c + '">' + esc(b.route) + (b.seq ? '<small>#' + esc(b.seq) + '</small>' : '') + '</span>';
   }).join('');
   var act = ek ? 'data-act="bb-cell" data-k="' + ek + '"' : 'data-act="bb-pal" data-p="' + esc(p) + '"';
-  return '<div class="' + cls + '" ' + act + '><div class="bb-ph"><span>' + esc(p) + '</span><span class="bb-cnt">' + left + '</span></div><div class="bb-items">' + items + '</div></div>';
+  return '<div class="' + cls + '" ' + act + '><div class="bb-ph"><span>' + esc(p) + '</span><span>' + ((bbui._others || {})[p] ? '<span class="bb-oth" title="Big box au sol d\'autres vagues">+' + bbui._others[p] + '</span>' : '') + '<span class="bb-cnt">' + left + '</span></span></div><div class="bb-items">' + items + '</div></div>';
 }
 
 /* ---------- Fenêtre d'une palette ---------- */
@@ -2369,10 +2375,12 @@ function bbPickRoute(disp) {
 function renderBBModal() {
   var p = bbui.pal;
   if (!p || $('bbModal').classList.contains('hidden')) return;
-  var list = BB.boxes.filter(function (b) { return b.tag === bbui.tag && b.pal === p; }).sort(bbSort);
+  var all = BB.boxes.filter(function (b) { return b.tag === bbui.tag && b.pal === p; });
+  var list = all.filter(bbInWave).sort(bbSort);
+  var nOther = all.filter(function (b) { return !bbInWave(b) && b.st !== 'pris'; }).length;
   var left = list.filter(function (b) { return b.st !== 'pris'; }).length;
   $('bb-m-title').innerHTML = '📦 Palette ' + esc(p) + ' ' + tagBadge(bbui.tag) +
-    ' <span class="chip ' + (left ? 'c-out' : 'c-in') + '">' + (left ? left + ' au sol' : '✅ vide') + '</span>';
+    ' <span class="chip ' + (left ? 'c-out' : 'c-in') + '">' + (left ? left + ' au sol' + (bbui.wave ? ' (' + esc(bbui.wave) + ')' : '') : (bbui.wave ? '✅ aucun ' + esc(bbui.wave) : '✅ vide')) + '</span>';
   $('bb-list').innerHTML = list.length ? list.map(function (b) {
     var r = bbRoute(b), out = b.st !== 'pris' && r && r.out, tmp = /^tmp/.test(b.id);
     var sub = (r ? r.wave + (r.idc ? ' · ' + r.idc : '') + (r.place && !r.out ? ' · 🅿️ ' + r.place : '') : 'route pas dans ParK') + ' · ' +
@@ -2387,7 +2395,8 @@ function renderBBModal() {
         : '<button class="b-pri adm" data-act="bb-set" data-id="' + esc(b.id) + '" data-st="pris">✅ Pris</button>' +
           '<button class="b-neu adm" data-act="bb-set" data-id="' + esc(b.id) + '" data-st="' + (b.st === 'perdu' ? 'sol' : 'perdu') + '" title="Introuvable">' + (b.st === 'perdu' ? '↩️' : '❓') + '</button>') +
       '<button class="b-bad adm" data-act="bb-del" data-id="' + esc(b.id) + '" title="Supprimer (erreur de saisie)">🗑️</button></div>';
-  }).join('') : '<p class="hint" style="padding:12px;text-align:center">Palette vide — ajoute les big box ci-dessus.</p>';
+  }).join('') : '<p class="hint" style="padding:12px;text-align:center">' + (bbui.wave ? 'Aucun big box ' + esc(bbui.wave) + ' sur cette palette.' : 'Palette vide — ajoute les big box ci-dessus.') + '</p>';
+  if (nOther) $('bb-list').innerHTML += '<p class="hint" style="padding:4px 8px">+ ' + nOther + ' big box au sol d\'autres vagues — <a href="#" data-act="bb-wave" data-w="">voir toutes</a></p>';
   renderBBSugg();
 }
 
@@ -2706,7 +2715,8 @@ document.addEventListener('click', function (e) {
     case 'bb-rclear': $('bb-route').value = ''; renderBBSugg(); $('bb-route').focus(); break;
     case 'bb-wave':
       bbui.wave = t.getAttribute('data-w') || ''; LS.set('park_bb_wave', bbui.wave);
-      renderBigBox(); renderBBSugg(); break;
+      if (t.tagName === 'A') e.preventDefault();
+      renderBigBox(); renderBBModal(); break;
     case 'bb-qclear': $('bb-q').value = ''; renderBigBox(); break;
     case 'bb-unsel': bbui.sels = []; renderBigBox(); break;
     case 'bb-grid': bbGridSize(t.getAttribute('data-op')); break;
