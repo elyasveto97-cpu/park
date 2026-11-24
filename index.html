@@ -404,7 +404,10 @@ body.dark .theme-btn{background:rgba(255,255,255,.12)}
 .bb-tag:disabled{opacity:.45;cursor:default}
 .bb-found{font-size:12px;font-weight:700;margin:0 0 8px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;flex-shrink:0}
 .bb-map{flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;padding:4px 2px 8px}
-.bb-table{margin:4px 0 12px;max-width:300px;text-align:center;background:#1d3b5c;color:#fff;font-size:12px;font-weight:800;border-radius:8px;padding:7px}
+.bb-wrap{display:flex;gap:8px;align-items:stretch;width:max-content}
+.bb-table{flex:0 0 22px;align-self:flex-end;height:min(100%,170px);min-height:110px;background:#1d3b5c;color:#fff;border-radius:6px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.bb-table.top{align-self:flex-start}
+.bb-table span{writing-mode:vertical-rl;transform:rotate(180deg);font-size:10px;font-weight:800;letter-spacing:1px;white-space:nowrap}
 .bb-row{display:flex;gap:8px;align-items:stretch;margin-bottom:10px}
 .bb-rl{width:22px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--g500)}
 .bb-pal{width:118px;min-height:92px;flex-shrink:0;background:var(--g100);border:2px solid var(--g300);border-radius:10px;padding:5px;cursor:pointer;display:flex;flex-direction:column;gap:4px;position:relative;-webkit-tap-highlight-color:transparent;transition:opacity .2s}
@@ -2147,7 +2150,9 @@ function bbIndex() {
     if (b.st === 'perdu') e.lost++;
   });
 }
+var BB_SRV = 'grid2';
 function bbApply(res) {
+  if (res && res.ok) BB.srvOld = res.srv !== BB_SRV;
   if (!res || !res.ok || res.same || !res.boxes) return false;
   BB.v = res.v || BB.v; BB.boxes = res.boxes; BB.layouts = res.layouts || BB.layouts; BB.loaded = true;
   bbIndex();
@@ -2223,6 +2228,7 @@ function renderBigBox() {
     fh = ks.length ? ks.map(function (r) { return '<span class="rng">' + esc(r) + ' → ' + esc(bbPalsText(hits[r])) + '</span>'; }).join('')
                    : '<span style="color:var(--g500)">Aucun big box au sol pour « ' + esc(q) + ' »</span>';
   }
+  if (BB.srvOld) fh = '<div class="banner err" style="width:100%;margin:0">⚠️ Le serveur Big Box n\'est pas à jour : remplace BigBox.gs dans Apps Script puis Déployer → Gérer les déploiements → ✏️ → Nouvelle version (sur le déploiement de cette URL).</div>' + fh;
   $('bb-found').innerHTML = fh;
 
   var g = bbGrid(tag), known = bbGridPals(g), ed = bbui.edit;
@@ -2249,11 +2255,12 @@ function renderBigBox() {
     }
   }
   var orphans = Object.keys(byPal).filter(function (p) { return !known[p]; }).sort(natCmp);
-  var table = '<div class="bb-table">🖥️ Tables checkout</div>';
+  // table checkout : petite barre verticale à gauche du plan (en bas ; en haut si inversé)
+  var table = '<div class="bb-table' + (bbui.flip ? ' top' : '') + '" title="Tables checkout"><span>🖥️ CHECKOUT</span></div>';
   var grid = nr && nc ? '<div class="bb-grid" style="--nc:' + nc + '">' + cells + '</div>' : '';
-  var h = (bbui.flip ? '' : table) + grid +
+  var h = '<div class="bb-wrap">' + table + grid + '</div>' +
     (orphans.length ? '<div class="hint" style="margin:10px 0 4px">Palettes retirées du plan (encore des colis) :</div><div class="bb-orph">' + orphans.map(function (p) { return bbPalHTML(p, byPal[p], q, ''); }).join('') + '</div>' : '') +
-    (bbui.flip ? table : '');
+    '';
   if (!Object.keys(g.cells).length && !ed) h += '<p class="empty-msg">Aucune palette — ✏️ Disposition, puis tape les cases où mettre les palettes</p>';
   $('bb-map').innerHTML = h;
 
