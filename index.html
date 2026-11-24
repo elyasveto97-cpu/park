@@ -395,6 +395,60 @@ body.dark .theme-btn{background:rgba(255,255,255,.12)}
 .role-badge{font-size:10px;font-weight:800;background:#fff;color:var(--tq-d);padding:3px 8px;border-radius:999px;margin-left:6px;vertical-align:middle}
 .ro .adm{display:none!important}
 .ro .btn-group{display:none!important}
+
+/* ---------- Big Box (palettes au checkout) ---------- */
+#bigbox-view{display:flex;flex-direction:column}
+.bb-tags{display:flex;gap:6px;flex-wrap:wrap}
+.bb-tag{border:1.5px solid var(--g300);background:#fff;border-radius:999px;padding:7px 13px;font-size:12px;font-weight:800;cursor:pointer;color:#555}
+.bb-tag.on{background:var(--tq);border-color:var(--tq);color:#fff}
+.bb-tag:disabled{opacity:.45;cursor:default}
+.bb-found{font-size:12px;font-weight:700;margin:0 0 8px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;flex-shrink:0}
+.bb-map{flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;padding:4px 2px 8px}
+.bb-table{margin:4px 0 12px 30px;max-width:300px;text-align:center;background:#1d3b5c;color:#fff;font-size:12px;font-weight:800;border-radius:8px;padding:7px}
+.bb-row{display:flex;gap:8px;align-items:stretch;margin-bottom:10px}
+.bb-rl{width:22px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--g500)}
+.bb-pal{width:118px;min-height:92px;flex-shrink:0;background:var(--g100);border:2px solid var(--g300);border-radius:10px;padding:5px;cursor:pointer;display:flex;flex-direction:column;gap:4px;position:relative;-webkit-tap-highlight-color:transparent;transition:opacity .2s}
+.bb-pal:active{transform:scale(.97)}
+.bb-ph{display:flex;align-items:center;justify-content:space-between;font-size:14px;font-weight:900}
+.bb-cnt{min-width:22px;text-align:center;font-size:12px;font-weight:900;padding:1px 7px;border-radius:999px;background:var(--g200);color:#555}
+.bb-items{display:flex;flex-wrap:wrap;gap:3px}
+.bb-it{display:inline-flex;align-items:baseline;gap:2px;font-size:11px;font-weight:900;padding:2px 5px;border-radius:5px;line-height:1.2}
+.bb-it small{font-size:9px;font-weight:700;opacity:.85}
+.bb-it.s-sol{background:var(--red);color:#fff}
+.bb-it.s-perdu{background:var(--orange);color:#fff}
+.bb-it.s-pris{background:var(--g200);color:var(--g400);text-decoration:line-through}
+.bb-it.hl{outline:2px solid #111;outline-offset:1px}
+.bb-it.late{animation:blinkRed 1s infinite}
+.bb-pal.p-red{background:var(--red-bg);border-color:var(--red)}
+.bb-pal.p-red .bb-cnt{background:var(--red);color:#fff}
+.bb-pal.p-done{opacity:.4}
+.bb-pal.p-done .bb-cnt{background:#dcfce7;color:#15803d}
+.bb-pal.hl{box-shadow:0 0 0 3px var(--orange),0 0 14px rgba(248,130,35,.55);opacity:1;z-index:2}
+.bb-pal.dim{opacity:.2}
+.bb-edit-btns{display:flex;flex-direction:column;gap:4px;justify-content:center;flex-shrink:0}
+.bb-edit-btns button,.bb-rowbtns button{border:1.5px solid var(--g300);background:#fff;border-radius:8px;width:36px;height:32px;font-size:16px;font-weight:800;cursor:pointer;color:var(--tq-d)}
+.bb-rowbtns{display:flex;gap:8px;margin:4px 0 10px 30px}
+.bb-rowbtns button{width:auto;padding:0 12px;font-size:12px}
+.bb-add{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 4px}
+.bb-add input{flex:1 1 130px;padding:11px;border:1.5px solid var(--g300);border-radius:8px;font-size:16px;font-weight:700;min-width:0;text-transform:uppercase}
+.bb-add input#bb-seq{flex:0 1 120px}
+.bb-add button{flex:0 0 auto;padding:11px 14px;font-size:14px}
+.bb-list{margin-top:10px;max-height:52vh;overflow:auto}
+.bb-li{display:flex;align-items:center;gap:6px;padding:8px;border-radius:8px;margin-bottom:6px;border-left:4px solid var(--red);background:var(--g100)}
+.bb-li.s-pris{border-left-color:var(--g300);opacity:.55}
+.bb-li.s-perdu{border-left-color:var(--orange)}
+.bb-li .bl-main{flex:1;min-width:0;font-size:15px;font-weight:800}
+.bb-li .bl-sub{font-size:11px;font-weight:600;color:var(--g500);margin-top:2px}
+.bb-li button{border:0;border-radius:8px;padding:9px 10px;font-size:13px;font-weight:800;cursor:pointer;flex-shrink:0}
+.pl-bb{position:absolute;top:0;left:0;z-index:3;font-size:calc(var(--lfs) + 1px);font-weight:900;line-height:1;padding:2px 4px;border-radius:4px 0 6px 0;background:var(--red);color:#fff;cursor:pointer}
+.pl-bb.ok{background:#cbd5e1;color:#334155}
+.pl-bb.warn{animation:blinkRed 1s infinite}
+.bb-line{margin-top:5px;font-size:12px;font-weight:700;color:var(--red-txt);cursor:pointer}
+.bb-line.ok{color:var(--g500)}
+body.dark .bb-tag,body.dark .bb-edit-btns button,body.dark .bb-rowbtns button,body.dark .bb-add input{background:var(--card);color:#e6e9ee;border-color:var(--g300)}
+body.dark .bb-pal.p-red{background:#3a1b1a}
+body.dark .bb-table{background:#2b4a6b}
+body.dark .bb-it.hl{outline-color:#fff}
 </style>
 </head>
 <body>
@@ -477,6 +531,24 @@ body.dark .theme-btn{background:rgba(255,255,255,.12)}
   </div>
 </div>
 
+<!-- Big Box : une palette -->
+<div id="bbModal" class="modal hidden">
+  <div class="mbox" style="max-width:540px">
+    <h3 id="bb-m-title">Palette</h3>
+    <div class="adm">
+      <div class="bb-add">
+        <input type="text" id="bb-route" list="bb-routes" placeholder="Route" autocomplete="off" autocapitalize="characters" spellcheck="false">
+        <input type="text" id="bb-seq" inputmode="numeric" placeholder="S&#233;quence" autocomplete="off">
+        <button class="bbtn b-pri" data-act="bb-add">&#65291; Ajouter</button>
+      </div>
+      <datalist id="bb-routes"></datalist>
+      <div class="hint">La route reste choisie : tape la s&#233;quence suivante puis Entr&#233;e pour encha&#238;ner.</div>
+    </div>
+    <div class="bb-list" id="bb-list"></div>
+    <div class="mbtns"><button class="b-neu" data-act="close-modal">Fermer</button></div>
+  </div>
+</div>
+
 <!-- Connexion -->
 <div id="login" class="login hidden">
   <form class="lbox" id="l-form" autocomplete="on" onsubmit="return false" style="position:relative">
@@ -518,6 +590,7 @@ body.dark .theme-btn{background:rgba(255,255,255,.12)}
     <button class="tab active" data-tab="routes">Routes</button>
     <button class="tab" data-tab="waves">&#127919; Set zone</button>
     <button class="tab" data-tab="plan">Plan WH</button>
+    <button class="tab" data-tab="bigbox">&#128230; Big Box</button>
     <button class="tab adm" data-tab="blocks">&#128274; Blocages</button>
     <button class="tab adm" data-tab="settings">&#9881;&#65039; R&#233;glages</button>
   </nav>
@@ -589,6 +662,29 @@ body.dark .theme-btn{background:rgba(255,255,255,.12)}
       <span><i class="lg-red" style="background:#ffd9d5;border:2px solid var(--red)"></i>Clignote : pas commenc&#233;, PPM &lt; 5 ou scan &gt; 75 min</span>
       <span><i class="lg-or" style="background:#ffe7cf;border:2px solid var(--orange)"></i>Charg&#233;, pas sorti</span>
       <span>&#128007; Scan rapide</span><span>&#128034; Scan lent</span>
+    </div>
+  </section>
+
+  <!-- BIG BOX -->
+  <section id="bigbox-view" class="view hidden">
+    <div class="plan-tools">
+      <div class="bb-tags" id="bb-tags"></div>
+      <div class="psearch"><input class="search-bar" type="search" id="bb-q" placeholder="&#128269; Route... o&#249; sont ses big box ?" autocomplete="off"></div>
+    </div>
+    <div class="plan-tools">
+      <div class="stats-bar" id="bb-stats"></div>
+      <div class="hspace"></div>
+      <button class="tool-btn" data-act="bb-flip" title="Inverser haut / bas">&#8645;</button>
+      <button class="tool-btn adm" id="bb-edit-btn" data-act="bb-edit">&#9999;&#65039; Disposition</button>
+      <button class="tool-btn adm" data-act="bb-reset">&#128465;&#65039; Vider (fin de journ&#233;e)</button>
+    </div>
+    <div class="bb-found" id="bb-found"></div>
+    <div class="bb-map" id="bb-map"></div>
+    <div class="legend">
+      <span><i style="background:var(--red-bg);border:2px solid var(--red)"></i>Big box au sol</span>
+      <span><i style="background:var(--g100);border:2px solid var(--g300);opacity:.45"></i>Tout scann&#233; et pris</span>
+      <span><i style="background:var(--orange)"></i>Introuvable</span>
+      <span><i style="background:var(--red);box-shadow:0 0 0 3px rgba(242,68,56,.5)"></i>Clignote : route d&#233;j&#224; sortie</span>
     </div>
   </section>
 
@@ -960,7 +1056,21 @@ var EN = {
   "introuvable": "not found",
   "pleine": "full",
   "Zone": "Zone",
-  "Routes": "Routes"
+  "Routes": "Routes",
+  "Vider (fin de journée)": "Clear (end of day)",
+  "Tables checkout": "Checkout tables",
+  "Tout scanné et pris": "All scanned and taken",
+  "Big box au sol": "Big box on the floor",
+  "Clignote : route déjà sortie": "Blinks: route already left",
+  "route déjà sortie": "route already left",
+  "route sortie": "route left",
+  "Disposition": "Layout",
+  "à venir": "coming soon",
+  "au sol": "on the floor",
+  "Séquence": "Sequence",
+  "Palette": "Pallet",
+  "Ajouter": "Add",
+  "Fermer": "Close"
 };
 var EN_RE = null;
 (function () {
@@ -1166,6 +1276,7 @@ function loadState(showLoader) {
   }).then(function () {
     loading = false; loader(false);
     renderAll();
+    if (S && !BB.loaded) bbLoad(true);
   });
 }
 
@@ -1339,12 +1450,14 @@ function renderAll() {
   if (tab === 'routes') renderRoutes();
   if (tab === 'waves') renderWaves();
   if (tab === 'plan') renderPlan();
+  if (tab === 'bigbox') renderBigBox();
   if (tab === 'blocks') renderBlocks();
   if (tab === 'settings') renderSettings();
   if (TV) renderTvBar();
   document.body.classList.toggle('noblink', !!(C && !C.blink));
   if (!$('waveModal').classList.contains('hidden')) renderWaveEditor();
   if (!$('routeModal').classList.contains('hidden')) renderRouteEditor();
+  renderBBModal();
 }
 function renderLive() {
   var dot = $('dot'), txt = $('live-txt');
@@ -1423,6 +1536,7 @@ function routeCard(r) {
   }
   if (C.vanscan) h += vsLine(r);
   if (al) h += '<div class="al-pill ' + al.k + '">' + esc(al.txt) + '</div>';
+  h += bbCardLine(r);
   h += '</div><div class="btn-group">' +
        '<button class="btn btn-edit" data-act="route-edit" data-id="' + esc(r.id) + '" title="Modifier place / heures">✏️</button>' +
        '<button class="btn btn-in' + (r.in ? ' active' : '') + '" data-act="check" data-id="' + esc(r.id) + '" data-col="IN">IN</button>' +
@@ -1750,6 +1864,7 @@ function renderPlan() {
     var spd = (status === 'in' && ro) ? speedIcon(ro) : '';
     h += '<div class="van-wrap">' + (status === 'blocked' ? '' : vanSVG(body)) + (p != null ? '<span class="pl-pct">' + (ro.vs.done ? '✓' : p + '%') + '</span>' : '') +
       (spd ? '<span class="pl-spd">' + spd + '</span>' : '') + '</div>';
+    if (ro) h += bbPlanBadge(ro);
     h += '<span class="pl-route">' + (ro ? esc(ro.disp) : (key ? esc(key.split('-').pop()) : '')) + '</span>';
     if (p != null) h += '<i class="pl-bar b-' + bd + '" style="width:' + p + '%"></i>';
     return h + '</div>';
@@ -1974,7 +2089,7 @@ function tvActivity() { document.body.classList.remove('idle'); clearTimeout(idl
 function startTV() {
   document.body.classList.add('tv');
   tab = 'plan';
-  ['routes', 'waves', 'plan', 'blocks', 'settings'].forEach(function (v) { $(v + '-view').classList.toggle('hidden', v !== 'plan'); });
+  ['routes', 'waves', 'plan', 'bigbox', 'blocks', 'settings'].forEach(function (v) { $(v + '-view').classList.toggle('hidden', v !== 'plan'); });
   tvClock(); setInterval(tvClock, 1000);
   keepAwake(); document.addEventListener('visibilitychange', keepAwake);
   ['mousemove', 'touchstart', 'keydown'].forEach(function (ev) { document.addEventListener(ev, tvActivity); });
@@ -1991,6 +2106,244 @@ function toggleFull() {
 /* =================================================================
  *  ACTIONS
  * ================================================================= */
+/* =================================================================
+ *  BIG BOX — palettes au checkout (peak)
+ *  Un colis = une ligne (palette, route, séquence, statut sol / pris / perdu).
+ *  « Pris » est coché par le CSR/sup quand le chauffeur a scanné ET emporté le colis.
+ * ================================================================= */
+var BB = { v: '', boxes: [], layouts: {}, byKey: {}, byId: {}, loaded: false };
+var BB_TAGS = [{ t: 'LAVL', on: true }, { t: 'MONT', on: false }, { t: 'RIDP', on: false }];
+var bbui = { tag: 'LAVL', edit: false, pal: null, tmp: 0, flip: LS.get('park_bb_flip', '0') === '1' };
+var bbBusy = false, bbNext = 0, bbPending = 0;
+
+function bbKey(b) { return b.key || ('?' + String(b.route || '').toUpperCase()); }
+function bbIndex() {
+  BB.byKey = {}; BB.byId = {};
+  BB.boxes.forEach(function (b) {
+    BB.byId[b.id] = b;
+    var k = bbKey(b), e = BB.byKey[k] || (BB.byKey[k] = { n: 0, left: 0, lost: 0, pals: {} });
+    e.n++;
+    if (b.st !== 'pris') { e.left++; e.pals[b.pal] = (e.pals[b.pal] || 0) + 1; }
+    if (b.st === 'perdu') e.lost++;
+  });
+}
+function bbApply(res) {
+  if (!res || !res.ok || res.same || !res.boxes) return false;
+  BB.v = res.v || BB.v; BB.boxes = res.boxes; BB.layouts = res.layouts || BB.layouts; BB.loaded = true;
+  bbIndex();
+  return true;
+}
+function bbLoad(force) {
+  if (bbBusy || !CONN.api || !CONN.key) return Promise.resolve();
+  bbBusy = true;
+  return api('bb_state', { since: force ? '' : BB.v }).then(function (res) {
+    if (!bbPending && bbApply(res)) renderAll();
+  }).catch(function () {}).then(function () { bbBusy = false; });
+}
+function bbOf(r) { return r && BB.byKey[r.key]; }
+function bbLayout(tag) { return BB.layouts[tag] || { rows: [] }; }
+function bbRoutes(tag) {
+  return S ? S.routes.filter(function (r) { return r.tag === tag; }).sort(function (a, b) { return natCmp(a.wave, b.wave) || natCmp(a.disp, b.disp); }) : [];
+}
+function bbRoute(b) { return (b.key && S && S.byKey[b.key]) || null; }
+function bbRouteOut(b) { var r = bbRoute(b); return !!(r && r.out); }
+function bbMin(a, b) { return a ? Math.max(0, ((b ? Date.parse(b) : now()) - Date.parse(a)) / 60000) : 0; }
+function bbMatch(b, q) { return !!q && String(b.route).toLowerCase().indexOf(q) !== -1; }
+function bbSort(a, b) { return (a.st === 'pris') - (b.st === 'pris') || natCmp(a.route, b.route) || natCmp(a.seq, b.seq); }
+function bbPalsText(e) { return Object.keys(e.pals).sort(natCmp).map(function (p) { return p + (e.pals[p] > 1 ? ' ×' + e.pals[p] : ''); }).join(' · '); }
+
+/* ---------- Page Big Box ---------- */
+function renderBigBox() {
+  $('bb-tags').innerHTML = BB_TAGS.map(function (x) {
+    return '<button class="bb-tag' + (bbui.tag === x.t ? ' on' : '') + '" data-act="bb-tag" data-t="' + x.t + '"' + (x.on ? '' : ' disabled') + '>' + x.t + (x.on ? '' : ' · à venir') + '</button>';
+  }).join('');
+  $('bb-edit-btn').classList.toggle('on', bbui.edit);
+  if (!BB.loaded) { $('bb-map').innerHTML = '<p class="empty-msg">Chargement…</p>'; $('bb-stats').innerHTML = ''; $('bb-found').innerHTML = ''; return; }
+
+  var tag = bbui.tag, q = $('bb-q').value.trim().toLowerCase();
+  var boxes = BB.boxes.filter(function (b) { return b.tag === tag; });
+  var byPal = {}, nSol = 0, nPris = 0, nPerdu = 0, nOut = 0;
+  boxes.forEach(function (b) {
+    (byPal[b.pal] = byPal[b.pal] || []).push(b);
+    if (b.st === 'pris') nPris++; else if (b.st === 'perdu') nPerdu++; else nSol++;
+    if (b.st !== 'pris' && bbRouteOut(b)) nOut++;
+  });
+  $('bb-stats').innerHTML = '<span class="chip c-total">📦 ' + boxes.length + '</span>' +
+    '<span class="chip c-out">🔴 ' + nSol + ' au sol</span>' +
+    '<span class="chip c-in">✅ ' + nPris + ' pris</span>' +
+    (nPerdu ? '<span class="chip c-blk">❓ ' + nPerdu + ' introuvable' + (nPerdu > 1 ? 's' : '') + '</span>' : '') +
+    (nOut ? '<span class="chip c-alert">🚨 ' + nOut + ' big box de route' + (nOut > 1 ? 's' : '') + ' déjà sortie' + (nOut > 1 ? 's' : '') + '</span>' : '');
+
+  // Recherche : où sont les big box de cette route ?
+  var fh = '';
+  if (q) {
+    var hits = {};
+    boxes.forEach(function (b) {
+      if (b.st === 'pris' || !bbMatch(b, q)) return;
+      var e = hits[b.route] || (hits[b.route] = { pals: {} });
+      e.pals[b.pal] = (e.pals[b.pal] || 0) + 1;
+    });
+    var ks = Object.keys(hits).sort(natCmp);
+    fh = ks.length ? ks.map(function (r) { return '<span class="rng">' + esc(r) + ' → ' + esc(bbPalsText(hits[r])) + '</span>'; }).join('')
+                   : '<span style="color:var(--g500)">Aucun big box au sol pour « ' + esc(q) + ' »</span>';
+  }
+  $('bb-found').innerHTML = fh;
+
+  var lay = bbLayout(tag), known = {}, rows = [];
+  lay.rows.forEach(function (row, ri) {
+    var h = '<div class="bb-row"><div class="bb-rl">' + (ri + 1) + '</div>';
+    row.forEach(function (p) { known[p] = 1; h += bbPalHTML(p, byPal[p] || [], q); });
+    if (bbui.edit) h += '<div class="bb-edit-btns"><button data-act="bb-lay" data-op="add" data-r="' + ri + '" title="Ajouter une palette">＋</button><button data-act="bb-lay" data-op="del" data-r="' + ri + '" title="Retirer la dernière palette">−</button></div>';
+    rows.push(h + '</div>');
+  });
+  if (bbui.flip) rows.reverse();
+  var orphans = Object.keys(byPal).filter(function (p) { return !known[p]; }).sort(natCmp);
+  var table = '<div class="bb-table">🖥️ Tables checkout</div>';
+  var h = (bbui.flip ? '' : table) + rows.join('') +
+    (orphans.length ? '<div class="hint" style="margin:4px 0 4px 30px">Palettes retirées du plan :</div><div class="bb-row"><div class="bb-rl">?</div>' + orphans.map(function (p) { return bbPalHTML(p, byPal[p], q); }).join('') + '</div>' : '') +
+    (bbui.flip ? table : '');
+  if (bbui.edit) h += '<div class="bb-rowbtns"><button data-act="bb-lay" data-op="addrow">＋ Rangée</button><button data-act="bb-lay" data-op="delrow">− Dernière rangée</button></div>';
+  if (!lay.rows.length && !orphans.length) h += '<p class="empty-msg">Aucune palette — ✏️ Disposition → ＋ Rangée</p>';
+  $('bb-map').innerHTML = h;
+}
+function bbPalHTML(p, list, q) {
+  var left = 0, hit = false;
+  list.forEach(function (b) { if (b.st !== 'pris') { left++; if (bbMatch(b, q)) hit = true; } });
+  var cls = 'bb-pal' + (left ? ' p-red' : (list.length ? ' p-done' : '')) + (q ? (hit ? ' hl' : ' dim') : '');
+  var items = list.slice().sort(bbSort).map(function (b) {
+    var c = 'bb-it s-' + b.st + (bbMatch(b, q) && b.st !== 'pris' ? ' hl' : '') + (b.st !== 'pris' && bbRouteOut(b) ? ' late' : '');
+    return '<span class="' + c + '">' + esc(b.route) + (b.seq ? '<small>#' + esc(b.seq) + '</small>' : '') + '</span>';
+  }).join('');
+  return '<div class="' + cls + '" data-act="bb-pal" data-p="' + esc(p) + '"><div class="bb-ph"><span>' + esc(p) + '</span><span class="bb-cnt">' + left + '</span></div><div class="bb-items">' + items + '</div></div>';
+}
+
+/* ---------- Fenêtre d'une palette ---------- */
+function openBBPal(p) {
+  bbui.pal = p;
+  $('bb-routes').innerHTML = bbRoutes(bbui.tag).map(function (r) {
+    return '<option value="' + esc(r.disp) + '">' + esc(r.wave + (r.idc ? ' · ' + r.idc : '')) + '</option>';
+  }).join('');
+  $('bb-route').value = ''; $('bb-seq').value = '';
+  $('bbModal').classList.remove('hidden');
+  renderBBModal();
+  if (ROLE === 'admin') setTimeout(function () { $('bb-route').focus(); }, 60);
+}
+function renderBBModal() {
+  var p = bbui.pal;
+  if (!p || $('bbModal').classList.contains('hidden')) return;
+  var list = BB.boxes.filter(function (b) { return b.tag === bbui.tag && b.pal === p; }).sort(bbSort);
+  var left = list.filter(function (b) { return b.st !== 'pris'; }).length;
+  $('bb-m-title').innerHTML = '📦 Palette ' + esc(p) + ' ' + tagBadge(bbui.tag) +
+    ' <span class="chip ' + (left ? 'c-out' : 'c-in') + '">' + (left ? left + ' au sol' : '✅ vide') + '</span>';
+  $('bb-list').innerHTML = list.length ? list.map(function (b) {
+    var r = bbRoute(b), out = b.st !== 'pris' && r && r.out, tmp = /^tmp/.test(b.id);
+    var sub = (r ? r.wave + (r.idc ? ' · ' + r.idc : '') + (r.place && !r.out ? ' · 🅿️ ' + r.place : '') : 'route pas dans ParK') + ' · ' +
+      (b.st === 'pris' ? 'pris à ' + hhmm(b.tPris) + ' (' + durText(bbMin(b.tAdd, b.tPris)) + ' au sol)' : 'au sol depuis ' + durText(bbMin(b.tAdd)));
+    return '<div class="bb-li s-' + b.st + '"' + (tmp ? ' style="opacity:.6"' : '') + '><div class="bl-main">' + esc(b.route) +
+      (b.seq ? ' <span style="color:var(--g500)">#' + esc(b.seq) + '</span>' : '') +
+      (b.st === 'perdu' ? ' <span class="al-pill or" style="margin:0">❓ introuvable</span>' : '') +
+      (out ? ' <span class="al-pill red" style="margin:0">🚨 route sortie</span>' : '') +
+      '<div class="bl-sub">' + esc(sub) + '</div></div>' +
+      (b.st === 'pris'
+        ? '<button class="b-neu adm" data-act="bb-set" data-id="' + esc(b.id) + '" data-st="sol" title="Remettre au sol">↩️</button>'
+        : '<button class="b-pri adm" data-act="bb-set" data-id="' + esc(b.id) + '" data-st="pris">✅ Pris</button>' +
+          '<button class="b-neu adm" data-act="bb-set" data-id="' + esc(b.id) + '" data-st="' + (b.st === 'perdu' ? 'sol' : 'perdu') + '" title="Introuvable">' + (b.st === 'perdu' ? '↩️' : '❓') + '</button>') +
+      '<button class="b-bad adm" data-act="bb-del" data-id="' + esc(b.id) + '" title="Supprimer (erreur de saisie)">🗑️</button></div>';
+  }).join('') : '<p class="hint" style="padding:12px;text-align:center">Palette vide — ajoute les big box ci-dessus.</p>';
+}
+
+/* ---------- Actions (affichées tout de suite, le serveur confirme derrière) ---------- */
+function bbAction(name, params, mutate) {
+  if (mutate) { mutate(); bbIndex(); renderAll(); }
+  bbPending++;
+  return enqueue(function () {
+    return api(name, params).then(function (res) {
+      bbPending--;
+      if (!res || !res.ok) { toast('❌ ' + ((res && res.msg) || 'Erreur')); BB.v = ''; bbNext = 0; return res; }
+      if (!bbPending) { bbApply(res); renderAll(); }
+      if (res.msg && name === 'bb_add') toast(res.msg);
+      return res;
+    }, function (e) { bbPending--; BB.v = ''; bbNext = 0; throw e; });
+  });
+}
+function bbAdd() {
+  var txt = $('bb-route').value.trim(), seq = $('bb-seq').value.trim(), p = bbui.pal, tag = bbui.tag;
+  if (!p) return;
+  if (!txt) { toast('Choisis une route'); $('bb-route').focus(); return; }
+  var lt = txt.toLowerCase();
+  var r = bbRoutes(tag).filter(function (x) { return String(x.disp).toLowerCase() === lt || String(x.route).toLowerCase() === lt; })[0];
+  if (!r && !confirm('La route « ' + txt + ' » n\'est pas dans ' + tag + ' (ParK). Ajouter quand même ?')) return;
+  var route = r ? r.disp : txt.toUpperCase(), key = r ? r.key : '';
+  var dup = seq && BB.boxes.some(function (b) { return b.tag === tag && b.st !== 'pris' && bbKey(b) === (key || '?' + route) && b.seq === seq; });
+  if (dup) { toast('⚠️ Déjà ajouté : ' + route + ' #' + seq); $('bb-seq').select(); return; }
+  var b = { id: 'tmp' + (++bbui.tmp), tag: tag, pal: p, route: route, key: key, seq: seq, st: 'sol', tAdd: new Date(now()).toISOString(), tPris: '' };
+  $('bb-seq').value = ''; $('bb-seq').focus();
+  bbAction('bb_add', { tag: tag, pal: p, route: route, key: key, seq: seq }, function () { BB.boxes.push(b); });
+}
+function bbSet(id, st) {
+  var b = BB.byId[id];
+  if (!b) return;
+  if (/^tmp/.test(id)) { toast('⏳ Patiente une seconde…'); return; }
+  bbAction('bb_set', { id: id, st: st }, function () { b.st = st; b.tPris = st === 'pris' ? new Date(now()).toISOString() : ''; });
+}
+function bbDel(id) {
+  var b = BB.byId[id];
+  if (!b) return;
+  if (/^tmp/.test(id)) { toast('⏳ Patiente une seconde…'); return; }
+  if (!confirm('Supprimer ' + b.route + (b.seq ? ' #' + b.seq : '') + ' de ' + b.pal + ' ? (seulement pour une erreur de saisie)')) return;
+  bbAction('bb_del', { id: id }, function () { BB.boxes = BB.boxes.filter(function (x) { return x.id !== id; }); });
+}
+function bbLay(op, ri) {
+  var tag = bbui.tag, lay = JSON.parse(JSON.stringify(bbLayout(tag)));
+  var all = [].concat.apply([], lay.rows);
+  BB.boxes.forEach(function (b) { if (b.tag === tag) all.push(b.pal); });
+  function next() { var m = 0; all.forEach(function (p) { var n = parseInt(String(p).replace(/\D/g, ''), 10) || 0; if (n > m) m = n; }); return 'P' + (m + 1); }
+  function used(p) { return BB.boxes.some(function (b) { return b.tag === tag && b.pal === p && b.st !== 'pris'; }); }
+  if (op === 'add') lay.rows[ri].push(next());
+  else if (op === 'del') {
+    var row = lay.rows[ri]; if (!row || !row.length) return;
+    var last = row[row.length - 1];
+    if (used(last)) { toast('⛔ ' + last + ' a encore des big box au sol'); return; }
+    row.pop();
+  } else if (op === 'addrow') lay.rows.push([next()]);
+  else if (op === 'delrow') {
+    var lr = lay.rows[lay.rows.length - 1]; if (!lr) return;
+    var u = lr.filter(used);
+    if (u.length) { toast('⛔ ' + u.join(', ') + ' : encore des big box au sol'); return; }
+    if (lr.length && !confirm('Supprimer la dernière rangée (' + lr.join(', ') + ') ?')) return;
+    lay.rows.pop();
+  } else return;
+  bbAction('bb_layout', { tag: tag, layout: JSON.stringify(lay) }, function () { BB.layouts[tag] = lay; });
+}
+function bbReset() {
+  var tag = bbui.tag, n = BB.boxes.filter(function (b) { return b.tag === tag; }).length;
+  var left = BB.boxes.filter(function (b) { return b.tag === tag && b.st !== 'pris'; }).length;
+  if (!n) { toast('Déjà vide'); return; }
+  if (!confirm('Archiver et vider les ' + n + ' big box ' + tag + ' ?' + (left ? '\n⚠️ ' + left + ' sont encore au sol / introuvables.' : '') + '\nLa disposition des palettes est conservée.')) return;
+  bbAction('bb_reset', { tag: tag }, function () { BB.boxes = BB.boxes.filter(function (b) { return b.tag !== tag; }); });
+}
+function bbGo(route, tag) {
+  if (tag && BB_TAGS.some(function (x) { return x.t === tag && x.on; })) bbui.tag = tag;
+  $('bb-q').value = route || '';
+  showTab('bigbox');
+}
+
+/* ---------- Badges sur le Plan WH et les cartes de route ---------- */
+function bbPlanBadge(ro) {
+  var e = bbOf(ro);
+  if (!e) return '';
+  var cls = 'pl-bb' + (e.left ? (ro.out ? ' warn' : '') : ' ok');
+  return '<span class="' + cls + '" data-act="bb-go" data-r="' + esc(ro.disp) + '" data-t="' + esc(ro.tag) + '" title="' + esc(e.left ? e.left + ' big box au sol : ' + bbPalsText(e) : 'Big box : tous pris') + '">📦' + e.left + '</span>';
+}
+function bbCardLine(r) {
+  var e = bbOf(r);
+  if (!e) return '';
+  var h = '<div class="bb-line' + (e.left ? '' : ' ok') + '" data-act="bb-go" data-r="' + esc(r.disp) + '" data-t="' + esc(r.tag) + '">📦 Big box : ' +
+    (e.left ? '<b>' + e.left + '</b> au sol → ' + esc(bbPalsText(e)) : '✅ ' + e.n + ' pris') + '</div>';
+  if (e.left && r.out) h += '<div class="al-pill red">🚨 Sorti avec ' + e.left + ' big box au sol !</div>';
+  return h;
+}
+
 var FULL_RELOAD = { undo: 1, reset: 1 };
 function runAction(name, params) {
   var full = FULL_RELOAD[name];
@@ -2035,7 +2388,8 @@ function doReset() {
 /* ---------- Connexion / rôle ---------- */
 var ROLE = 'admin';
 var WRITE_ACTS = { check: 1, 'route-edit': 1, 're-save': 1, 're-remove': 1, undo: 1, reset: 1, 'reset-yes': 1, export: 1, 'wave-edit': 1, 'wave-clear': 1,
-  'wm-save': 1, 'wm-clear': 1, 'zones-reset': 1, 'settings-save': 1, 'settings-reset': 1, 'move-mode': 1, 'move-free': 1, 'move-edit': 1, pick: 1, 'blk-row': 1, 'blk-col': 1 };
+  'wm-save': 1, 'wm-clear': 1, 'zones-reset': 1, 'settings-save': 1, 'settings-reset': 1, 'move-mode': 1, 'move-free': 1, 'move-edit': 1, pick: 1, 'blk-row': 1, 'blk-col': 1,
+  'bb-add': 1, 'bb-set': 1, 'bb-del': 1, 'bb-edit': 1, 'bb-lay': 1, 'bb-reset': 1 };
 function setRole(r) {
   ROLE = r === 'view' ? 'view' : 'admin';
   document.body.classList.toggle('ro', ROLE !== 'admin');
@@ -2071,18 +2425,21 @@ function doLogin() {
 }
 function logout() {
   LS.set('park_key', ''); CONN.key = ''; S = null; lastOk = 0;
+  BB = { v: '', boxes: [], layouts: {}, byKey: {}, byId: {}, loaded: false };
   renderAll(); showLogin('');
 }
 function closeModals() {
   document.querySelectorAll('.modal').forEach(function (m) { m.classList.add('hidden'); });
   ui.pickTarget = null;
+  bbui.pal = null;
 }
 function showTab(name) {
   tab = name;
   document.querySelectorAll('.tab').forEach(function (t) { t.classList.toggle('active', t.getAttribute('data-tab') === name); });
-  ['routes', 'waves', 'plan', 'blocks', 'settings'].forEach(function (v) { $(v + '-view').classList.toggle('hidden', v !== name); });
+  ['routes', 'waves', 'plan', 'bigbox', 'blocks', 'settings'].forEach(function (v) { $(v + '-view').classList.toggle('hidden', v !== name); });
   if (name === 'settings') SETDRAFT = null;
   if (name !== 'plan') { ui.moveMode = false; ui.moveFrom = null; }
+  if (name === 'bigbox') { bbNext = 0; if (!BB.loaded) bbLoad(true); }
   updateZoomLabels();
   renderAll();
 }
@@ -2165,12 +2522,26 @@ document.addEventListener('click', function (e) {
       LS.set('park_zoom2', String(ui.zoom)); updateZoomLabels(); renderAll(); break;
     case 'blk-row': bulkBlock('row', t.getAttribute('data-v')); break;
     case 'blk-col': bulkBlock('col', t.getAttribute('data-v')); break;
+    case 'bb-tag': bbui.tag = t.getAttribute('data-t'); renderBigBox(); break;
+    case 'bb-pal': openBBPal(t.getAttribute('data-p')); break;
+    case 'bb-add': bbAdd(); break;
+    case 'bb-set': bbSet(t.getAttribute('data-id'), t.getAttribute('data-st')); break;
+    case 'bb-del': bbDel(t.getAttribute('data-id')); break;
+    case 'bb-edit': bbui.edit = !bbui.edit; renderBigBox(); if (bbui.edit) toast('✏️ ＋ / − pour ajouter ou retirer des palettes'); break;
+    case 'bb-lay': bbLay(t.getAttribute('data-op'), parseInt(t.getAttribute('data-r'), 10)); break;
+    case 'bb-reset': bbReset(); break;
+    case 'bb-flip': bbui.flip = !bbui.flip; LS.set('park_bb_flip', bbui.flip ? '1' : '0'); renderBigBox(); break;
+    case 'bb-go': bbGo(t.getAttribute('data-r'), t.getAttribute('data-t')); break;
   }
 });
 ['r-q', 'r-tag', 'r-wave', 'r-idc'].forEach(function (id) {
   $(id).addEventListener(id === 'r-q' ? 'input' : 'change', function () { if (S) renderRoutes(); });
 });
 $('p-q').addEventListener('input', function () { if (S) renderPlan(); });
+$('bb-q').addEventListener('input', function () { renderBigBox(); });
+$('bb-route').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); $('bb-seq').focus(); } });
+$('bb-route').addEventListener('change', function () { if ($('bb-route').value) $('bb-seq').focus(); });
+$('bb-seq').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); bbAdd(); } });
 $('pick-q').addEventListener('input', renderPick);
 $('reset-wave').addEventListener('change', resetText);
 $('reset-code').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); doReset(); } });
@@ -2197,6 +2568,13 @@ setInterval(function () {
   }).catch(function () {}).then(function () { verBusy = false; });
 }, 1000);
 setInterval(function () { if (!document.hidden && S && !pending && !modalOpen()) renderAll(); else renderLive(); }, 30000);
+/* Big Box : toutes les 4 s sur la page Big Box, 10 s ailleurs (badges du plan) — réponse vide si rien n'a changé */
+setInterval(function () {
+  if (document.hidden || !CONN.api || !CONN.key || !S || bbPending || bbBusy) return;
+  if (Date.now() < bbNext) return;
+  bbNext = Date.now() + (tab === 'bigbox' ? 4 : (TV ? 8 : 10)) * 1000;
+  bbLoad(!BB.loaded);
+}, 1000);
 document.addEventListener('visibilitychange', function () { if (!document.hidden && Date.now() - lastOk > 20000) loadState(false); });
 
 $('l-show').addEventListener('change', function (e) { $('l-key').type = e.target.checked ? 'text' : 'password'; });
