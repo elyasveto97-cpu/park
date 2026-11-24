@@ -452,6 +452,15 @@ body.dark .theme-btn{background:rgba(255,255,255,.12)}
 .bb-add input#bb-seq{flex:0 1 120px}
 .bb-add button{flex:0 0 auto;padding:11px 14px;font-size:14px}
 .bb-list{margin-top:10px;max-height:52vh;overflow:auto}
+.bb-sugg{max-height:30vh;overflow:auto;display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin:4px 0 2px;padding:2px 0}
+.bb-sw{flex:0 0 100%;margin-top:4px}
+.bb-rchip{border:1.5px solid var(--g300);background:#fff;border-radius:8px;padding:8px 10px;font-size:14px;font-weight:800;cursor:pointer;min-width:58px;display:inline-flex;align-items:center;justify-content:center;gap:3px;-webkit-tap-highlight-color:transparent}
+.bb-rchip:active{background:var(--tq-l);border-color:var(--tq)}
+.bb-rchip small{font-size:10px;color:var(--red-txt)}
+.bb-chosen{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:15px;background:var(--tq-l);border-radius:8px;padding:6px 8px;width:100%}
+.bb-chosen .bbtn{margin-left:auto;padding:6px 10px}
+@media(max-width:600px){#bbModal{align-items:flex-start;padding:8px}#bbModal .mbox{padding:14px}}
+body.dark .bb-rchip{background:var(--card);color:#e6e9ee;border-color:var(--g300)}
 .bb-li{display:flex;align-items:center;gap:6px;padding:8px;border-radius:8px;margin-bottom:6px;border-left:4px solid var(--red);background:var(--g100)}
 .bb-li.s-pris{border-left-color:var(--g300);opacity:.55}
 .bb-li.s-perdu{border-left-color:var(--orange)}
@@ -556,11 +565,11 @@ body.dark .bb-it.hl{outline-color:#fff}
     <h3 id="bb-m-title">Palette</h3>
     <div class="adm">
       <div class="bb-add">
-        <input type="text" id="bb-route" list="bb-routes" placeholder="Route" autocomplete="off" autocapitalize="characters" spellcheck="false">
+        <input type="text" id="bb-route" inputmode="numeric" placeholder="Route" autocomplete="off" autocapitalize="characters" spellcheck="false">
         <input type="text" id="bb-seq" inputmode="numeric" placeholder="S&#233;quence" autocomplete="off">
         <button class="bbtn b-pri" data-act="bb-add">&#65291; Ajouter</button>
       </div>
-      <datalist id="bb-routes"></datalist>
+      <div class="bb-sugg" id="bb-sugg"></div>
       <div class="hint">La route reste choisie : tape la s&#233;quence suivante puis Entr&#233;e pour encha&#238;ner.</div>
     </div>
     <div class="bb-list" id="bb-list"></div>
@@ -2136,7 +2145,7 @@ function toggleFull() {
  * ================================================================= */
 var BB = { v: '', boxes: [], layouts: {}, byKey: {}, byId: {}, loaded: false };
 var BB_TAGS = [{ t: 'LAVL', on: true }, { t: 'MONT', on: false }, { t: 'RIDP', on: false }];
-var bbui = { tag: 'LAVL', edit: false, sel: null, pal: null, tmp: 0, zoom: parseFloat(LS.get('park_bb_zoom', '1')) || 1, flip: LS.get('park_bb_flip', '0') === '1' };
+var bbui = { tag: 'LAVL', edit: false, sels: [], pal: null, tmp: 0, zoom: parseFloat(LS.get('park_bb_zoom', '1')) || 1, flip: LS.get('park_bb_flip', '0') === '1' };
 var bbBusy = false, bbNext = 0, bbPending = 0;
 
 function bbKey(b) { return b.key || ('?' + String(b.route || '').toUpperCase()); }
@@ -2250,7 +2259,7 @@ function renderBigBox() {
     for (var c = 0; c < nc; c++) {
       var k = r + '-' + c, p = g.cells[k];
       if (p) cells += bbPalHTML(p, byPal[p] || [], q, ed ? k : '');
-      else if (ed) cells += '<div class="bb-slot' + (bbui.sel ? ' tgt' : '') + '" data-act="bb-cell" data-k="' + k + '">' + (bbui.sel ? '↘' : '＋') + '</div>';
+      else if (ed) cells += '<div class="bb-slot' + (bbui.sels.length === 1 ? ' tgt' : '') + '" data-act="bb-cell" data-k="' + k + '">' + (bbui.sels.length === 1 ? '↘' : (bbui.sels.length ? '' : '＋')) + '</div>';
       else cells += '<div></div>';
     }
   }
@@ -2268,20 +2277,24 @@ function renderBigBox() {
   var eb = $('bb-editbar');
   eb.classList.toggle('show', ed);
   if (ed) {
-    var sel = bbui.sel && g.cells[bbui.sel];
-    eb.innerHTML = sel
-      ? '<span><b>' + esc(sel) + '</b> choisie — tape une case vide pour la déplacer</span><span class="sp"></span>' +
-        '<button class="bbtn b-bad" data-act="bb-pdel">🗑️ Retirer ' + esc(sel) + '</button><button class="bbtn b-neu" data-act="bb-unsel">✕ Annuler</button>'
-      : '<span>＋ case vide = nouvelle palette · tape une palette pour la déplacer ou la retirer</span><span class="sp"></span>' +
+    bbui.sels = bbui.sels.filter(function (k) { return g.cells[k]; });
+    var ns = bbui.sels.length, names = bbui.sels.map(function (k) { return g.cells[k]; }).sort(natCmp), nAll = Object.keys(g.cells).length;
+    eb.innerHTML = ns
+      ? '<span><b>' + ns + ' palette' + (ns > 1 ? 's' : '') + ' choisie' + (ns > 1 ? 's' : '') + '</b> : ' + esc(names.slice(0, 10).join(', ') + (ns > 10 ? '…' : '')) +
+        (ns === 1 ? ' — tape une case vide pour la déplacer' : '') + ' · tape d\'autres palettes pour les ajouter</span><span class="sp"></span>' +
+        '<button class="bbtn b-neu" data-act="bb-selall">☑️ Tout choisir</button>' +
+        '<button class="bbtn b-bad" data-act="bb-pdel">🗑️ Supprimer (' + ns + ')</button><button class="bbtn b-neu" data-act="bb-unsel">✕ Annuler</button>'
+      : '<span>＋ case vide = nouvelle palette · tape une ou plusieurs palettes pour les déplacer ou les supprimer</span><span class="sp"></span>' +
         '<button class="bbtn b-neu" data-act="bb-grid" data-op="c+">＋ Colonne</button><button class="bbtn b-neu" data-act="bb-grid" data-op="c-">− Colonne</button>' +
         '<button class="bbtn b-neu" data-act="bb-grid" data-op="r+">＋ Rangée</button><button class="bbtn b-neu" data-act="bb-grid" data-op="r-">− Rangée</button>' +
+        (nAll ? '<button class="bbtn b-bad" data-act="bb-delall">🗑️ Tout supprimer (' + nAll + ')</button>' : '') +
         '<button class="bbtn b-pri" data-act="bb-edit">✅ Terminé</button>';
   }
 }
 function bbPalHTML(p, list, q, ek) {
   var left = 0, hit = false;
   list.forEach(function (b) { if (b.st !== 'pris') { left++; if (bbMatch(b, q)) hit = true; } });
-  var cls = 'bb-pal' + (left ? ' p-red' : (list.length ? ' p-done' : '')) + (q ? (hit ? ' hl' : ' dim') : '') + (ek && bbui.sel === ek ? ' sel' : '');
+  var cls = 'bb-pal' + (left ? ' p-red' : (list.length ? ' p-done' : '')) + (q ? (hit ? ' hl' : ' dim') : '') + (ek && bbui.sels.indexOf(ek) >= 0 ? ' sel' : '');
   var items = list.slice().sort(bbSort).map(function (b) {
     var c = 'bb-it s-' + b.st + (bbMatch(b, q) && b.st !== 'pris' ? ' hl' : '') + (b.st !== 'pris' && bbRouteOut(b) ? ' late' : '');
     return '<span class="' + c + '">' + esc(b.route) + (b.seq ? '<small>#' + esc(b.seq) + '</small>' : '') + '</span>';
@@ -2293,13 +2306,43 @@ function bbPalHTML(p, list, q, ek) {
 /* ---------- Fenêtre d'une palette ---------- */
 function openBBPal(p) {
   bbui.pal = p;
-  $('bb-routes').innerHTML = bbRoutes(bbui.tag).map(function (r) {
-    return '<option value="' + esc(r.disp) + '">' + esc(r.wave + (r.idc ? ' · ' + r.idc : '')) + '</option>';
-  }).join('');
   $('bb-route').value = ''; $('bb-seq').value = '';
+  renderBBSugg();
   $('bbModal').classList.remove('hidden');
   renderBBModal();
   if (ROLE === 'admin') setTimeout(function () { $('bb-route').focus(); }, 60);
+}
+/* Liste des routes dans la fenêtre (remplace la datalist, illisible sur Android) */
+function bbFindRoute(txt) {
+  var lt = String(txt || '').trim().toLowerCase();
+  return lt ? bbRoutes(bbui.tag).filter(function (x) { return String(x.disp).toLowerCase() === lt || String(x.route).toLowerCase() === lt; })[0] : null;
+}
+function bbSuggList() {
+  var q = $('bb-route').value.trim().toLowerCase();
+  return bbRoutes(bbui.tag).filter(function (r) { return !q || String(r.disp).toLowerCase().indexOf(q) === 0 || String(r.route).toLowerCase().indexOf(q) !== -1; });
+}
+function renderBBSugg() {
+  var el = $('bb-sugg'), r = bbFindRoute($('bb-route').value);
+  if (r) {
+    var e = bbOf(r);
+    el.innerHTML = '<div class="bb-chosen">✓ <b>' + esc(r.disp) + '</b> ' + waveBadge(r.wave) + ' <span class="hint">' + esc(r.idc || '') + (r.place && !r.out ? ' · 🅿️ ' + esc(r.place) : '') + '</span>' +
+      (e && e.left ? ' <span class="chip c-out">📦 déjà ' + e.left + ' au sol</span>' : '') +
+      ' <button class="bbtn b-neu" data-act="bb-rclear">✕ Changer</button></div>';
+    return;
+  }
+  var list = bbSuggList(), h = '', w = null;
+  if (!list.length) { el.innerHTML = '<div class="hint" style="padding:6px 2px">Aucune route ' + esc(bbui.tag) + ' qui commence par « ' + esc($('bb-route').value.trim()) + ' »</div>'; return; }
+  list.slice(0, 120).forEach(function (x) {
+    if (x.wave !== w) { w = x.wave; h += '<div class="bb-sw">' + waveBadge(w) + '</div>'; }
+    var e = bbOf(x);
+    h += '<button class="bb-rchip" data-act="bb-rpick" data-r="' + esc(x.disp) + '">' + esc(x.disp) + (e && e.left ? '<small>📦' + e.left + '</small>' : '') + '</button>';
+  });
+  el.innerHTML = h;
+}
+function bbPickRoute(disp) {
+  $('bb-route').value = disp;
+  renderBBSugg();
+  $('bb-seq').focus();
 }
 function renderBBModal() {
   var p = bbui.pal;
@@ -2323,6 +2366,7 @@ function renderBBModal() {
           '<button class="b-neu adm" data-act="bb-set" data-id="' + esc(b.id) + '" data-st="' + (b.st === 'perdu' ? 'sol' : 'perdu') + '" title="Introuvable">' + (b.st === 'perdu' ? '↩️' : '❓') + '</button>') +
       '<button class="b-bad adm" data-act="bb-del" data-id="' + esc(b.id) + '" title="Supprimer (erreur de saisie)">🗑️</button></div>';
   }).join('') : '<p class="hint" style="padding:12px;text-align:center">Palette vide — ajoute les big box ci-dessus.</p>';
+  renderBBSugg();
 }
 
 /* ---------- Actions (affichées tout de suite, le serveur confirme derrière) ---------- */
@@ -2343,8 +2387,7 @@ function bbAdd() {
   var txt = $('bb-route').value.trim(), seq = $('bb-seq').value.trim(), p = bbui.pal, tag = bbui.tag;
   if (!p) return;
   if (!txt) { toast('Choisis une route'); $('bb-route').focus(); return; }
-  var lt = txt.toLowerCase();
-  var r = bbRoutes(tag).filter(function (x) { return String(x.disp).toLowerCase() === lt || String(x.route).toLowerCase() === lt; })[0];
+  var r = bbFindRoute(txt);
   if (!r && !confirm('La route « ' + txt + ' » n\'est pas dans ' + tag + ' (ParK). Ajouter quand même ?')) return;
   var route = r ? r.disp : txt.toUpperCase(), key = r ? r.key : '';
   var dup = seq && BB.boxes.some(function (b) { return b.tag === tag && b.st !== 'pris' && bbKey(b) === (key || '?' + route) && b.seq === seq; });
@@ -2378,20 +2421,33 @@ function bbNextId(g) {
   all.forEach(function (p) { var n = parseInt(String(p).replace(/\D/g, ''), 10) || 0; if (n > m) m = n; });
   return 'P' + (m + 1);
 }
-/* Mode Disposition : case vide = ajouter (ou y déplacer la palette choisie), palette = la choisir */
+/* Mode Disposition : case vide = ajouter (ou y déplacer LA palette choisie) ; palette = la choisir / l'enlever du choix */
 function bbCell(k) {
-  var g = bbCopyGrid(), p = g.cells[k];
-  if (p) { bbui.sel = bbui.sel === k ? null : k; renderBigBox(); return; }
-  if (bbui.sel && g.cells[bbui.sel]) { g.cells[k] = g.cells[bbui.sel]; delete g.cells[bbui.sel]; bbui.sel = null; }
+  var g = bbCopyGrid(), p = g.cells[k], i = bbui.sels.indexOf(k);
+  if (p) { if (i >= 0) bbui.sels.splice(i, 1); else bbui.sels.push(k); renderBigBox(); return; }
+  if (bbui.sels.length > 1) { toast('Pour déplacer, choisis une seule palette'); return; }
+  if (bbui.sels.length === 1) { var from = bbui.sels[0]; g.cells[k] = g.cells[from]; delete g.cells[from]; bbui.sels = []; }
   else g.cells[k] = bbNextId(g);
   bbSaveGrid(g);
 }
-function bbPalDel() {
-  var g = bbCopyGrid(), k = bbui.sel, p = k && g.cells[k];
-  if (!p) return;
-  if (bbUsed(p)) { toast('⛔ ' + p + ' a encore des big box au sol'); return; }
-  delete g.cells[k]; bbui.sel = null;
+/* Supprime des palettes (choisies ou toutes) après confirmation ; celles qui ont encore des big box au sol sont gardées */
+function bbDeletePals(keys, all) {
+  var g = bbCopyGrid();
+  keys = keys.filter(function (k) { return g.cells[k]; });
+  if (!keys.length) return;
+  var busy = keys.map(function (k) { return g.cells[k]; }).filter(bbUsed).sort(natCmp);
+  var ok = keys.filter(function (k) { return !bbUsed(g.cells[k]); });
+  if (!ok.length) { toast('⛔ ' + busy.join(', ') + ' : encore des big box au sol'); return; }
+  var okNames = ok.map(function (k) { return g.cells[k]; }).sort(natCmp);
+  var txt = (all ? '⚠️ Supprimer TOUTES les palettes ' + bbui.tag + ' (' + ok.length + ') ?'
+                 : 'Supprimer ' + ok.length + ' palette' + (ok.length > 1 ? 's' : '') + ' : ' + okNames.join(', ') + ' ?') +
+    (busy.length ? '\n\nGardées (encore des big box au sol) : ' + busy.join(', ') : '') +
+    '\n\nLes big box déjà pris ne sont pas effacés.';
+  if (!confirm(txt)) return;
+  ok.forEach(function (k) { delete g.cells[k]; });
+  bbui.sels = [];
   bbSaveGrid(g);
+  toast('🗑️ ' + ok.length + ' palette' + (ok.length > 1 ? 's' : '') + ' supprimée' + (ok.length > 1 ? 's' : ''));
 }
 function bbGridSize(op) {
   var g = bbCopyGrid(), used = Object.keys(g.cells).map(function (k) { return k.split('-').map(Number); });
@@ -2476,7 +2532,7 @@ function doReset() {
 var ROLE = 'admin';
 var WRITE_ACTS = { check: 1, 'route-edit': 1, 're-save': 1, 're-remove': 1, undo: 1, reset: 1, 'reset-yes': 1, export: 1, 'wave-edit': 1, 'wave-clear': 1,
   'wm-save': 1, 'wm-clear': 1, 'zones-reset': 1, 'settings-save': 1, 'settings-reset': 1, 'move-mode': 1, 'move-free': 1, 'move-edit': 1, pick: 1, 'blk-row': 1, 'blk-col': 1,
-  'bb-add': 1, 'bb-set': 1, 'bb-del': 1, 'bb-edit': 1, 'bb-cell': 1, 'bb-pdel': 1, 'bb-grid': 1, 'bb-reset': 1 };
+  'bb-add': 1, 'bb-set': 1, 'bb-del': 1, 'bb-edit': 1, 'bb-cell': 1, 'bb-pdel': 1, 'bb-delall': 1, 'bb-selall': 1, 'bb-grid': 1, 'bb-reset': 1 };
 function setRole(r) {
   ROLE = r === 'view' ? 'view' : 'admin';
   document.body.classList.toggle('ro', ROLE !== 'admin');
@@ -2609,18 +2665,22 @@ document.addEventListener('click', function (e) {
       LS.set('park_zoom2', String(ui.zoom)); updateZoomLabels(); renderAll(); break;
     case 'blk-row': bulkBlock('row', t.getAttribute('data-v')); break;
     case 'blk-col': bulkBlock('col', t.getAttribute('data-v')); break;
-    case 'bb-tag': bbui.tag = t.getAttribute('data-t'); bbui.sel = null; renderBigBox(); break;
+    case 'bb-tag': bbui.tag = t.getAttribute('data-t'); bbui.sels = []; renderBigBox(); break;
     case 'bb-pal': openBBPal(t.getAttribute('data-p')); break;
     case 'bb-add': bbAdd(); break;
     case 'bb-set': bbSet(t.getAttribute('data-id'), t.getAttribute('data-st')); break;
     case 'bb-del': bbDel(t.getAttribute('data-id')); break;
-    case 'bb-edit': bbui.edit = !bbui.edit; bbui.sel = null; renderBigBox(); break;
+    case 'bb-edit': bbui.edit = !bbui.edit; bbui.sels = []; renderBigBox(); break;
     case 'bb-cell': bbCell(t.getAttribute('data-k')); break;
-    case 'bb-pdel': bbPalDel(); break;
+    case 'bb-pdel': bbDeletePals(bbui.sels.slice(), false); break;
+    case 'bb-delall': bbDeletePals(Object.keys(bbGrid(bbui.tag).cells), true); break;
+    case 'bb-selall': bbui.sels = Object.keys(bbGrid(bbui.tag).cells); renderBigBox(); break;
     case 'bb-zoom':
       bbui.zoom = clamp(Math.round((bbui.zoom + 0.1 * parseInt(t.getAttribute('data-z'), 10)) * 100) / 100, 0.5, 1.6);
       LS.set('park_bb_zoom', String(bbui.zoom)); renderBigBox(); break;
-    case 'bb-unsel': bbui.sel = null; renderBigBox(); break;
+    case 'bb-rpick': bbPickRoute(t.getAttribute('data-r')); break;
+    case 'bb-rclear': $('bb-route').value = ''; renderBBSugg(); $('bb-route').focus(); break;
+    case 'bb-unsel': bbui.sels = []; renderBigBox(); break;
     case 'bb-grid': bbGridSize(t.getAttribute('data-op')); break;
     case 'bb-reset': bbReset(); break;
     case 'bb-flip': bbui.flip = !bbui.flip; LS.set('park_bb_flip', bbui.flip ? '1' : '0'); renderBigBox(); break;
@@ -2632,8 +2692,13 @@ document.addEventListener('click', function (e) {
 });
 $('p-q').addEventListener('input', function () { if (S) renderPlan(); });
 $('bb-q').addEventListener('input', function () { renderBigBox(); });
-$('bb-route').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); $('bb-seq').focus(); } });
-$('bb-route').addEventListener('change', function () { if ($('bb-route').value) $('bb-seq').focus(); });
+$('bb-route').addEventListener('input', renderBBSugg);
+$('bb-route').addEventListener('keydown', function (e) {
+  if (e.key !== 'Enter') return;
+  e.preventDefault();
+  var l = bbSuggList();
+  if (!bbFindRoute($('bb-route').value) && l.length === 1) bbPickRoute(l[0].disp); else $('bb-seq').focus();
+});
 $('bb-seq').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); bbAdd(); } });
 $('pick-q').addEventListener('input', renderPick);
 $('reset-wave').addEventListener('change', resetText);
