@@ -404,7 +404,7 @@ body.dark .theme-btn{background:rgba(255,255,255,.12)}
 .bb-tag:disabled{opacity:.45;cursor:default}
 .bb-found{font-size:12px;font-weight:700;margin:0 0 8px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;flex-shrink:0}
 .bb-map{flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;padding:4px 2px 8px}
-.bb-table{margin:4px 0 12px 30px;max-width:300px;text-align:center;background:#1d3b5c;color:#fff;font-size:12px;font-weight:800;border-radius:8px;padding:7px}
+.bb-table{margin:4px 0 12px;max-width:300px;text-align:center;background:#1d3b5c;color:#fff;font-size:12px;font-weight:800;border-radius:8px;padding:7px}
 .bb-row{display:flex;gap:8px;align-items:stretch;margin-bottom:10px}
 .bb-rl{width:22px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--g500)}
 .bb-pal{width:118px;min-height:92px;flex-shrink:0;background:var(--g100);border:2px solid var(--g300);border-radius:10px;padding:5px;cursor:pointer;display:flex;flex-direction:column;gap:4px;position:relative;-webkit-tap-highlight-color:transparent;transition:opacity .2s}
@@ -425,6 +425,21 @@ body.dark .theme-btn{background:rgba(255,255,255,.12)}
 .bb-pal.p-done .bb-cnt{background:#dcfce7;color:#15803d}
 .bb-pal.hl{box-shadow:0 0 0 3px var(--orange),0 0 14px rgba(248,130,35,.55);opacity:1;z-index:2}
 .bb-pal.dim{opacity:.2}
+:root{--bbw:112px;--bbh:92px}
+@media(max-width:600px){:root{--bbw:94px;--bbh:84px}}
+.bb-grid{display:grid;gap:8px;grid-template-columns:repeat(var(--nc),var(--bbw));grid-auto-rows:var(--bbh);width:max-content}
+.bb-grid .bb-pal,.bb-orph .bb-pal{width:auto;min-height:0;overflow:hidden}
+.bb-grid{gap:calc(var(--bbw) * .07)}
+.bb-grid .bb-ph,.bb-orph .bb-ph{font-size:calc(14px * var(--bbz,1))}
+.bb-grid .bb-cnt,.bb-orph .bb-cnt{font-size:calc(12px * var(--bbz,1));min-width:0;padding:1px calc(7px * var(--bbz,1))}
+.bb-grid .bb-it,.bb-orph .bb-it{font-size:calc(11px * var(--bbz,1));padding:1px calc(5px * var(--bbz,1))}
+.bb-grid .bb-pal,.bb-orph .bb-pal{padding:calc(5px * var(--bbz,1));gap:calc(4px * var(--bbz,1))}
+.bb-orph{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,var(--bbw));grid-auto-rows:var(--bbh)}
+.bb-slot{border:2px dashed var(--g300);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--g400);font-size:22px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.bb-slot:active{background:var(--tq-l)}
+.bb-slot.tgt{border-color:var(--purple);color:var(--purple);background:#f3ecff}
+.bb-pal.sel{box-shadow:0 0 0 3px var(--purple),0 0 14px rgba(126,87,194,.55);border-color:var(--purple)!important;z-index:2}
+#bb-editbar button{flex:0 0 auto}
 .bb-edit-btns{display:flex;flex-direction:column;gap:4px;justify-content:center;flex-shrink:0}
 .bb-edit-btns button,.bb-rowbtns button{border:1.5px solid var(--g300);background:#fff;border-radius:8px;width:36px;height:32px;font-size:16px;font-weight:800;cursor:pointer;color:var(--tq-d)}
 .bb-rowbtns{display:flex;gap:8px;margin:4px 0 10px 30px}
@@ -447,6 +462,7 @@ body.dark .theme-btn{background:rgba(255,255,255,.12)}
 .bb-line.ok{color:var(--g500)}
 body.dark .bb-tag,body.dark .bb-edit-btns button,body.dark .bb-rowbtns button,body.dark .bb-add input{background:var(--card);color:#e6e9ee;border-color:var(--g300)}
 body.dark .bb-pal.p-red{background:#3a1b1a}
+body.dark .bb-slot.tgt{background:#241b38}
 body.dark .bb-table{background:#2b4a6b}
 body.dark .bb-it.hl{outline-color:#fff}
 </style>
@@ -674,10 +690,14 @@ body.dark .bb-it.hl{outline-color:#fff}
     <div class="plan-tools">
       <div class="stats-bar" id="bb-stats"></div>
       <div class="hspace"></div>
+      <div class="zoom-ctl">
+        <button data-act="bb-zoom" data-z="-1">&#8722;</button><span id="bb-zoom-val">100%</span><button data-act="bb-zoom" data-z="1">+</button>
+      </div>
       <button class="tool-btn" data-act="bb-flip" title="Inverser haut / bas">&#8645;</button>
       <button class="tool-btn adm" id="bb-edit-btn" data-act="bb-edit">&#9999;&#65039; Disposition</button>
       <button class="tool-btn adm" data-act="bb-reset">&#128465;&#65039; Vider (fin de journ&#233;e)</button>
     </div>
+    <div class="move-bar" id="bb-editbar"></div>
     <div class="bb-found" id="bb-found"></div>
     <div class="bb-map" id="bb-map"></div>
     <div class="legend">
@@ -2113,7 +2133,7 @@ function toggleFull() {
  * ================================================================= */
 var BB = { v: '', boxes: [], layouts: {}, byKey: {}, byId: {}, loaded: false };
 var BB_TAGS = [{ t: 'LAVL', on: true }, { t: 'MONT', on: false }, { t: 'RIDP', on: false }];
-var bbui = { tag: 'LAVL', edit: false, pal: null, tmp: 0, flip: LS.get('park_bb_flip', '0') === '1' };
+var bbui = { tag: 'LAVL', edit: false, sel: null, pal: null, tmp: 0, zoom: parseFloat(LS.get('park_bb_zoom', '1')) || 1, flip: LS.get('park_bb_flip', '0') === '1' };
 var bbBusy = false, bbNext = 0, bbPending = 0;
 
 function bbKey(b) { return b.key || ('?' + String(b.route || '').toUpperCase()); }
@@ -2141,7 +2161,23 @@ function bbLoad(force) {
   }).catch(function () {}).then(function () { bbBusy = false; });
 }
 function bbOf(r) { return r && BB.byKey[r.key]; }
-function bbLayout(tag) { return BB.layouts[tag] || { rows: [] }; }
+/* Disposition libre : une grille (nc colonnes × nr rangées), chaque case peut avoir une palette.
+   L'ancien format (rangées de palettes) est converti automatiquement. */
+function bbGrid(tag) {
+  var l = BB.layouts[tag];
+  if (l && l.grid && l.cells) return { grid: true, nc: l.nc || 1, nr: l.nr || 1, cells: l.cells };
+  var g = { grid: true, nc: 1, nr: 1, cells: {} };
+  if (l && Array.isArray(l.rows)) {
+    l.rows.forEach(function (row, ri) {
+      (row || []).forEach(function (p, ci) { g.cells[ri + '-' + ci] = p; });
+      g.nc = Math.max(g.nc, (row || []).length);
+    });
+    g.nr = Math.max(1, l.rows.length);
+  }
+  g.nc += 1; g.nr += 1;   // une colonne / rangée libre pour ajouter
+  return g;
+}
+function bbGridPals(g) { var o = {}; Object.keys(g.cells).forEach(function (k) { o[g.cells[k]] = k; }); return o; }
 function bbRoutes(tag) {
   return S ? S.routes.filter(function (r) { return r.tag === tag; }).sort(function (a, b) { return natCmp(a.wave, b.wave) || natCmp(a.disp, b.disp); }) : [];
 }
@@ -2189,32 +2225,62 @@ function renderBigBox() {
   }
   $('bb-found').innerHTML = fh;
 
-  var lay = bbLayout(tag), known = {}, rows = [];
-  lay.rows.forEach(function (row, ri) {
-    var h = '<div class="bb-row"><div class="bb-rl">' + (ri + 1) + '</div>';
-    row.forEach(function (p) { known[p] = 1; h += bbPalHTML(p, byPal[p] || [], q); });
-    if (bbui.edit) h += '<div class="bb-edit-btns"><button data-act="bb-lay" data-op="add" data-r="' + ri + '" title="Ajouter une palette">＋</button><button data-act="bb-lay" data-op="del" data-r="' + ri + '" title="Retirer la dernière palette">−</button></div>';
-    rows.push(h + '</div>');
-  });
-  if (bbui.flip) rows.reverse();
+  var g = bbGrid(tag), known = bbGridPals(g), ed = bbui.edit;
+  // hors modification : on n'affiche que la partie utilisée de la grille
+  var nr = g.nr, nc = g.nc;
+  if (!ed) {
+    var mr = -1, mc = -1;
+    Object.keys(g.cells).forEach(function (k) { var a = k.split('-'); mr = Math.max(mr, +a[0]); mc = Math.max(mc, +a[1]); });
+    nr = mr + 1; nc = mc + 1;
+  }
+  var small = window.innerWidth <= 600, z = bbui.zoom;
+  $('bb-map').style.setProperty('--bbw', Math.round((small ? 94 : 112) * z) + 'px');
+  $('bb-map').style.setProperty('--bbh', Math.round((small ? 84 : 92) * z) + 'px');
+  $('bb-map').style.setProperty('--bbz', String(Math.max(.65, z)));
+  $('bb-zoom-val').textContent = Math.round(z * 100) + '%';
+  var cells = '';
+  for (var i = 0; i < nr; i++) {
+    var r = bbui.flip ? nr - 1 - i : i;
+    for (var c = 0; c < nc; c++) {
+      var k = r + '-' + c, p = g.cells[k];
+      if (p) cells += bbPalHTML(p, byPal[p] || [], q, ed ? k : '');
+      else if (ed) cells += '<div class="bb-slot' + (bbui.sel ? ' tgt' : '') + '" data-act="bb-cell" data-k="' + k + '">' + (bbui.sel ? '↘' : '＋') + '</div>';
+      else cells += '<div></div>';
+    }
+  }
   var orphans = Object.keys(byPal).filter(function (p) { return !known[p]; }).sort(natCmp);
   var table = '<div class="bb-table">🖥️ Tables checkout</div>';
-  var h = (bbui.flip ? '' : table) + rows.join('') +
-    (orphans.length ? '<div class="hint" style="margin:4px 0 4px 30px">Palettes retirées du plan :</div><div class="bb-row"><div class="bb-rl">?</div>' + orphans.map(function (p) { return bbPalHTML(p, byPal[p], q); }).join('') + '</div>' : '') +
+  var grid = nr && nc ? '<div class="bb-grid" style="--nc:' + nc + '">' + cells + '</div>' : '';
+  var h = (bbui.flip ? '' : table) + grid +
+    (orphans.length ? '<div class="hint" style="margin:10px 0 4px">Palettes retirées du plan (encore des colis) :</div><div class="bb-orph">' + orphans.map(function (p) { return bbPalHTML(p, byPal[p], q, ''); }).join('') + '</div>' : '') +
     (bbui.flip ? table : '');
-  if (bbui.edit) h += '<div class="bb-rowbtns"><button data-act="bb-lay" data-op="addrow">＋ Rangée</button><button data-act="bb-lay" data-op="delrow">− Dernière rangée</button></div>';
-  if (!lay.rows.length && !orphans.length) h += '<p class="empty-msg">Aucune palette — ✏️ Disposition → ＋ Rangée</p>';
+  if (!Object.keys(g.cells).length && !ed) h += '<p class="empty-msg">Aucune palette — ✏️ Disposition, puis tape les cases où mettre les palettes</p>';
   $('bb-map').innerHTML = h;
+
+  // barre de modification
+  var eb = $('bb-editbar');
+  eb.classList.toggle('show', ed);
+  if (ed) {
+    var sel = bbui.sel && g.cells[bbui.sel];
+    eb.innerHTML = sel
+      ? '<span><b>' + esc(sel) + '</b> choisie — tape une case vide pour la déplacer</span><span class="sp"></span>' +
+        '<button class="bbtn b-bad" data-act="bb-pdel">🗑️ Retirer ' + esc(sel) + '</button><button class="bbtn b-neu" data-act="bb-unsel">✕ Annuler</button>'
+      : '<span>＋ case vide = nouvelle palette · tape une palette pour la déplacer ou la retirer</span><span class="sp"></span>' +
+        '<button class="bbtn b-neu" data-act="bb-grid" data-op="c+">＋ Colonne</button><button class="bbtn b-neu" data-act="bb-grid" data-op="c-">− Colonne</button>' +
+        '<button class="bbtn b-neu" data-act="bb-grid" data-op="r+">＋ Rangée</button><button class="bbtn b-neu" data-act="bb-grid" data-op="r-">− Rangée</button>' +
+        '<button class="bbtn b-pri" data-act="bb-edit">✅ Terminé</button>';
+  }
 }
-function bbPalHTML(p, list, q) {
+function bbPalHTML(p, list, q, ek) {
   var left = 0, hit = false;
   list.forEach(function (b) { if (b.st !== 'pris') { left++; if (bbMatch(b, q)) hit = true; } });
-  var cls = 'bb-pal' + (left ? ' p-red' : (list.length ? ' p-done' : '')) + (q ? (hit ? ' hl' : ' dim') : '');
+  var cls = 'bb-pal' + (left ? ' p-red' : (list.length ? ' p-done' : '')) + (q ? (hit ? ' hl' : ' dim') : '') + (ek && bbui.sel === ek ? ' sel' : '');
   var items = list.slice().sort(bbSort).map(function (b) {
     var c = 'bb-it s-' + b.st + (bbMatch(b, q) && b.st !== 'pris' ? ' hl' : '') + (b.st !== 'pris' && bbRouteOut(b) ? ' late' : '');
     return '<span class="' + c + '">' + esc(b.route) + (b.seq ? '<small>#' + esc(b.seq) + '</small>' : '') + '</span>';
   }).join('');
-  return '<div class="' + cls + '" data-act="bb-pal" data-p="' + esc(p) + '"><div class="bb-ph"><span>' + esc(p) + '</span><span class="bb-cnt">' + left + '</span></div><div class="bb-items">' + items + '</div></div>';
+  var act = ek ? 'data-act="bb-cell" data-k="' + ek + '"' : 'data-act="bb-pal" data-p="' + esc(p) + '"';
+  return '<div class="' + cls + '" ' + act + '><div class="bb-ph"><span>' + esc(p) + '</span><span class="bb-cnt">' + left + '</span></div><div class="bb-items">' + items + '</div></div>';
 }
 
 /* ---------- Fenêtre d'une palette ---------- */
@@ -2293,27 +2359,41 @@ function bbDel(id) {
   if (!confirm('Supprimer ' + b.route + (b.seq ? ' #' + b.seq : '') + ' de ' + b.pal + ' ? (seulement pour une erreur de saisie)')) return;
   bbAction('bb_del', { id: id }, function () { BB.boxes = BB.boxes.filter(function (x) { return x.id !== id; }); });
 }
-function bbLay(op, ri) {
-  var tag = bbui.tag, lay = JSON.parse(JSON.stringify(bbLayout(tag)));
-  var all = [].concat.apply([], lay.rows);
-  BB.boxes.forEach(function (b) { if (b.tag === tag) all.push(b.pal); });
-  function next() { var m = 0; all.forEach(function (p) { var n = parseInt(String(p).replace(/\D/g, ''), 10) || 0; if (n > m) m = n; }); return 'P' + (m + 1); }
-  function used(p) { return BB.boxes.some(function (b) { return b.tag === tag && b.pal === p && b.st !== 'pris'; }); }
-  if (op === 'add') lay.rows[ri].push(next());
-  else if (op === 'del') {
-    var row = lay.rows[ri]; if (!row || !row.length) return;
-    var last = row[row.length - 1];
-    if (used(last)) { toast('⛔ ' + last + ' a encore des big box au sol'); return; }
-    row.pop();
-  } else if (op === 'addrow') lay.rows.push([next()]);
-  else if (op === 'delrow') {
-    var lr = lay.rows[lay.rows.length - 1]; if (!lr) return;
-    var u = lr.filter(used);
-    if (u.length) { toast('⛔ ' + u.join(', ') + ' : encore des big box au sol'); return; }
-    if (lr.length && !confirm('Supprimer la dernière rangée (' + lr.join(', ') + ') ?')) return;
-    lay.rows.pop();
-  } else return;
+function bbSaveGrid(g) {
+  var tag = bbui.tag, lay = { grid: true, nc: g.nc, nr: g.nr, cells: g.cells };
   bbAction('bb_layout', { tag: tag, layout: JSON.stringify(lay) }, function () { BB.layouts[tag] = lay; });
+}
+function bbCopyGrid() { var g = bbGrid(bbui.tag); return { grid: true, nc: g.nc, nr: g.nr, cells: JSON.parse(JSON.stringify(g.cells)) }; }
+function bbUsed(p) { return BB.boxes.some(function (b) { return b.tag === bbui.tag && b.pal === p && b.st !== 'pris'; }); }
+function bbNextId(g) {
+  var m = 0, all = Object.keys(g.cells).map(function (k) { return g.cells[k]; });
+  BB.boxes.forEach(function (b) { if (b.tag === bbui.tag) all.push(b.pal); });
+  all.forEach(function (p) { var n = parseInt(String(p).replace(/\D/g, ''), 10) || 0; if (n > m) m = n; });
+  return 'P' + (m + 1);
+}
+/* Mode Disposition : case vide = ajouter (ou y déplacer la palette choisie), palette = la choisir */
+function bbCell(k) {
+  var g = bbCopyGrid(), p = g.cells[k];
+  if (p) { bbui.sel = bbui.sel === k ? null : k; renderBigBox(); return; }
+  if (bbui.sel && g.cells[bbui.sel]) { g.cells[k] = g.cells[bbui.sel]; delete g.cells[bbui.sel]; bbui.sel = null; }
+  else g.cells[k] = bbNextId(g);
+  bbSaveGrid(g);
+}
+function bbPalDel() {
+  var g = bbCopyGrid(), k = bbui.sel, p = k && g.cells[k];
+  if (!p) return;
+  if (bbUsed(p)) { toast('⛔ ' + p + ' a encore des big box au sol'); return; }
+  delete g.cells[k]; bbui.sel = null;
+  bbSaveGrid(g);
+}
+function bbGridSize(op) {
+  var g = bbCopyGrid(), used = Object.keys(g.cells).map(function (k) { return k.split('-').map(Number); });
+  if (op === 'c+') g.nc = Math.min(40, g.nc + 1);
+  else if (op === 'r+') g.nr = Math.min(60, g.nr + 1);
+  else if (op === 'c-') { if (used.some(function (a) { return a[1] === g.nc - 1; })) { toast('⛔ La dernière colonne a des palettes'); return; } g.nc = Math.max(1, g.nc - 1); }
+  else if (op === 'r-') { if (used.some(function (a) { return a[0] === g.nr - 1; })) { toast('⛔ La dernière rangée a des palettes'); return; } g.nr = Math.max(1, g.nr - 1); }
+  else return;
+  bbSaveGrid(g);
 }
 function bbReset() {
   var tag = bbui.tag, n = BB.boxes.filter(function (b) { return b.tag === tag; }).length;
@@ -2389,7 +2469,7 @@ function doReset() {
 var ROLE = 'admin';
 var WRITE_ACTS = { check: 1, 'route-edit': 1, 're-save': 1, 're-remove': 1, undo: 1, reset: 1, 'reset-yes': 1, export: 1, 'wave-edit': 1, 'wave-clear': 1,
   'wm-save': 1, 'wm-clear': 1, 'zones-reset': 1, 'settings-save': 1, 'settings-reset': 1, 'move-mode': 1, 'move-free': 1, 'move-edit': 1, pick: 1, 'blk-row': 1, 'blk-col': 1,
-  'bb-add': 1, 'bb-set': 1, 'bb-del': 1, 'bb-edit': 1, 'bb-lay': 1, 'bb-reset': 1 };
+  'bb-add': 1, 'bb-set': 1, 'bb-del': 1, 'bb-edit': 1, 'bb-cell': 1, 'bb-pdel': 1, 'bb-grid': 1, 'bb-reset': 1 };
 function setRole(r) {
   ROLE = r === 'view' ? 'view' : 'admin';
   document.body.classList.toggle('ro', ROLE !== 'admin');
@@ -2522,13 +2602,19 @@ document.addEventListener('click', function (e) {
       LS.set('park_zoom2', String(ui.zoom)); updateZoomLabels(); renderAll(); break;
     case 'blk-row': bulkBlock('row', t.getAttribute('data-v')); break;
     case 'blk-col': bulkBlock('col', t.getAttribute('data-v')); break;
-    case 'bb-tag': bbui.tag = t.getAttribute('data-t'); renderBigBox(); break;
+    case 'bb-tag': bbui.tag = t.getAttribute('data-t'); bbui.sel = null; renderBigBox(); break;
     case 'bb-pal': openBBPal(t.getAttribute('data-p')); break;
     case 'bb-add': bbAdd(); break;
     case 'bb-set': bbSet(t.getAttribute('data-id'), t.getAttribute('data-st')); break;
     case 'bb-del': bbDel(t.getAttribute('data-id')); break;
-    case 'bb-edit': bbui.edit = !bbui.edit; renderBigBox(); if (bbui.edit) toast('✏️ ＋ / − pour ajouter ou retirer des palettes'); break;
-    case 'bb-lay': bbLay(t.getAttribute('data-op'), parseInt(t.getAttribute('data-r'), 10)); break;
+    case 'bb-edit': bbui.edit = !bbui.edit; bbui.sel = null; renderBigBox(); break;
+    case 'bb-cell': bbCell(t.getAttribute('data-k')); break;
+    case 'bb-pdel': bbPalDel(); break;
+    case 'bb-zoom':
+      bbui.zoom = clamp(Math.round((bbui.zoom + 0.1 * parseInt(t.getAttribute('data-z'), 10)) * 100) / 100, 0.5, 1.6);
+      LS.set('park_bb_zoom', String(bbui.zoom)); renderBigBox(); break;
+    case 'bb-unsel': bbui.sel = null; renderBigBox(); break;
+    case 'bb-grid': bbGridSize(t.getAttribute('data-op')); break;
     case 'bb-reset': bbReset(); break;
     case 'bb-flip': bbui.flip = !bbui.flip; LS.set('park_bb_flip', bbui.flip ? '1' : '0'); renderBigBox(); break;
     case 'bb-go': bbGo(t.getAttribute('data-r'), t.getAttribute('data-t')); break;
@@ -2549,7 +2635,7 @@ $('p-idc').addEventListener('change', function (e) { setIdc(e.target.value); });
 $('tv-idc').addEventListener('change', function (e) { setIdc(e.target.value); });
 $('p-color').addEventListener('change', function (e) { ui.colorMode = e.target.value; LS.set('park_color', ui.colorMode); renderPlan(); });
 var rzT = null;
-window.addEventListener('resize', function () { clearTimeout(rzT); rzT = setTimeout(function () { if (tab === 'plan' || tab === 'blocks') renderAll(); }, 150); });
+window.addEventListener('resize', function () { clearTimeout(rzT); rzT = setTimeout(function () { if (tab === 'plan' || tab === 'blocks' || tab === 'bigbox') renderAll(); }, 150); });
 
 /* =================================================================
  *  LIVE : état toutes les 20 s, alertes recalculées toutes les 30 s
