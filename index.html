@@ -402,6 +402,10 @@ body.dark .theme-btn{background:rgba(255,255,255,.12)}
 .bb-tag{border:1.5px solid var(--g300);background:#fff;border-radius:999px;padding:7px 13px;font-size:12px;font-weight:800;cursor:pointer;color:#555}
 .bb-tag.on{background:var(--tq);border-color:var(--tq);color:#fff}
 .bb-tag:disabled{opacity:.45;cursor:default}
+.bb-waves{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding-left:8px;margin-left:2px;border-left:2px solid var(--g300)}
+.bb-waves .bb-tag{display:inline-flex;align-items:center;gap:4px}
+.bb-waves.sm{flex:0 0 100%;border-left:0;padding:0;margin:0 0 4px}
+.bb-waves.sm .bb-tag{padding:5px 10px;font-size:11px}
 .bb-found{font-size:12px;font-weight:700;margin:0 0 8px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;flex-shrink:0}
 .bb-map{flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;padding:4px 2px 8px}
 .bb-wrap{display:flex;gap:8px;align-items:stretch;width:max-content}
@@ -2145,7 +2149,7 @@ function toggleFull() {
  * ================================================================= */
 var BB = { v: '', boxes: [], layouts: {}, byKey: {}, byId: {}, loaded: false };
 var BB_TAGS = [{ t: 'LAVL', on: true }, { t: 'MONT', on: false }, { t: 'RIDP', on: false }];
-var bbui = { tag: 'LAVL', edit: false, sels: [], pal: null, tmp: 0, zoom: parseFloat(LS.get('park_bb_zoom', '1')) || 1, flip: LS.get('park_bb_flip', '0') === '1' };
+var bbui = { tag: 'LAVL', wave: LS.get('park_bb_wave', ''), edit: false, sels: [], pal: null, tmp: 0, zoom: parseFloat(LS.get('park_bb_zoom', '1')) || 1, flip: LS.get('park_bb_flip', '0') === '1' };
 var bbBusy = false, bbNext = 0, bbPending = 0;
 
 function bbKey(b) { return b.key || ('?' + String(b.route || '').toUpperCase()); }
@@ -2195,6 +2199,23 @@ function bbGridPals(g) { var o = {}; Object.keys(g.cells).forEach(function (k) {
 function bbRoutes(tag) {
   return S ? S.routes.filter(function (r) { return r.tag === tag; }).sort(function (a, b) { return natCmp(a.wave, b.wave) || natCmp(a.disp, b.disp); }) : [];
 }
+/* Vagues du TAG (LAVL1, LAVL2…) — la vague choisie filtre les routes proposées dans les palettes */
+function bbWaves(tag) {
+  if (!S) return [];
+  var set = {};
+  (S.waveList || []).forEach(function (w) { if (String(w).indexOf(tag) === 0) set[w] = 1; });
+  S.routes.forEach(function (r) { if (r.tag === tag && r.wave) set[r.wave] = 1; });
+  return Object.keys(set).sort(natCmp);
+}
+function bbWaveOk() { if (bbui.wave && bbWaves(bbui.tag).indexOf(bbui.wave) < 0) bbui.wave = ''; return bbui.wave; }
+function bbWaveChips(small) {
+  var ws = bbWaves(bbui.tag), cur = bbWaveOk();
+  if (!ws.length) return '';
+  return '<div class="bb-waves' + (small ? ' sm' : '') + '">' +
+    '<button class="bb-tag' + (!cur ? ' on' : '') + '" data-act="bb-wave" data-w="">Toutes</button>' +
+    ws.map(function (w) { return '<button class="bb-tag' + (cur === w ? ' on' : '') + '" data-act="bb-wave" data-w="' + esc(w) + '"><span class="wdot" style="background:' + waveColor(w) + '"></span> ' + esc(w) + '</button>'; }).join('') +
+    '</div>';
+}
 function bbRoute(b) { return (b.key && S && S.byKey[b.key]) || null; }
 function bbRouteOut(b) { var r = bbRoute(b); return !!(r && r.out); }
 function bbMin(a, b) { return a ? Math.max(0, ((b ? Date.parse(b) : now()) - Date.parse(a)) / 60000) : 0; }
@@ -2206,7 +2227,7 @@ function bbPalsText(e) { return Object.keys(e.pals).sort(natCmp).map(function (p
 function renderBigBox() {
   $('bb-tags').innerHTML = BB_TAGS.map(function (x) {
     return '<button class="bb-tag' + (bbui.tag === x.t ? ' on' : '') + '" data-act="bb-tag" data-t="' + x.t + '"' + (x.on ? '' : ' disabled') + '>' + x.t + (x.on ? '' : ' · à venir') + '</button>';
-  }).join('');
+  }).join('') + bbWaveChips(false);
   $('bb-edit-btn').classList.toggle('on', bbui.edit);
   if (!BB.loaded) { $('bb-map').innerHTML = '<p class="empty-msg">Chargement…</p>'; $('bb-stats').innerHTML = ''; $('bb-found').innerHTML = ''; return; }
 
@@ -2319,8 +2340,8 @@ function bbFindRoute(txt) {
   return lt ? bbRoutes(bbui.tag).filter(function (x) { return String(x.disp).toLowerCase() === lt || String(x.route).toLowerCase() === lt; })[0] : null;
 }
 function bbSuggList() {
-  var q = $('bb-route').value.trim().toLowerCase();
-  return bbRoutes(bbui.tag).filter(function (r) { return !q || String(r.disp).toLowerCase().indexOf(q) === 0 || String(r.route).toLowerCase().indexOf(q) !== -1; });
+  var q = $('bb-route').value.trim().toLowerCase(), w = bbWaveOk();
+  return bbRoutes(bbui.tag).filter(function (r) { if (w && r.wave !== w) return false; return !q || String(r.disp).toLowerCase().indexOf(q) === 0 || String(r.route).toLowerCase().indexOf(q) !== -1; });
 }
 function renderBBSugg() {
   var el = $('bb-sugg'), r = bbFindRoute($('bb-route').value);
@@ -2331,8 +2352,8 @@ function renderBBSugg() {
       ' <button class="bbtn b-neu" data-act="bb-rclear">✕ Changer</button></div>';
     return;
   }
-  var list = bbSuggList(), h = '', w = null;
-  if (!list.length) { el.innerHTML = '<div class="hint" style="padding:6px 2px">Aucune route ' + esc(bbui.tag) + ' qui commence par « ' + esc($('bb-route').value.trim()) + ' »</div>'; return; }
+  var list = bbSuggList(), h = bbWaveChips(true), w = null;
+  if (!list.length) { el.innerHTML = h + '<div class="hint" style="padding:6px 2px">Aucune route ' + esc(bbui.wave || bbui.tag) + ($('bb-route').value.trim() ? ' qui commence par « ' + esc($('bb-route').value.trim()) + ' »' : '') + '</div>'; return; }
   list.slice(0, 120).forEach(function (x) {
     if (x.wave !== w) { w = x.wave; h += '<div class="bb-sw">' + waveBadge(w) + '</div>'; }
     var e = bbOf(x);
@@ -2683,6 +2704,9 @@ document.addEventListener('click', function (e) {
       LS.set('park_bb_zoom', String(bbui.zoom)); renderBigBox(); break;
     case 'bb-rpick': bbPickRoute(t.getAttribute('data-r')); break;
     case 'bb-rclear': $('bb-route').value = ''; renderBBSugg(); $('bb-route').focus(); break;
+    case 'bb-wave':
+      bbui.wave = t.getAttribute('data-w') || ''; LS.set('park_bb_wave', bbui.wave);
+      renderBigBox(); renderBBSugg(); break;
     case 'bb-qclear': $('bb-q').value = ''; renderBigBox(); break;
     case 'bb-unsel': bbui.sels = []; renderBigBox(); break;
     case 'bb-grid': bbGridSize(t.getAttribute('data-op')); break;
