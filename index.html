@@ -2234,8 +2234,9 @@ function renderBigBox() {
       e.pals[b.pal] = (e.pals[b.pal] || 0) + 1;
     });
     var ks = Object.keys(hits).sort(natCmp);
-    fh = ks.length ? ks.map(function (r) { return '<span class="rng">' + esc(r) + ' → ' + esc(bbPalsText(hits[r])) + '</span>'; }).join('')
-                   : '<span style="color:var(--g500)">Aucun big box au sol pour « ' + esc(q) + ' »</span>';
+    fh = (ks.length ? ks.map(function (r) { return '<span class="rng">' + esc(r) + ' → ' + esc(bbPalsText(hits[r])) + '</span>'; }).join('')
+                    : '<span style="color:var(--g500)">Aucun big box au sol pour « ' + esc(q) + ' »</span>') +
+         '<button class="bbtn b-neu" data-act="bb-qclear" style="padding:4px 10px">✕ Tout afficher</button>';
   }
   if (BB.srvOld) fh = '<div class="banner err" style="width:100%;margin:0">⚠️ Le serveur Big Box n\'est pas à jour : remplace BigBox.gs dans Apps Script puis Déployer → Gérer les déploiements → ✏️ → Nouvelle version (sur le déploiement de cette URL).</div>' + fh;
   $('bb-found').innerHTML = fh;
@@ -2589,6 +2590,8 @@ function showTab(name) {
 
 document.addEventListener('click', function (e) {
   var t = e.target.closest('[data-act],[data-tab],[data-l]');
+  // Big Box : toucher le vide du plan efface la recherche (palettes de la route en surbrillance)
+  if (!t && tab === 'bigbox' && e.target.closest('#bb-map') && $('bb-q').value) { $('bb-q').value = ''; renderBigBox(); return; }
   if (!t) return;
   if (t.hasAttribute('data-tab')) { showTab(t.getAttribute('data-tab')); return; }
   var act = t.getAttribute('data-act');
@@ -2680,6 +2683,7 @@ document.addEventListener('click', function (e) {
       LS.set('park_bb_zoom', String(bbui.zoom)); renderBigBox(); break;
     case 'bb-rpick': bbPickRoute(t.getAttribute('data-r')); break;
     case 'bb-rclear': $('bb-route').value = ''; renderBBSugg(); $('bb-route').focus(); break;
+    case 'bb-qclear': $('bb-q').value = ''; renderBigBox(); break;
     case 'bb-unsel': bbui.sels = []; renderBigBox(); break;
     case 'bb-grid': bbGridSize(t.getAttribute('data-op')); break;
     case 'bb-reset': bbReset(); break;
