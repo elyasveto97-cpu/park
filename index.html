@@ -402,6 +402,26 @@ body.dark .theme-btn{background:rgba(255,255,255,.12)}
 .bb-tag{border:1.5px solid var(--g300);background:#fff;border-radius:999px;padding:7px 13px;font-size:12px;font-weight:800;cursor:pointer;color:#555}
 .bb-tag.on{background:var(--tq);border-color:var(--tq);color:#fff}
 .bb-tag:disabled{opacity:.45;cursor:default}
+.bb-mode{display:inline-flex;border:1.5px solid var(--g300);border-radius:10px;overflow:hidden;flex-shrink:0}
+.bb-mode button{border:0;background:#fff;padding:7px 12px;font-size:12px;font-weight:800;cursor:pointer;color:#555}
+.bb-mode button.on{background:var(--tq);color:#fff}
+.bb-listmode .bb-maponly{display:none!important}
+.bb-lhead{font-size:13px;margin:2px 2px 8px}
+.bb-lrow{display:flex;align-items:center;gap:10px;background:var(--card,#fff);border:1.5px solid var(--g200);border-left:5px solid var(--red);border-radius:10px;padding:9px 10px;margin-bottom:7px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.bb-lrow:active{background:var(--g100)}
+.bb-lrow.out{border-left-color:var(--red);background:var(--red-bg);animation:blinkRed 1.4s infinite}
+.bb-lnum{flex:0 0 46px;text-align:center;font-size:22px;font-weight:900;color:var(--red-txt);line-height:1}
+.bb-lnum small{display:block;font-size:11px}
+.bb-lmain{flex:1;min-width:0}
+.bb-ltop{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:16px}
+.bb-lidc{font-size:12px;font-weight:600;color:var(--g500)}
+.bb-lplace{font-size:12px;font-weight:800;background:var(--tq-l);color:var(--tq-d);border-radius:6px;padding:2px 6px}
+.bb-lpals{font-size:13px;font-weight:800;margin-top:3px}
+.bb-lsub{font-size:11px;font-weight:600;color:var(--g500);margin-top:3px}
+.bb-lgo{font-size:22px;color:var(--g400);flex-shrink:0}
+body.dark .bb-mode button{background:var(--card);color:#e6e9ee}
+body.dark .bb-mode button.on{background:var(--tq);color:#fff}
+body.dark .bb-lrow{background:var(--card);border-color:var(--g300)}
 .bb-oth{font-size:10px;font-weight:800;color:var(--g500);background:var(--g200);border-radius:999px;padding:1px 5px;margin-right:3px}
 .bb-waves{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding-left:8px;margin-left:2px;border-left:2px solid var(--g300)}
 .bb-waves .bb-tag{display:inline-flex;align-items:center;gap:4px}
@@ -575,7 +595,7 @@ body.dark .bb-it.hl{outline-color:#fff}
         <button class="bbtn b-pri" data-act="bb-add">&#65291; Ajouter</button>
       </div>
       <div class="bb-sugg" id="bb-sugg"></div>
-      <div class="hint">La route reste choisie : tape la s&#233;quence suivante puis Entr&#233;e pour encha&#238;ner.</div>
+      <div class="hint">Route &#8594; Entr&#233;e &#8594; s&#233;quence &#8594; Entr&#233;e : le colis est ajout&#233; et tout se vide pour le suivant.</div>
     </div>
     <div class="bb-list" id="bb-list"></div>
     <div class="mbtns"><button class="b-neu" data-act="close-modal">Fermer</button></div>
@@ -705,13 +725,16 @@ body.dark .bb-it.hl{outline-color:#fff}
       <div class="psearch"><input class="search-bar" type="search" id="bb-q" placeholder="&#128269; Route... o&#249; sont ses big box ?" autocomplete="off"></div>
     </div>
     <div class="plan-tools">
+      <div class="bb-mode" id="bb-mode">
+        <button data-act="bb-mode" data-m="map">&#128506;&#65039; Palettes</button><button data-act="bb-mode" data-m="list">&#128203; Liste</button>
+      </div>
       <div class="stats-bar" id="bb-stats"></div>
       <div class="hspace"></div>
-      <div class="zoom-ctl">
+      <div class="zoom-ctl bb-maponly">
         <button data-act="bb-zoom" data-z="-1">&#8722;</button><span id="bb-zoom-val">100%</span><button data-act="bb-zoom" data-z="1">+</button>
       </div>
-      <button class="tool-btn" data-act="bb-flip" title="Inverser haut / bas">&#8645;</button>
-      <button class="tool-btn adm" id="bb-edit-btn" data-act="bb-edit">&#9999;&#65039; Disposition</button>
+      <button class="tool-btn bb-maponly" data-act="bb-flip" title="Inverser haut / bas">&#8645;</button>
+      <button class="tool-btn adm bb-maponly" id="bb-edit-btn" data-act="bb-edit">&#9999;&#65039; Disposition</button>
       <button class="tool-btn adm" data-act="bb-reset">&#128465;&#65039; Vider (fin de journ&#233;e)</button>
     </div>
     <div class="move-bar" id="bb-editbar"></div>
@@ -2149,9 +2172,10 @@ function toggleFull() {
  *  « Pris » est coché par le CSR/sup quand le chauffeur a scanné ET emporté le colis.
  * ================================================================= */
 var BB = { v: '', boxes: [], layouts: {}, byKey: {}, byId: {}, loaded: false };
-var BB_TAGS = [{ t: 'LAVL', on: true }, { t: 'MONT', on: false }, { t: 'RIDP', on: false }];
-var bbui = { tag: 'LAVL', wave: LS.get('park_bb_wave', ''), edit: false, sels: [], pal: null, tmp: 0, zoom: parseFloat(LS.get('park_bb_zoom', '1')) || 1, flip: LS.get('park_bb_flip', '0') === '1' };
+var BB_TAGS = [{ t: 'LAVL', on: true }, { t: 'MONT', on: true }, { t: 'RIDP', on: true }];
+var bbui = { mode: LS.get('park_bb_mode', 'map') === 'list' ? 'list' : 'map', tag: LS.get('park_bb_tag', 'LAVL'), wave: '', edit: false, sels: [], pal: null, tmp: 0, zoom: parseFloat(LS.get('park_bb_zoom', '1')) || 1, flip: LS.get('park_bb_flip', '0') === '1' };
 var bbBusy = false, bbNext = 0, bbPending = 0;
+bbSetTag(bbui.tag);
 
 function bbKey(b) { return b.key || ('?' + String(b.route || '').toUpperCase()); }
 function bbIndex() {
@@ -2207,6 +2231,12 @@ function bbWaves(tag) {
   (S.waveList || []).forEach(function (w) { if (String(w).indexOf(tag) === 0) set[w] = 1; });
   S.routes.forEach(function (r) { if (r.tag === tag && r.wave) set[r.wave] = 1; });
   return Object.keys(set).sort(natCmp);
+}
+/* la vague choisie est gardée par TAG (LAVL1 pour LAVL, MONT2 pour MONT…) */
+function bbSetTag(t) {
+  if (!BB_TAGS.some(function (x) { return x.t === t && x.on; })) t = 'LAVL';
+  bbui.tag = t; bbui.wave = LS.get('park_bb_wave_' + t, ''); bbui.sels = [];
+  LS.set('park_bb_tag', t);
 }
 function bbWaveOk() { if (bbui.wave && bbWaves(bbui.tag).indexOf(bbui.wave) < 0) bbui.wave = ''; return bbui.wave; }
 function bbWaveChips(small) {
@@ -2267,6 +2297,11 @@ function renderBigBox() {
   if (BB.srvOld) fh = '<div class="banner err" style="width:100%;margin:0">⚠️ Le serveur Big Box n\'est pas à jour : remplace BigBox.gs dans Apps Script puis Déployer → Gérer les déploiements → ✏️ → Nouvelle version (sur le déploiement de cette URL).</div>' + fh;
   $('bb-found').innerHTML = fh;
 
+  // mode Liste / mode Palettes
+  [].forEach.call($('bb-mode').children, function (b) { b.classList.toggle('on', b.getAttribute('data-m') === bbui.mode); });
+  $('bigbox-view').classList.toggle('bb-listmode', bbui.mode === 'list');
+  if (bbui.mode === 'list') { $('bb-editbar').classList.remove('show'); $('bb-map').innerHTML = bbListHTML(boxes, q); return; }
+
   var g = bbGrid(tag), known = bbGridPals(g), ed = bbui.edit;
   // hors modification : on n'affiche que la partie utilisée de la grille
   var nr = g.nr, nc = g.nc;
@@ -2317,6 +2352,49 @@ function renderBigBox() {
         (nAll ? '<button class="bbtn b-bad" data-act="bb-delall">🗑️ Tout supprimer (' + nAll + ')</button>' : '') +
         '<button class="bbtn b-pri" data-act="bb-edit">✅ Terminé</button>';
   }
+}
+/* Mode Liste : les routes qui ont encore des big box au sol — combien et sur quelles palettes */
+function bbListHTML(boxes, q) {
+  var by = {}, done = {};
+  boxes.forEach(function (b) {
+    var k = bbKey(b);
+    if (b.st === 'pris') { done[k] = 1; return; }
+    if (q && !bbMatch(b, q)) return;
+    var e = by[k] || (by[k] = { route: b.route, r: bbRoute(b), items: [], pals: {}, lost: 0, old: '' });
+    e.items.push(b);
+    e.pals[b.pal] = (e.pals[b.pal] || 0) + 1;
+    if (b.st === 'perdu') e.lost++;
+    if (!e.old || b.tAdd < e.old) e.old = b.tAdd;
+  });
+  var arr = Object.keys(by).map(function (k) { delete done[k]; return by[k]; });
+  arr.sort(function (a, b) {
+    var ao = a.r && a.r.out ? 1 : 0, bo = b.r && b.r.out ? 1 : 0;
+    return (bo - ao) || natCmp(a.r ? a.r.wave : 'zz', b.r ? b.r.wave : 'zz') || natCmp(a.route, b.route);
+  });
+  var nBox = arr.reduce(function (s, e) { return s + e.items.length; }, 0), nDone = Object.keys(done).length;
+  if (!arr.length) return '<p class="empty-msg">' + (q ? 'Aucune route « ' + esc(q) + ' » avec des big box au sol' : '✅ Aucun big box au sol' + (bbui.wave ? ' pour ' + esc(bbui.wave) : '')) + '</p>' +
+    (nDone ? '<p class="hint" style="text-align:center">' + nDone + ' route' + (nDone > 1 ? 's' : '') + ' avec tous leurs big box pris</p>' : '');
+  var h = '<div class="bb-lhead"><b>' + arr.length + '</b> route' + (arr.length > 1 ? 's' : '') + ' · <b>' + nBox + '</b> big box au sol' +
+    (nDone ? ' <span class="hint">· ' + nDone + ' route' + (nDone > 1 ? 's' : '') + ' terminée' + (nDone > 1 ? 's' : '') + ' ✅</span>' : '') + '</div>';
+  h += arr.map(function (e) {
+    var r = e.r, out = r && r.out;
+    var st = !r ? '<span class="hint">route pas dans ParK</span>'
+      : out ? '<span class="al-pill red" style="margin:0">🚨 sortie à ' + esc(r.tOut || '?') + '</span>'
+      : r.place ? '<span class="bb-lplace">🅿️ ' + esc(r.place) + '</span>'
+      : r.in ? '<span class="hint">IN · pas de place</span>' : '<span class="hint">pas encore arrivé</span>';
+    var seqs = e.items.slice().sort(bbSort).map(function (b) {
+      return '<span class="bb-it s-' + b.st + '">' + esc(b.pal) + (b.seq ? '<small>#' + esc(b.seq) + '</small>' : '') + '</span>';
+    }).join('');
+    return '<div class="bb-lrow' + (out ? ' out' : '') + '" data-act="bb-lgo" data-r="' + esc(e.route) + '">' +
+      '<div class="bb-lnum">' + e.items.length + '<small>📦</small></div>' +
+      '<div class="bb-lmain"><div class="bb-ltop"><b>' + esc(e.route) + '</b>' + (r ? ' ' + waveBadge(r.wave) : '') +
+        (r && r.idc ? ' <span class="bb-lidc">' + esc(r.idc) + '</span>' : '') + ' ' + st + '</div>' +
+        '<div class="bb-lpals">📍 ' + esc(bbPalsText(e)) + (e.lost ? ' · <span style="color:var(--orange);font-weight:800">❓ ' + e.lost + ' introuvable' + (e.lost > 1 ? 's' : '') + '</span>' : '') + '</div>' +
+        '<div class="bb-items" style="margin-top:4px">' + seqs + '</div>' +
+        '<div class="bb-lsub">au sol depuis ' + durText(bbMin(e.old)) + '</div></div>' +
+      '<div class="bb-lgo">›</div></div>';
+  }).join('');
+  return h;
 }
 function bbInWave(b) { var w = bbWaveOk(); if (!w) return true; var r = bbRoute(b); return !!(r && r.wave === w); }
 function bbPalHTML(p, list, q, ek) {
@@ -2424,7 +2502,9 @@ function bbAdd() {
   var dup = seq && BB.boxes.some(function (b) { return b.tag === tag && b.st !== 'pris' && bbKey(b) === (key || '?' + route) && b.seq === seq; });
   if (dup) { toast('⚠️ Déjà ajouté : ' + route + ' #' + seq); $('bb-seq').select(); return; }
   var b = { id: 'tmp' + (++bbui.tmp), tag: tag, pal: p, route: route, key: key, seq: seq, st: 'sol', tAdd: new Date(now()).toISOString(), tPris: '' };
-  $('bb-seq').value = ''; $('bb-seq').focus();
+  // colis suivant : route ET séquence vidées, curseur sur Route
+  $('bb-route').value = ''; $('bb-seq').value = '';
+  renderBBSugg(); $('bb-route').focus();
   bbAction('bb_add', { tag: tag, pal: p, route: route, key: key, seq: seq }, function () { BB.boxes.push(b); });
 }
 function bbSet(id, st) {
@@ -2497,7 +2577,7 @@ function bbReset() {
   bbAction('bb_reset', { tag: tag }, function () { BB.boxes = BB.boxes.filter(function (b) { return b.tag !== tag; }); });
 }
 function bbGo(route, tag) {
-  if (tag && BB_TAGS.some(function (x) { return x.t === tag && x.on; })) bbui.tag = tag;
+  if (tag && tag !== bbui.tag && BB_TAGS.some(function (x) { return x.t === tag && x.on; })) bbSetTag(tag);
   $('bb-q').value = route || '';
   showTab('bigbox');
 }
@@ -2698,7 +2778,7 @@ document.addEventListener('click', function (e) {
       LS.set('park_zoom2', String(ui.zoom)); updateZoomLabels(); renderAll(); break;
     case 'blk-row': bulkBlock('row', t.getAttribute('data-v')); break;
     case 'blk-col': bulkBlock('col', t.getAttribute('data-v')); break;
-    case 'bb-tag': bbui.tag = t.getAttribute('data-t'); bbui.sels = []; renderBigBox(); break;
+    case 'bb-tag': bbSetTag(t.getAttribute('data-t')); renderBigBox(); break;
     case 'bb-pal': openBBPal(t.getAttribute('data-p')); break;
     case 'bb-add': bbAdd(); break;
     case 'bb-set': bbSet(t.getAttribute('data-id'), t.getAttribute('data-st')); break;
@@ -2714,9 +2794,15 @@ document.addEventListener('click', function (e) {
     case 'bb-rpick': bbPickRoute(t.getAttribute('data-r')); break;
     case 'bb-rclear': $('bb-route').value = ''; renderBBSugg(); $('bb-route').focus(); break;
     case 'bb-wave':
-      bbui.wave = t.getAttribute('data-w') || ''; LS.set('park_bb_wave', bbui.wave);
+      bbui.wave = t.getAttribute('data-w') || ''; LS.set('park_bb_wave_' + bbui.tag, bbui.wave);
       if (t.tagName === 'A') e.preventDefault();
       renderBigBox(); renderBBModal(); break;
+    case 'bb-mode':
+      bbui.mode = t.getAttribute('data-m') === 'list' ? 'list' : 'map'; LS.set('park_bb_mode', bbui.mode);
+      bbui.edit = false; bbui.sels = []; renderBigBox(); break;
+    case 'bb-lgo':
+      bbui.mode = 'map'; LS.set('park_bb_mode', 'map'); $('bb-q').value = t.getAttribute('data-r') || '';
+      renderBigBox(); break;
     case 'bb-qclear': $('bb-q').value = ''; renderBigBox(); break;
     case 'bb-unsel': bbui.sels = []; renderBigBox(); break;
     case 'bb-grid': bbGridSize(t.getAttribute('data-op')); break;
